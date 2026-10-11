@@ -1,2 +1,3 @@
-# Godot itself, unzipped here for Play.bat. Keep it out of the repo.
+# Godot itself, unzipped here for Play.bat, and the Godot you picked. Keep them out of the repo.
 /godot/
+/godot_path.txt
