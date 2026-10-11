@@ -1,0 +1,47 @@
+These are based on how hero works and this is mostly Sammie's project so she can trump them.
+
+HOW WE WORK
+- Every change goes: discuss, plan, ask to write, write in the work folder.
+- Push to playtest only when hero says "push to playtest". Push to main only when he says "push to main", and back up main first.
+- Plans are letters (Plan A, B...), steps are numbers, and questions are Q1, Q2...
+- Small changes need only a short discussion. Take requests literally and don't add extras.
+  If he asks for only a new look, keep the mechanics exactly the same.
+- For art, try at least 6 versions, pick the best, and show screenshots.
+- Check that abilities actually do what their names say, and measure them if unsure.
+- There are three folders: main (Sammie's), work and playtest.
+  (This was for local and is unnecessary for cloud.)
+
+CO-OP FAIRNESS
+- Lives are shared and never created. Someone joining takes lives from whoever has the most until everyone
+  is within one life of each other. Someone leaving gives their lives to whoever has the fewest.
+- Starting together doesn't give extra lives, because that would make co-op stronger than playing alone.
+- Running out of lives costs you every power-up and boost from that run, and nobody else gets them.
+  That's the price of being carried in co-op. You keep your candy.
+- SECOND WIND wipes you the same way, then brings you back with 2 lives.
+
+PROGRESSION
+- Each player number (P1-P4) has its own candy, characters and upgrades.
+- Candy goes to whoever catches it.
+- Unlocks happen only in the menu between games, never during play.
+- Characters cost 400 candy and upgrades cost 100. Every character's first upgrade is free,
+  and characters can be bought in any order.
+- ON/OFF in the menu decides which upgrades can drop. You don't start a run with them.
+- The pumpkin drops a catchable power-up, with no equip screen.
+- After all your upgrades are collected, pumpkins give small boosts that stack slowly. That way late waves still matter.
+- A boost never beats the character ability it matches. It stacks on top of it,
+  so the Black Cat with BIG ORB has the biggest orbs.
+
+MENUS AND CONTROLS
+- The title screen has a proper QUIT, and Start/Esc gives you options.
+- On a controller, B goes back and LB/RB switch tabs. Switching tabs keeps the page you're on.
+- Start joins instantly with a small character picker that doesn't pause the game.
+  It only pauses if you're already playing. The picker has a "?" for random.
+- In the upgrade pop-up, the name is biggest, the description goes right under it,
+  and the player number is played down.
+- Settings: full screen and windowed are separate from window size. Window sizes are clean multiples
+  of the game size, and real 16:9 can come later.
+
+CHARACTER LOOKS
+- A character's name sets its look: the Black Cat is always black. Players tell cats apart by a coloured tummy.
+- Don't put colour where it could read as a mouth. The cat uses a black chin with a tummy patch lower down.
+- Abilities should look like the character: NINE LIVES is the cat's tail curled over his head.
