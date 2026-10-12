@@ -2149,7 +2149,8 @@ func swept(s: Dictionary, y: float, h: float) -> bool:
 	return y > minf(s.y, py) - h and y < maxf(s.y, py) + h
 
 # TRICK SHOT's balls fly straight until they've gone off the top once; from then on gravity pulls them back down,
-# speeding up as they fall. Every time one goes off the top it comes back with one more hit. They don't bounce off
+# speeding up as they fall. Every time one goes off the top it comes back with one more hit, pushed 1-2 character
+# widths left or right. They don't bounce off
 # the sides: off the left, the right or the bottom they're gone.
 const TRICK_GRAV := 520.0
 func trick_move(s: Dictionary, dt: float) -> void:
@@ -2162,6 +2163,10 @@ func trick_move(s: Dictionary, dt: float) -> void:
 		s.up = true
 		s.hl += 1
 		s.grav = true
+		# a slight wind push: it comes back down 1-2 character widths (24-48 px) to the left or right of where it
+		# would have, at random, so shots straight up come down on both sides
+		var off := 2.0 * absf(s.vy) / TRICK_GRAV
+		s.vx += (24.0 + randf() * 24.0) * (1.0 if randf() < 0.5 else -1.0) / off
 	if s.y > -6:
 		s.up = false
 	if s.x < -6 or s.x > 326 or s.y > 246:

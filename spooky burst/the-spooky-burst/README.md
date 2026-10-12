@@ -127,7 +127,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   The glint in his eyes looks the way he's moving. He shoots jingle bells, angled 30 degrees the way he's moving.
 - TRICK SHOT turns his shots into balls that do 1 damage and get one hit for every third of their damage (3 to
   start). They bounce off enemies, leaning a little toward the next one, but not off the sides or the floor.
-  Each time one goes off the top it falls back down with one more hit, speeding up as it falls.
+  Each time one goes off the top it falls back down with one more hit, speeding up as it falls, and drifting
+  1-2 character widths left or right at random.
 - WICKED CLOWN gives him a life back the first time he's down to 1, then it's used up until a pumpkin gives it
   again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
 - JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
