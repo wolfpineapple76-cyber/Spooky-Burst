@@ -1983,25 +1983,27 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	b.y = minf(b.y, JUG_GROUND - 1.0)
 	sfx("shoot0")
 
-# I'M NOT A PINATA: when he loses a life he tosses up a gift box of his own candy, up to 8 pieces taken from his
-# stash (a gumball, worth 2, costs him 2; with less he throws what he has, with none nothing). The box goes up
+# I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 pieces of candy (some gumballs, worth 2).
+# It costs him half of what it's worth from his stash, rounded up; with less he throws only what he can pay for,
+# with none nothing. The box goes up
 # about 3 rows and bursts; the pieces fly out hitting enemies (1 damage, a gumball 2), then rain down as candy
 # for anyone to catch.
 func pinata(p: Dictionary) -> void:
+	# it costs him half of what it throws out (rounded up), so a full box doesn't drain him
 	var have := candy_of(p.n)
 	var pieces := []
-	var cost := 0
+	var worth := 0
 	for i in 8:
 		var gum := randf() < 1.0 / 3.0
-		if gum and have - cost < 2:
+		if gum and ceili((worth + 2) / 2.0) > have:
 			gum = false
-		if have - cost < 1:
+		if ceili((worth + 1) / 2.0) > have:
 			break
-		cost += 2 if gum else 1
+		worth += 2 if gum else 1
 		pieces.append(gum)
 	if pieces.is_empty():
 		return
-	add_candy(p.n, -cost)
+	add_candy(p.n, -ceili(worth / 2.0))
 	G.gifts.append({"x": p.x, "y": 196.0, "top": 196.0 - 66.0, "pieces": pieces, "n": p.n, "dead": false})
 	sfx("treat")
 

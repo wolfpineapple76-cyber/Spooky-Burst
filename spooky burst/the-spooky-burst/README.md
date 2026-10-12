@@ -134,9 +134,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
   one, kicking it 1-2 rows up toward another player, then the Jester, then a random spot, in turn. They block
   enemy shots, do 2 damage to enemies they touch and never leave the play area.
-- I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 of his own candy (a gumball costs
-  him 2). It bursts about 3 rows up, the pieces hit enemies on the way out (1 damage, gumballs 2), then rain
-  down for anyone to catch. With less candy he throws what he has, with none nothing.
+- I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 pieces of candy, some of them gumballs.
+  It costs him half of what it's worth (rounded up). It bursts about 3 rows up, the pieces hit enemies on the way
+  out (1 damage, gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can
+  pay for, with none nothing.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.
