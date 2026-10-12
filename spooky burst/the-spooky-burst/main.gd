@@ -1902,9 +1902,11 @@ func food_pull(d: Dictionary, dt: float) -> void:
 		return
 	for p in live():
 		if p.eq.has("food") and p.lives == 1:
+			# a little secret: the blue player (P3) reaches half a character width further and pulls a bit harder
+			var blue: bool = p.n == 2
 			var to := Vector2(p.x - d.x, 209.0 - d.y)
-			if to.length() < FOOD_REACH:
-				var step := to.limit_length(140.0 * dt)
+			if to.length() < FOOD_REACH + (12.0 if blue else 0.0):
+				var step := to.limit_length((161.0 if blue else 140.0) * dt)
 				d.x += step.x
 				d.y += step.y
 				return
