@@ -31,12 +31,12 @@ PROGRESSION
 - The pumpkin drops a catchable power-up, with no equip screen.
 - After all your upgrades are collected, pumpkins give small boosts that stack slowly. That way late waves still matter.
 - A boost collected during a run never beats the character ability it matches. It stacks on top of it,
-  so the Black Cat with BIG ORB has the biggest orbs. Prestige can go past that.
+  so the Black Cat with LUCKY COIN has the biggest shots. Prestige can go past that.
 
 WAVES AND ENEMIES
 - Everything is on a doubled scale (orbs do 2, bats and witches have 2 HP, vampires 12, spiders 6).
   Each PUMPKIN KING beaten adds 1 HP to every enemy after him.
-- SPECTRAL SHOT halves with each enemy it goes through and stops under 1 damage, so it can't clear whole screens.
+- SPECTRAL SHOT and PUNCH THROUGH halve with each enemy they go through and stop under 1 damage, so they can't clear whole screens.
 - Each enemy enters its own way: bats swarm in from the corners, witches swoop in from the sides firing,
   vampires come as dark red-eyed bats and transform.
 - Spiders hang on threads and web the spot below a front enemy. Webs only stop player shots (piercing too).

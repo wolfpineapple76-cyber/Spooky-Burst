@@ -55,8 +55,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   and sways with the rows. Enemies and their shots pass straight through webs.
 - Every enemy has its own chance to attack, so more of a kind means more attacks, about one per row of
   them at a time. A wave calms down as you clear it.
-- Everything is on a doubled scale: orbs do 2 damage before boosts. SPECTRAL SHOT halves each time it
-  goes through an enemy and stops once it's under 1 damage (or after 3 enemies).
+- Everything is on a doubled scale: orbs do 2 damage before boosts. SPECTRAL SHOT and PUNCH THROUGH halve
+  each time they go through an enemy and stop once under 1 damage (or after 3 enemies).
 - Every 5th wave is a boss, in this order: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN,
   PUMPKIN KING. Each boss's own kind fills the waves before the next one:
   - Waves 1-4 ease in (bats, then witches, then vampires; spiders from wave 3).
@@ -77,8 +77,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   and they act just like the ones in a normal wave.
 
 ## Candy and upgrades
-- Whoever catches candy keeps it (treat buckets and boss candy too). DOUBLE CANDY, GRAVE ROBBER and
-  SOUL MATE help you earn it faster.
+- Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and
+  SOUL MATE help you get more of it.
 - Spend it in UPGRADES on the title screen. There's a tab for each player: LB / RB on a controller,
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
@@ -99,7 +99,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   About 1 wave in 6 a bonus pumpkin also flies across above all the enemies.
 - Once you have all of those, pumpkins give small boosts for the rest of the run instead, picked at random.
   Each one stacks up to 10 times and stays below the character upgrade it matches, stacking on top of it
-  (so the Black Cat with BIG ORB has the biggest orbs):
+  (so the Black Cat with LUCKY COIN has the biggest shots):
   DM damage +5% each, FR fire rate +5%, SS shot speed +4%, MS move speed +4%, OS orb size, LS longer safe time +6%.
   Your boosts show in blue above your upgrades. When all six are maxed, pumpkins give 300 points.
 - This version saves to a new file (spooky_burst_v2.cfg), so everyone starts fresh. Reset Save erases one player
@@ -108,6 +108,13 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 ## Characters
 - The Black Cat is black for every player; players 2-4 have a coloured tummy matching their orbs.
 - NINE LIVES shows as the cat's tail curled up over his head while the shield is ready.
+- LUCKY COIN shoots big gold coins that flip as they fly. Half the time a hit knocks the enemy up a little
+  (4 px per point of damage, up to 24), and it drifts back to its spot. Bosses can be knocked too.
+- WIGGLE TAIL collects candy, power-ups, buckets and apples up to one cat width beyond him, as high as his head.
+  His tail flicks up over his back toward it, or with NINE LIVES the curled tail leans over and back.
+- HEAVY FIST makes the Zombie's shots little fists. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT.
+- BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
+  RIBBED: FOR THEIR PAIN shows a faint rib between the two side shots as they leave.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.

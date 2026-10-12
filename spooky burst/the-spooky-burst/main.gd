@@ -62,6 +62,18 @@ const WEBPAL := {"w": "#e6e0f5"}
 # the PRIMAL BAT's sound wave shot: three little arcs
 const SOUND := ["..b...b..", "...bbb...", ".a.....a.", "..aaaaa..", "c.......c", ".ccccccc."]
 const SOUNDPAL := {"a": "#c77dff", "b": "#e3b8ff", "c": "#8a4fd6"}
+# LUCKY COIN: a gold coin turning heads, edge, tails, edge as it flies (H heads face, T tails face,
+# g gold, d dark gold rim, c the player's colour faded in)
+const COIN := [
+	[".ddd.", "dgHgd", "dHgHd", "dgHgd", ".ddd."],
+	[".d.", "dgd", "dcd", "dgd", ".d."],
+	[".ddd.", "dgTgd", "dgTgd", "dgTgd", ".ddd."],
+	[".d.", "dgd", "dcd", "dgd", ".d."]]
+# HEAVY FIST: a little four-fingered fist in fleshy green, fading row by row (0-6) into the player's colour
+const FIST := [".0.0.0.0.", "111111111", "222222222", "333333333", ".4444444.", "..55555..", "..66666.."]
+# BONE THROW: the left and right ends of the bone, two knobs each (a 2 px shaft joins them)
+const BONE_L := ["ww.", "www", ".ww", ".ww", "www", "ww."]
+const BONE_R := [".ww", "www", "ww.", "ww.", "www", ".ww"]
 # the PRIMAL BAT's other shots: dark orbs the colour of his skin
 const DORB := [".aaa.", "abbba", "abhba", "abbba", ".aaa."]
 const DORBPAL := {"a": "#6b4a8a", "b": "#3a2252", "h": "#9d7ac4"}
@@ -179,8 +191,8 @@ const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "sho
 # where each player's character picker shows when they press Start to join (640x480 screen x)
 const PICK_X := [80, 240, 400, 560]
 # Once a player has every power-up that's ON, pumpkins give small boosts for the rest of the run instead.
-# Each stays below the character power-up it matches (HEAVY ORB, RESTLESS SHOT, QUICK BONES, CAT REFLEXES,
-# BIG ORB, THICK SKIN) and stacks on top of it. [key, name, what one does, HUD code]
+# Each stays below the character power-up it matches (HEAVY FIST, RESTLESS SHOT, QUICK BONES, CAT REFLEXES,
+# LUCKY COIN, THICK SKIN) and stacks on top of it. [key, name, what one does, HUD code]
 const BOOSTS := [["dmg", "DAMAGE UP", "+5% ORB DAMAGE", "DM"], ["rate", "FIRE RATE UP", "+5% FASTER SHOOTING", "FR"],
 	["shot", "SHOT SPEED UP", "+4% FASTER ORBS", "SS"], ["move", "MOVE SPEED UP", "+4% FASTER MOVING", "MS"],
 	["size", "ORB SIZE UP", "SLIGHTLY BIGGER ORBS", "OS"], ["safe", "LONGER SAFETY", "+6% LONGER SAFE TIME AFTER A HIT", "LS"]]
@@ -192,10 +204,11 @@ const MAX_PLAYERS := 4
 const SHOT_COLS := ["", "#228b22", "#4169e1", "#ff7518"]
 const LIFE_X := [[6, 14], [86, 14], [166, 14], [246, 14]]
 const CODE_X := [[13, 0], [173, 0], [333, 0], [493, 0]]
-# GHOST SHOT: two shots that split a little and weave side to side, leaning up to LEAN_MAX degrees
-# the way the shooter is moving, building up over LEAN_TIME seconds of moving the same way.
-const GS_SPLIT := 18.0
-const WEAVE_A := 5.0
+# GHOST SHOT: two shots GS_GAP either side of the shooter that fly up side by side, weaving as mirror images
+# (so the gap swings between about 26 and 42 px), leaning up to LEAN_MAX degrees the way the shooter is
+# moving, building up over LEAN_TIME seconds of moving the same way.
+const GS_GAP := 17.0
+const WEAVE_A := 4.0
 const WEAVE_F := 11.0
 const LEAN_MAX := 15.0
 const LEAN_TIME := 1.0
@@ -302,10 +315,9 @@ func _build_chars() -> void:
 				{"X": "#a8bcff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}, {"X": "#ffc08a", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
 			# tr: what each character is a bit better at, counted in boosts. desc shows in UPGRADES.
 			"tr": {"rate": 2}, "desc": "FIRES QUICK AND HAS FRIENDS",
-			# the save keys (triple, rapid...) are the old names, so upgrades already bought are kept
-			"pow": [["triple", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["rapid", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
-				["pierce", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["magnet", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
-				["twin", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
+			"pow": [["ghostshot", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["restless", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
+				["spectral", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["soulmate", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
+				["ghostress", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
 			# always a black cat; players 2-4 have a tummy (c) in their colour: forest green, royal blue, halloween orange
@@ -314,9 +326,9 @@ func _build_chars() -> void:
 				{"K": "#4a4170", "c": "#4169e1", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
 				{"K": "#4a4170", "c": "#ff7518", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
 			"tr": {"move": 2}, "desc": "AGILE AND DOESN'T LIKE BEING ATTACKED",
-			"pow": [["big", "BIG ORB", "BIGGER ORBS THAT HIT MORE", "BIG"], ["home", "HOMING ORB", "ORBS CURVE TOWARD ENEMIES", "HOM"],
+			"pow": [["coin", "LUCKY COIN", "BIG COINS THAT KNOCK FOES UP", "LCK"], ["home", "CAT'S EYE", "ORBS CURVE TOWARD ENEMIES", "EYE"],
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
-				["dcandy", "DOUBLE CANDY", "EVERY CANDY COUNTS TWICE", "2XC"]]},
+				["tail", "WIGGLE TAIL", "TAIL SNATCHES NEARBY CANDY", "WIG"]]},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
 			"spr2": _alt(ZOMB, {7: "G.GGGGGGGG.G", 9: "..SSSSSSSS..", 12: ".PPP....PPP."}),
 			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#3a3450", "P": "#6a5a8a"},
@@ -324,14 +336,14 @@ func _build_chars() -> void:
 				{"d": "#5a4a3a", "G": "#8fd6a8", "o": "#1b0f33", "m": "#3a1420", "S": "#4169e1", "P": "#6a5a8a"},
 				{"d": "#5a4a3a", "G": "#a8d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#ff7518", "P": "#6a5a8a"}],
 			"tr": {"dmg": 2}, "desc": "POWERFUL AND NOT AFRAID OF DEATH",
-			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["heavy", "HEAVY ORB", "ORBS DO DOUBLE DAMAGE", "HVY"],
+			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["fist", "HEAVY FIST", "FISTS DO DOUBLE DAMAGE", "FST"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
-				["score", "BRAIN FOOD", "DOUBLE POINTS", "2XP"]]},
+				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]]},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
 			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
 			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
-			"pow": [["fan", "BONE FAN", "TWO EXTRA ORBS OUT TO THE SIDES", "FAN"], ["more", "DEEP POCKETS", "TWO ORBS SIDE BY SIDE", "MOR"],
+			"pow": [["ribs", "RIBBED: FOR THEIR PAIN", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
 	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
@@ -779,7 +791,7 @@ func say(s: String, dur: float) -> void:
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
-		"ld": 1, "md": 0, "mv": 0.0}
+		"ld": 1, "md": 0, "mv": 0.0, "tl": null}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -847,7 +859,7 @@ func any_eq(key: String) -> bool:
 	return false
 
 func pts(n: int) -> void:
-	G.score += n * (2 if any_eq("score") else 1)
+	G.score += n
 
 func pick(arr: Array):
 	return arr[randi() % arr.size()]
@@ -867,7 +879,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
-		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0},
+		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [],
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to UPGRADES to buy one
@@ -1215,7 +1227,7 @@ func give_boost(p: Dictionary) -> void:
 	var opts := BOOSTS.filter(func(b): return bo(p, b[0]) < BOOST_MAX)
 	if opts.is_empty():
 		pts(300)
-		say("BONUS %d" % (600 if any_eq("score") else 300), 1.2)
+		say("BONUS 300", 1.2)
 		return
 	var b: Array = pick(opts)
 	p.bo[b[0]] = bo(p, b[0]) + 1
@@ -1395,11 +1407,10 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		return
 	var r := randf()
 	if r < 0.5:
-		var c := 10 if p.eq.has("dcandy") else 5
-		add_candy(p.n, c)
-		p.got += c
+		add_candy(p.n, 5)
+		p.got += 5
 		pts(100)
-		say("TREAT: %d CANDY" % c, 1.4)
+		say("TREAT: 5 CANDY", 1.4)
 		sfx("treat")
 	elif r < 0.7:
 		pts(300)
@@ -1474,7 +1485,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		strafe(e, bx, by, dt)
 	else:
 		e.x = bx
-		e.y = by
+		e.y = maxf(minf(by, 44.0), by - e.get("kick", 0.0))
 	if e.sp > 0:
 		e.sp -= dt
 		e.spt -= dt
@@ -1648,35 +1659,53 @@ func strafe(e: Dictionary, bx: float, by: float, dt: float) -> void:
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form" and e.get("wait", 0.0) <= 0)
 
-# sideways speeds of one volley's orbs (before DEEP POCKETS pairs them)
+# sideways speeds of one volley's orbs (before BONE THROW pairs them); GHOST SHOT's two fly straight,
+# GS_GAP either side
 func vxs_of(p: Dictionary) -> Array:
-	var vxs := [-GS_SPLIT, GS_SPLIT] if p.eq.has("triple") else [0.0]
-	if p.eq.has("fan"):
+	var vxs := [0.0, 0.0] if p.eq.has("ghostshot") else [0.0]
+	if p.eq.has("ribs"):
 		vxs.append(-95.0)
 		vxs.append(95.0)
 	return vxs
 
 func orb_dmg(p: Dictionary) -> float:
-	return (4.0 if p.eq.has("heavy") else 2.0) * (1.0 + 0.05 * lvl(p, "dmg"))
+	return (4.0 if p.eq.has("fist") else 2.0) * (1.0 + 0.05 * lvl(p, "dmg"))
 
 # one volley of p's orbs from x, y. lean (degrees, + is right) only bends GHOST SHOT.
 # helper is true for SOUL MATE's and GHOSTRESS's volleys.
 func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 	var xs := [x]
-	# DEEP POCKETS: every orb comes out as a pair side by side
-	if p.eq.has("more"):
+	# BONE THROW: every orb comes out as a pair side by side, drawn as the two ends of one bone
+	var bone: bool = p.eq.has("bone")
+	if bone:
 		xs = [x - 4, x + 4]
-	var gs: bool = p.eq.has("triple")
+	var gs: bool = p.eq.has("ghostshot")
 	var vxs := vxs_of(p)
 	var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
 	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
+	var made := []
 	for ox in xs:
+		var row := []
 		for i in vxs.size():
 			# the two GHOST SHOTs weave as mirror images of each other
-			G.shots.append({"x": ox, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col, "pc": 3 if p.eq.has("pierce") else 1, "big": p.eq.has("big"),
-				"grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p), "sp": sp, "last": null, "dead": false,
-				"h": helper, "gs": gs, "ph": PI * i})
+			var sx: float = ox + ((GS_GAP if i == 1 else -GS_GAP) if gs else 0.0)
+			var s := {"x": sx, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col,
+				"pc": 3 if p.eq.has("spectral") or p.eq.has("punch") else 1, "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
+				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p),
+				"sp": sp, "last": null, "dead": false, "h": helper, "gs": gs, "ph": PI * i}
+			G.shots.append(s)
+			row.append(s)
+		made.append(row)
+	# the two ends of each bone know each other, so the bone can be drawn whole while both are flying
+	if bone:
+		for i in made[0].size():
+			made[0][i].mate = made[1][i]
+			made[1][i].mate = made[0][i]
+	# RIBBED: a faint white rib arcs between the two side shots as they leave, fading by 24 px up
+	if p.eq.has("ribs"):
+		var row: Array = made[0]
+		G.arcs.append({"a": row[row.size() - 2], "b": made[made.size() - 1][row.size() - 1], "y0": y})
 
 # how long o (a player or a helper ghost) has kept moving the same way; v is its speed this frame
 func track_lean(o: Dictionary, v: float, dt: float) -> void:
@@ -1695,8 +1724,8 @@ func lean(o: Dictionary) -> float:
 # every enemy shot that passes through her and every enemy that touches her adds 3 volleys to fire.
 # She can't be hurt, and enemy shots keep going. An enemy touching her also takes one volley's damage.
 func helpers(p: Dictionary, dt: float) -> void:
-	for k in ["magnet", "twin"]:
-		var key := "sm" if k == "magnet" else "gr"
+	for k in ["soulmate", "ghostress"]:
+		var key := "sm" if k == "soulmate" else "gr"
 		if not p.eq.has(k):
 			p.erase(key)
 			continue
@@ -1730,7 +1759,7 @@ func helpers(p: Dictionary, dt: float) -> void:
 			elif not e.has(tag):
 				e[tag] = true
 				h.q += 3
-				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("more") else 1)
+				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("bone") else 1)
 				e.flash = 0.1
 				if e.hp <= 0:
 					down(e)
@@ -1742,6 +1771,37 @@ func helpers(p: Dictionary, dt: float) -> void:
 			h.q -= 1
 			h.qt = SOUL_GAP
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
+
+# p catches the candy k
+func got_candy(k: Dictionary, p: Dictionary) -> void:
+	k.dead = true
+	add_candy(p.n, 1)
+	p.got += 1
+	pts(10)
+	sfx("candy")
+
+# WIGGLE TAIL: falling candy or a drop that comes within one character width (24 px) beyond the Cat's body,
+# as high as his head, is collected straight away, and his tail flicks out toward where it was (0.12 s) and back
+# (0.18 s). The flick is only for show: a cat's tail can't hold things.
+const TAIL_OUT := 0.12
+const TAIL_BACK := 0.18
+func wiggle_reach(o: Dictionary) -> bool:
+	for p in live():
+		if p.eq.has("tail") and absf(o.x - p.x) < 36 and o.y > 188 and o.y < 224:
+			p.tl = {"t": 0.0, "tx": o.x, "ty": o.y}
+			if o.has("k"):
+				catch_drop(o, p)
+			else:
+				got_candy(o, p)
+			return true
+	return false
+
+func wiggle(p: Dictionary, dt: float) -> void:
+	if p.get("tl") == null:
+		return
+	p.tl.t += dt
+	if p.tl.t >= TAIL_OUT + TAIL_BACK:
+		p.tl = null
 
 # the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
 # player, so falling things reach a player standing under them first.
@@ -1796,6 +1856,14 @@ func enemy_attacks(dt: float, w: int) -> void:
 			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 			G.gap.v = 0.12
 
+# LUCKY COIN's knock back: anything held to a spot (formation, a hanging spider, a boss) is nudged up and drifts
+# back over about half a second, up to 24 px; anything flying about is just moved up. Never above the top row.
+func shove(e: Dictionary, d: float) -> void:
+	if e.ty == "B" or e.st == "form":
+		e.kick = minf(e.get("kick", 0.0) + d, 24.0)
+	else:
+		e.y = maxf(44.0, e.y - d)
+
 func form_sway() -> float:
 	return sin(G.t * 0.8) * 22
 
@@ -1821,6 +1889,8 @@ func spider(e: Dictionary, dt: float) -> void:
 		if e.y <= a[1]:
 			e.st = "form"
 	e.x = a[0] + sin(e.t * 1.3) * 3
+	if e.st == "form":
+		e.y = maxf(minf(a[1], 44.0), a[1] - e.get("kick", 0.0))
 	e.silk -= dt
 	if e.st != "form":
 		return
@@ -1963,11 +2033,12 @@ func update(dt: float) -> void:
 		p.cd -= dt
 		p.inv -= dt
 		helpers(p, dt)
+		wiggle(p, dt)
 		# how many orbs can be out at once: 3 per stream, +1 per 3 FIRE RATE UP boosts, doubled by RESTLESS SHOT
-		# (otherwise faster shooting just hits the limit) and DEEP POCKETS.
+		# (otherwise faster shooting just hits the limit) and BONE THROW.
 		# SOUL MATE's and GHOSTRESS's shots don't count toward it.
 		var per := 3 + lvl(p, "rate") / 3
-		var lim := per * vxs_of(p).size() * (2 if p.eq.has("more") else 1) * (2 if p.eq.has("rapid") else 1)
+		var lim := per * vxs_of(p).size() * (2 if p.eq.has("bone") else 1) * (2 if p.eq.has("restless") else 1)
 		var mine := 0
 		for s in G.shots:
 			if s.o == p.n and not s.h:
@@ -1976,7 +2047,7 @@ func update(dt: float) -> void:
 			volley(p, p.x, 194.0, lean(p), false)
 			if p.has("gr"):
 				volley(p, p.gr.x, HELP_Y - 8, lean(p.gr), true)
-			p.cd = (0.13 if p.eq.has("rapid") else 0.26) / (1.0 + 0.05 * lvl(p, "rate"))
+			p.cd = (0.13 if p.eq.has("restless") else 0.26) / (1.0 + 0.05 * lvl(p, "rate"))
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 
 	# orbs
@@ -2034,6 +2105,7 @@ func update(dt: float) -> void:
 			continue
 		e.t += dt
 		e.flash -= dt
+		e.kick = maxf(0.0, e.get("kick", 0.0) - 48 * dt)
 		if e.ty == "B":
 			boss(e, dt)
 			continue
@@ -2048,6 +2120,7 @@ func update(dt: float) -> void:
 			if e.ty == "w":
 				e.x += sin(e.t * 1.7) * 10
 				e.y += sin(e.t * 3.4) * 5
+			e.y = maxf(minf(e.y, 44.0), e.y - e.kick)
 		elif e.st == "fly":
 			# witches face the way they're flying, and keep that facing in formation
 			e.face = e.dir
@@ -2148,6 +2221,9 @@ func update(dt: float) -> void:
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and absf(s.y - e.y) < hh:
 				e.hp -= s.dmg
+				# LUCKY COIN: half the time the hit shoves the enemy up 4 px per point of damage (up to 24)
+				if s.coin and randf() < 0.5:
+					shove(e, minf(4.0 * s.dmg, 24.0))
 				s.pc -= 1
 				s.last = e
 				# SPECTRAL SHOT: each enemy it goes through halves it, and it stops under 1 damage or after 3
@@ -2195,12 +2271,9 @@ func update(dt: float) -> void:
 		if catcher == null:
 			catcher = soul_catch(k)
 		if catcher != null:
-			k.dead = true
-			var c := 2 if catcher.eq.has("dcandy") else 1
-			add_candy(catcher.n, c)
-			catcher.got += c
-			pts(10)
-			sfx("candy")
+			got_candy(k, catcher)
+		elif wiggle_reach(k):
+			pass
 		elif k.y > 246:
 			k.dead = true
 	for p in G.parts:
@@ -2217,10 +2290,13 @@ func update(dt: float) -> void:
 			got = soul_catch(d)
 		if got != null:
 			catch_drop(d, got)
+		elif wiggle_reach(d):
+			pass
 		elif d.y > 248:
 			d.dead = true
 
 	var keep := func(o): return not o.dead
+	G.arcs = G.arcs.filter(func(a): return not a.a.dead and not a.b.dead and a.y0 - a.a.y < 24)
 	G.shots = G.shots.filter(keep)
 	G.eb = G.eb.filter(keep)
 	G.en = G.en.filter(keep)
@@ -2369,6 +2445,14 @@ func draw_game() -> void:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")
 			R(x - 1, y, 1, 1, "#ff8fa0")
+	# RIBBED: a faint white rib arcing between the side shots as they leave
+	for a in G.arcs:
+		var al: float = 1.0 - (a.y0 - a.a.y) / 24.0
+		for i in 13:
+			var u := i / 12.0
+			var ax: float = lerpf(a.a.x, a.b.x, u)
+			var ay: float = lerpf(a.a.y, a.b.y, u) - sin(u * PI) * 5
+			R(int(round(ax)), int(round(ay)), 1, 1, "#f3efe0", 0.75 * al)
 	for s in G.shots:
 		var x := int(round(s.x))
 		var y := int(round(s.y))
@@ -2377,16 +2461,32 @@ func draw_game() -> void:
 		if s.gs:
 			spr(GSHOT, {"c": col, "k": "#1b0f33"}, x - 2, y - 3, 1)
 			continue
+		if s.coin:
+			var fr: Array = COIN[int(floor(gt * 12 + s.x * 0.1)) % 4]
+			var cp := {"g": "#ffd92e", "d": "#c9a24a", "H": "#fff3a8", "T": "#b88a1e",
+				"c": "#" + Color("#ffd92e").lerp(Color(col), 0.45).to_html(false)}
+			spr(fr, cp, x - (fr[0].length() / 2) * 2, y - 5, 2)
+			continue
+		if s.fist:
+			var fp := {}
+			for i in 7:
+				fp[str(i)] = "#" + Color("#a8d088").lerp(Color(col), i / 6.0).to_html(false)
+			spr(FIST, fp, x - 4, y - 3, 1)
+			continue
+		if s.bone:
+			var bp := {"w": "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false)}
+			var m = s.get("mate")
+			if m != null and not m.dead and s.x < m.x:
+				R(x + 2, y - 1, int(round(m.x)) - x - 3, 2, bp.w)
+			spr(BONE_L if m == null or s.x < m.x else BONE_R, bp, x - 1, y - 3, 1)
+			continue
 		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
 		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
 		R(x - 2, y - 1, 5, 3, col)
 		R(x - 1, y - 2, 3, 5, col)
-		# ORB SIZE boosts show a little at 5+, always smaller than BIG ORB, and grow BIG ORB further
+		# ORB SIZE boosts show a little at 5+, always smaller than LUCKY COIN
 		var g := 1 if s.grow >= 2.0 else 0
-		if s.big:
-			R(x - 4 - g, y - 2, 9 + g * 2, 5, col)
-			R(x - 2, y - 4 - g, 5, 9 + g * 2, col)
-		elif g > 0:
+		if g > 0:
 			R(x - 3, y - 1, 7, 3, col)
 			R(x - 1, y - 3, 3, 7, col)
 	for i in G.players.size():
@@ -2406,7 +2506,9 @@ func draw_game() -> void:
 		var px := int(round(p.x))
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.eq.has("shield") and p.sh <= 0:
-			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt)
+			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt, p.get("tl"))
+		elif p.get("tl") != null:
+			draw_swoop(px, 196 + bob, C.pals[p.n].values()[0], gt, p.tl)
 		spr(C.spr2 if int(floor(gt * 4 + i)) % 2 == 1 else C.spr, C.pals[p.n], px - 12, 196 + bob, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
@@ -2431,12 +2533,54 @@ func draw_game() -> void:
 
 # NINE LIVES shield: the tail comes out from behind, up the side and curls over the head.
 # Drawn before the cat so it sits behind him. by is the top of the sprite.
-func draw_tail(px: int, by: int, col: String, gt: float) -> void:
+func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
 	var sw := int(round(sin(gt * 3) * 1))
 	var pts := [Vector2(px + 8, by + 20), Vector2(px + 14, by + 15), Vector2(px + 16, by + 6), Vector2(px + 14, by - 2),
 		Vector2(px + 8 + sw, by - 7), Vector2(px + sw, by - 9), Vector2(px - 6 + sw, by - 8), Vector2(px - 9 + sw, by - 4)]
+	# WIGGLE TAIL with NINE LIVES: the curl leans over toward what he collected, keeping its shape, and back
+	if tl != null:
+		var k := tail_reach(tl)
+		var dx: float = clampf(tl.tx - px, -36.0, 36.0)
+		for j in range(1, pts.size()):
+			pts[j].x += dx * 0.5 * k * clampf((pts[0].y - pts[j].y) / 30.0, 0.0, 1.0)
+			pts[j].y += sin(gt * 20 + j) * k
+	smooth_line(pts, col, 4)
+
+# a smooth curve through pts (Catmull-Rom), 3 px wide for the first thick segments and 2 px after
+func smooth_line(pts: Array, col: String, thick: int) -> void:
+	var prev: Vector2 = pts[0]
 	for j in pts.size() - 1:
-		pline(pts[j].x, pts[j].y, pts[j + 1].x, pts[j + 1].y, 3 if j < 4 else 2, col)
+		var p0: Vector2 = pts[maxi(j - 1, 0)]
+		var p1: Vector2 = pts[j]
+		var p2: Vector2 = pts[j + 1]
+		var p3: Vector2 = pts[mini(j + 2, pts.size() - 1)]
+		for i in range(1, 7):
+			var u := i / 6.0
+			var q := 0.5 * ((2.0 * p1) + (p2 - p0) * u + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * u * u
+				+ (3.0 * p1 - p0 - 3.0 * p2 + p3) * u * u * u)
+			pline(prev.x, prev.y, q.x, q.y, 3 if j < thick else 2, col)
+			prev = q
+
+# how far out the tail is in a WIGGLE TAIL flick, 0 to 1 and back, eased
+func tail_reach(tl: Dictionary) -> float:
+	var u: float = tl.t / TAIL_OUT if tl.t < TAIL_OUT else 1.0 - (tl.t - TAIL_OUT) / TAIL_BACK
+	return smoothstep(0.0, 1.0, clampf(u, 0.0, 1.0))
+
+# WIGGLE TAIL without NINE LIVES: the tail flicks up over his back in a soft arc toward what he collected and back
+func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> void:
+	var k := tail_reach(tl)
+	var base := Vector2(px, by + 19)
+	var tip := base.lerp(Vector2(tl.tx, tl.ty), k)
+	var c1 := Vector2(base.x, by - 4 * k)
+	var c2 := Vector2(tip.x, tip.y - 12 * k)
+	var pts := []
+	for i in 9:
+		var u := i / 8.0
+		var a1 := base.lerp(c1, u)
+		var a2 := c1.lerp(c2, u)
+		var a3 := c2.lerp(tip, u)
+		pts.append(a1.lerp(a2, u).lerp(a2.lerp(a3, u), u) + Vector2(0, sin(u * 6 + gt * 20) * k * u))
+	smooth_line(pts, col, 5)
 
 func draw_hud() -> void:
 	T("STATS", 13, 12, 2, "#ff8a1f")
