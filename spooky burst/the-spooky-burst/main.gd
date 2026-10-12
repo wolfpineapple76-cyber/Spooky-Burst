@@ -45,6 +45,12 @@ const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", "
 const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", ".WWWWkkWWWW.", "..WWWWWWWW..", "..WkWkWkWW..", "....WWWW....",
 	"W.WWWWWWWW.W", "W..kWWWWk..W", "W.WWWWWWWW.W", "...WW..WW...", "...WW..WW..."]
 const GPAL := {"X": "#f6f1ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}
+# GHOST SHOT orbs are little ghosts in the shot colour (c)
+const GSHOT := [".ccc.", "ccccc", "ckckc", "ccccc", "ccccc", "c.c.c"]
+# SOUL MATE's bow and GHOSTRESS's black rose clip, drawn on top of a small ghost at (x + 7, y - 2) and (x + 7, y)
+const BOW := ["B...B", "BBdBB", "B...B"]
+const ROSE := [".RR.", "RrRR", "RRrR", ".RRg"]
+const ACCPAL := {"B": "#ff4f9a", "d": "#b02670", "R": "#140a1a", "r": "#7a5a8e", "g": "#3d8b3a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -54,7 +60,7 @@ const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "sho
 # where each player's character picker shows when they press Start to join (640x480 screen x)
 const PICK_X := [80, 560, 240, 400]
 # Once a player has every power-up that's ON, pumpkins give small boosts for the rest of the run instead.
-# Each stays below the character power-up it matches (HEAVY ORB, RAPID FIRE, QUICK BONES, CAT REFLEXES,
+# Each stays below the character power-up it matches (HEAVY ORB, RESTLESS SHOT, QUICK BONES, CAT REFLEXES,
 # BIG ORB, THICK SKIN) and stacks on top of it. [key, name, what one does, HUD code]
 const BOOSTS := [["dmg", "DAMAGE UP", "+5% ORB DAMAGE", "DM"], ["rate", "FIRE RATE UP", "+5% FASTER SHOOTING", "FR"],
 	["shot", "SHOT SPEED UP", "+4% FASTER ORBS", "SS"], ["move", "MOVE SPEED UP", "+4% FASTER MOVING", "MS"],
@@ -66,6 +72,17 @@ const MAX_PLAYERS := 4
 const SHOT_COLS := ["", "#d6ffe4", "#ffc78a", "#a8d8ff"]
 const LIFE_X := [[6, 14], [302, -14], [88, 14], [232, -14]]
 const CODE_X := [[13, 0], [627, 2], [176, 0], [488, 2]]
+# GHOST SHOT: two shots that split a little and weave side to side, leaning up to LEAN_MAX degrees
+# the way the shooter is moving, building up over LEAN_TIME seconds of moving the same way.
+const GS_SPLIT := 18.0
+const WEAVE_A := 5.0
+const WEAVE_F := 11.0
+const LEAN_MAX := 15.0
+const LEAN_TIME := 1.0
+# SOUL MATE and GHOSTRESS: small ghosts that trail you along the ground. HELP_Y is the middle of them.
+const HELP_Y := 212.0
+# SOUL MATE fires 3 volleys back for every enemy shot or enemy that touches her, this far apart
+const SOUL_GAP := 0.07
 
 # 5x7 pixel font, drawn in code so the project needs no font file.
 const GLYPHS := {
@@ -159,9 +176,10 @@ func _build_chars() -> void:
 			"spr2": _alt(GHOST, {11: "X.XXX.XXX.XX", 12: "..X...X...X."}),
 			"pals": [GPAL, {"X": "#b8ffd0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
 				{"X": "#ffc78a", "o": "#1b0f33", "b": "#ff7f7f", "m": "#1b0f33"}, {"X": "#a8d8ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
-			"pow": [["triple", "TRIPLE SHOT", "THREE ORBS IN A SPREAD", "TRI"], ["rapid", "RAPID FIRE", "SHOOT MUCH FASTER", "RAP"],
-				["pierce", "PIERCING ORB", "ORBS PASS THROUGH ENEMIES", "PRC"], ["magnet", "CANDY MAGNET", "PULLS CANDY TO YOU", "MAG"],
-				["twin", "TWIN GHOST", "A BUDDY COPIES YOUR SHOTS", "TWN"]]},
+			# the save keys (triple, rapid...) are the old names, so upgrades already bought are kept
+			"pow": [["triple", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["rapid", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
+				["pierce", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["magnet", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
+				["twin", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
 			# always a black cat; players 2-4 have a coloured tummy (c) to tell them apart
@@ -187,6 +205,12 @@ func _build_chars() -> void:
 			"pow": [["fan", "BONE FAN", "TWO EXTRA ORBS OUT TO THE SIDES", "FAN"], ["more", "DEEP POCKETS", "TWO ORBS SIDE BY SIDE", "MOR"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
+	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
+	for tint in [["smp", "#ff9ec2"], ["grp", "#b07cff"]]:
+		chars[0][tint[0]] = chars[0].pals.map(func(pal):
+			var o: Dictionary = pal.duplicate()
+			o.X = "#" + Color(pal.X).lerp(Color(tint[1]), 0.2).to_html(false)
+			return o)
 	for ch in chars:
 		var sil := {}
 		for k in ch.pals[0].keys():
@@ -612,7 +636,8 @@ func say(s: String, dur: float) -> void:
 # for their character. eq: upgrades they have this run. bo: how many of each boost this run. got: candy this run.
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
-		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false}
+		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
+		"ld": 1, "md": 0, "mv": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -1181,6 +1206,109 @@ func boss(e: Dictionary, dt: float) -> void:
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form")
 
+# sideways speeds of one volley's orbs (before DEEP POCKETS pairs them)
+func vxs_of(p: Dictionary) -> Array:
+	var vxs := [-GS_SPLIT, GS_SPLIT] if p.eq.has("triple") else [0.0]
+	if p.eq.has("fan"):
+		vxs.append(-95.0)
+		vxs.append(95.0)
+	return vxs
+
+func orb_dmg(p: Dictionary) -> float:
+	return (2.0 if p.eq.has("heavy") else 1.0) * (1.0 + 0.05 * bo(p, "dmg"))
+
+# one volley of p's orbs from x, y. lean (degrees, + is right) only bends GHOST SHOT.
+# helper is true for SOUL MATE's and GHOSTRESS's volleys.
+func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
+	var xs := [x]
+	# DEEP POCKETS: every orb comes out as a pair side by side
+	if p.eq.has("more"):
+		xs = [x - 4, x + 4]
+	var gs: bool = p.eq.has("triple")
+	var vxs := vxs_of(p)
+	var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
+	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * bo(p, "shot"))
+	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
+	for ox in xs:
+		for i in vxs.size():
+			# the two GHOST SHOTs weave as mirror images of each other
+			G.shots.append({"x": ox, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col, "pc": 3 if p.eq.has("pierce") else 1, "big": p.eq.has("big"),
+				"grow": 0.4 * bo(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p), "sp": sp, "last": null, "dead": false,
+				"h": helper, "gs": gs, "ph": PI * i})
+
+# how long o (a player or a helper ghost) has kept moving the same way; v is its speed this frame
+func track_lean(o: Dictionary, v: float, dt: float) -> void:
+	var d := 0 if absf(v) < 15 else int(signf(v))
+	if d == 0 or d != o.md:
+		o.mv = 0.0
+	else:
+		o.mv += dt
+	o.md = d
+
+func lean(o: Dictionary) -> float:
+	return LEAN_MAX * minf(1.0, o.mv / LEAN_TIME) * o.md
+
+# SOUL MATE ("sm") and GHOSTRESS ("gr") trail behind you on springs, so they catch up and slightly
+# pass you when you stop or turn. SOUL MATE also veers off for falling candy and drops, and fights back:
+# every enemy shot that passes through her and every enemy that touches her adds 3 volleys to fire.
+# She can't be hurt, and enemy shots keep going. An enemy touching her also takes one volley's damage.
+func helpers(p: Dictionary, dt: float) -> void:
+	for k in ["magnet", "twin"]:
+		var key := "sm" if k == "magnet" else "gr"
+		if not p.eq.has(k):
+			p.erase(key)
+			continue
+		if not p.has(key):
+			p[key] = {"x": p.x, "v": 0.0, "md": 0, "mv": 0.0, "q": 0, "qt": 0.0}
+		var h: Dictionary = p[key]
+		var tx: float = p.x - p.ld * (14.0 if key == "sm" else 26.0)
+		if key == "sm":
+			var best = null
+			for o in G.candy + G.drops:
+				if o.y > 120 and absf(o.x - h.x) < 70 and (best == null or absf(o.x - h.x) < absf(best.x - h.x)):
+					best = o
+			if best != null:
+				tx = best.x
+		h.v += (tx - h.x) * (18.0 if key == "sm" else 14.0) * dt
+		h.v = clampf(h.v - h.v * (4.0 if key == "sm" else 3.5) * dt, -220, 220)
+		h.x = clampf(h.x + h.v * dt, 6, 314)
+		track_lean(h, h.v, dt)
+		if key == "gr":
+			continue
+		var tag := "s%d" % p.n
+		for b in G.eb:
+			if not b.dead and not b.has(tag) and absf(b.x - h.x) < 6 and absf(b.y - HELP_Y) < 7:
+				b[tag] = true
+				h.q += 3
+		for e in G.en:
+			var big: bool = e.ty == "B"
+			var on: bool = not e.dead and absf(e.x - h.x) < (30 if big else 10) and absf(e.y - HELP_Y) < (28 if big else 11)
+			if not on:
+				e.erase(tag)
+			elif not e.has(tag):
+				e[tag] = true
+				h.q += 3
+				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("more") else 1)
+				e.flash = 0.1
+				if e.hp <= 0:
+					kill(e)
+				else:
+					sfx("bosshit")
+		h.qt -= dt
+		if h.q > 0 and h.qt <= 0:
+			volley(p, h.x, HELP_Y - 8, lean(h), true)
+			h.q -= 1
+			h.qt = SOUL_GAP
+			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
+
+# the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
+# player, so falling things reach a player standing under them first.
+func soul_catch(o: Dictionary):
+	for p in live():
+		if p.has("sm") and absf(o.x - p.sm.x) < 8 and absf(o.y - HELP_Y) < 7:
+			return p
+	return null
+
 func player_input(p: Dictionary) -> Dictionary:
 	var dir := 0
 	var fire := false
@@ -1236,39 +1364,27 @@ func update(dt: float) -> void:
 		if p.out:
 			continue
 		var I := player_input(p)
+		var ox: float = p.x
 		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * bo(p, "move")) * dt
 		if p.sh > 0:
 			p.sh -= dt
 		p.x = clampf(p.x, 14, 306)
+		track_lean(p, (p.x - ox) / dt if dt > 0 else 0.0, dt)
+		if I.dir != 0:
+			p.ld = I.dir
 		p.cd -= dt
 		p.inv -= dt
-		var vxs := [-45.0, 0.0, 45.0] if p.eq.has("triple") else [0.0]
-		if p.eq.has("fan"):
-			vxs.append(-95.0)
-			vxs.append(95.0)
-		var lim := 3 * vxs.size() * (2 if p.eq.has("twin") else 1) * (2 if p.eq.has("more") else 1)
+		helpers(p, dt)
+		# SOUL MATE's and GHOSTRESS's shots don't count toward the limit
+		var lim := 3 * vxs_of(p).size() * (2 if p.eq.has("more") else 1)
 		var mine := 0
 		for s in G.shots:
-			if s.o == p.n:
+			if s.o == p.n and not s.h:
 				mine += 1
 		if I.fire and p.cd <= 0 and mine < lim:
-			var xs := [p.x]
-			if p.eq.has("twin"):
-				xs.append(p.x + (20 if p.x < 290 else -20))
-			# DEEP POCKETS: every orb comes out as a pair side by side
-			if p.eq.has("more"):
-				var pairs := []
-				for x in xs:
-					pairs.append(x - 4)
-					pairs.append(x + 4)
-				xs = pairs
-			var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
-			var dmg := (2.0 if p.eq.has("heavy") else 1.0) * (1.0 + 0.05 * bo(p, "dmg"))
-			var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * bo(p, "shot"))
-			for x in xs:
-				for vx in vxs:
-					G.shots.append({"x": x, "y": 194.0, "vx": vx, "o": p.n, "col": col, "pc": 3 if p.eq.has("pierce") else 1, "big": p.eq.has("big"),
-						"grow": 0.4 * bo(p, "size"), "hm": p.eq.has("home"), "dmg": dmg, "sp": sp, "last": null, "dead": false})
+			volley(p, p.x, 194.0, lean(p), false)
+			if p.has("gr"):
+				volley(p, p.gr.x, HELP_Y - 8, lean(p.gr), true)
 			p.cd = (0.13 if p.eq.has("rapid") else 0.26) / (1.0 + 0.05 * bo(p, "rate"))
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 
@@ -1283,6 +1399,9 @@ func update(dt: float) -> void:
 				s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
 		s.y -= s.sp * dt
 		s.x += s.vx * dt
+		if s.gs:
+			s.ph += WEAVE_F * dt
+			s.x += cos(s.ph) * WEAVE_A * WEAVE_F * dt
 		if s.y < -6 or s.x < -6 or s.x > 326:
 			s.dead = true
 
@@ -1460,11 +1579,10 @@ func update(dt: float) -> void:
 		k.y += 45 * dt
 		var catcher = null
 		for p in live():
-			if p.eq.has("magnet") and absf(k.x - p.x) < 90:
-				k.x += signf(p.x - k.x) * minf(absf(p.x - k.x), 130 * dt)
-				k.y += 50 * dt
 			if absf(k.x - p.x) < 13 and absf(k.y - 209) < 14:
 				catcher = p
+		if catcher == null:
+			catcher = soul_catch(k)
 		if catcher != null:
 			k.dead = true
 			var c := 2 if catcher.eq.has("dcandy") else 1
@@ -1484,6 +1602,8 @@ func update(dt: float) -> void:
 		for p in live():
 			if absf(d.x - p.x) < 14 and absf(d.y - 209) < 14:
 				got = p
+		if got == null:
+			got = soul_catch(d)
 		if got != null:
 			catch_drop(d, got)
 		elif d.y > 248:
@@ -1597,6 +1717,9 @@ func draw_game() -> void:
 		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
 		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
 		var col: String = s.col
+		if s.gs:
+			spr(GSHOT, {"c": col, "k": "#1b0f33"}, x - 2, y - 3, 1)
+			continue
 		R(x - 2, y - 1, 5, 3, col)
 		R(x - 1, y - 2, 3, 5, col)
 		# ORB SIZE boosts show a little at 5+, always smaller than BIG ORB, and grow BIG ORB further
@@ -1611,12 +1734,17 @@ func draw_game() -> void:
 		var p: Dictionary = G.players[i]
 		if p.out or mode == "over":
 			continue
+		var C: Dictionary = chars[p.ch]
+		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you
+		for h in [["gr", "grp", ROSE, 0], ["sm", "smp", BOW, -2]]:
+			if p.has(h[0]):
+				var hx := int(round(p[h[0]].x)) - 6
+				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
+				spr(C.spr, C[h[1]][p.n], hx, hb, 1)
+				spr(h[2], ACCPAL, hx + 7, hb + h[3], 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
-		var C: Dictionary = chars[p.ch]
 		var px := int(round(p.x))
-		if p.eq.has("twin"):
-			spr(C.spr, C.pals[p.n], px + (14 if p.x < 290 else -26), 206, 1)
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.eq.has("shield") and p.sh <= 0:
 			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt)

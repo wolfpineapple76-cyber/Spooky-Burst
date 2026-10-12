@@ -41,7 +41,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). DOUBLE CANDY, GRAVE ROBBER and
-  CANDY MAGNET help you earn it faster.
+  SOUL MATE help you earn it faster.
 - Spend it in UPGRADES on the title screen. There's a tab for each player: LB / RB on a controller,
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 400 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
