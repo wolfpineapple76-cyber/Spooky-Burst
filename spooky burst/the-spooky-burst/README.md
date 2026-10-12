@@ -87,7 +87,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
   The Ghost starts free. Each character's page shows a line about what it's a bit better at:
   the Ghost shoots 10% faster, the Black Cat moves 8% faster, the Zombie does 10% more damage,
-  the Skeleton's orbs fly 8% faster and the Jester's orbs are bigger (each worth 2 boosts, stacking with everything else).
+  and the Skeleton's and the Jester's shots fly 8% faster (each worth 2 boosts, stacking with everything else).
 - PRESTIGE: once you own a character and all its upgrades, a PRESTIGE row shows at the bottom of its page.
   Confirming relocks the character and all its upgrades, and gives that character +1 of every boost
   for good, up to PRESTIGE 10/10 (so 10 more on top of the 10 a run can give). Each prestige level makes
@@ -130,7 +130,12 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   Each time one goes off the top it falls back down with one more hit, speeding up as it falls.
 - WICKED CLOWN gives him a life back the first time he's down to 1, then it's used up until a pumpkin gives it
   again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
-- JUGGLING BALLS and I'M NOT A PINATA are listed but don't do anything yet.
+- JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
+  one, kicking it 1-2 rows up toward another player, then the Jester, then a random spot, in turn. They block
+  enemy shots, do 2 damage to enemies they touch and never leave the play area.
+- I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 of his own candy (a gumball costs
+  him 2). It bursts about 3 rows up, the pieces hit enemies on the way out (1 damage, gumballs 2), then rain
+  down for anyone to catch. With less candy he throws what he has, with none nothing.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.

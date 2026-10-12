@@ -102,6 +102,11 @@ const JBELL := [".ccc.", "cWccc", "ccccc", "ckkkc", "..c.."]
 const JBELL_B := ["..ccc..", ".cWccc.", "ccWcccc", "ccccccc", "ccccccc", "ckkkkkc", "...c..."]
 const TBALL := [".cc.", "cWcc", "cccw", ".cw."]
 const TBALL_B := ["..cc..", ".cWcc.", "cWcccc", "ccccww", ".cccw.", "..cw.."]
+# JUGGLING BALLS: a shiny ball, always one green, one blue and one orange
+const JUGBALL := ["..ccc..", ".cWlcc.", "cWlcccc", "clccccc", "cccccdc", ".ccccd.", "..ddd.."]
+const JUG_COLS := ["#228b22", "#4169e1", "#ff7518"]
+# I'M NOT A PINATA's gift box: white with a ribbon (red for P1, the player's colour for P2-4)
+const GIFT := [".rr...rr.", "..rrRrr..", "WWWWrWWWW", "WWWWrWWWW", "rrrrrrrrr", "WWWWrWWWW", "WWWWrWWWW", "ggggrgggg"]
 # a gumball: the double candy
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
@@ -378,7 +383,7 @@ func _build_chars() -> void:
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#228b22", "o": "#228b22"},
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#4169e1", "o": "#4169e1"},
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#ff7518", "o": "#ff7518"}],
-			"tr": {"size": 2}, "desc": "IT'S JUST A JOKE.",
+			"tr": {"shot": 2}, "desc": "IT'S JUST A JOKE.",
 			"pow": [["trick", "TRICK SHOT", "BOUNCY BALLS, MANY HITS", "TRK"], ["wicked", "WICKED CLOWN", "AT 1 LIFE, GET ONE BACK", "WKD"],
 				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
 				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]}]
@@ -928,7 +933,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
-		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [],
+		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [],
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to UPGRADES to buy one
@@ -1364,6 +1369,8 @@ func hurt(p: Dictionary) -> void:
 		sfx("shield")
 		return
 	p.lives -= 1
+	if p.eq.has("pinata"):
+		pinata(p)
 	# WICKED CLOWN: the first time he's down to 1 life he gets one straight back, and it's used up (a pumpkin can
 	# give it to him again)
 	if p.lives == 1 and p.eq.has("wicked"):
@@ -1902,6 +1909,134 @@ func food_pull(d: Dictionary, dt: float) -> void:
 				d.y += step.y
 				return
 
+# JUGGLING BALLS: three balls (green, blue, orange) that stay with the Jester as long as he's in the game. They sit
+# on the ground, bouncing a little until they settle. Any player who walks into one kicks it 1-2 rows up, aimed in
+# turn at another player (if there is one), at the Jester, and at a random spot. They block enemy shots and do 2
+# damage to enemies they touch, and never leave the play area.
+const JUG_GROUND := 218.0
+const JUG_GRAV := 420.0
+func juggle(p: Dictionary, dt: float) -> void:
+	if not p.eq.has("juggle"):
+		p.erase("jb")
+		return
+	if not p.has("jb"):
+		p.jb = []
+		for i in 3:
+			p.jb.append({"x": p.x + (i - 1) * 16.0, "y": 190.0, "vx": (i - 1) * 30.0, "vy": -60.0, "col": JUG_COLS[i], "k": i, "cd": 0.0})
+	for b in p.jb:
+		b.cd -= dt
+		b.vy += JUG_GRAV * dt
+		b.x += b.vx * dt
+		b.y += b.vy * dt
+		# bounce on the ground, a little less each time, until it settles
+		if b.y >= JUG_GROUND:
+			b.y = JUG_GROUND
+			b.vy = -b.vy * 0.45 if b.vy > 40.0 else 0.0
+			b.vx *= 0.6
+			if absf(b.vx) < 4.0:
+				b.vx = 0.0
+		if b.x < 6.0 or b.x > 314.0:
+			b.x = clampf(b.x, 6.0, 314.0)
+			b.vx = -b.vx
+		b.y = maxf(b.y, 10.0)
+		# kicked by a player walking into it
+		if b.cd <= 0.0:
+			for q in live():
+				if absf(b.x - q.x) < 12.0 and b.y > 196.0:
+					jug_kick(p, b, q)
+					break
+		# blocks enemy shots
+		for s in G.eb:
+			if not s.dead and absf(s.x - b.x) < 6.0 and absf(s.y - b.y) < 6.0:
+				s.dead = true
+		# 2 damage to an enemy it touches (once every half second per enemy)
+		for e in G.en:
+			if e.dead or e.laugh > 0 or e.get("wait", 0.0) > 0 or G.t < e.get("jbt", -1.0):
+				continue
+			var hw: float = 27.0 if e.ty == "B" else 11.0
+			var hh: float = 20.0 if e.ty == "B" else 9.0
+			if absf(b.x - e.x) < hw + 3.0 and absf(b.y - e.y) < hh + 3.0:
+				e.jbt = G.t + 0.5
+				e.hp -= 2
+				e.flash = 0.1
+				if e.hp <= 0:
+					down(e)
+				else:
+					sfx("bosshit")
+
+# kick ball b up 1-2 rows, aimed at the next target in its turn: another player, the Jester, a random spot
+func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
+	var tx := 20.0 + randf() * 280.0
+	if b.k == 0:
+		var others := live().filter(func(q): return not is_same(q, j))
+		if not others.is_empty():
+			tx = pick(others).x
+	elif b.k == 1:
+		tx = j.x
+	b.k = (b.k + 1) % 3
+	var h := 30.0 + randf() * 14.0
+	b.vy = -sqrt(2.0 * JUG_GRAV * h)
+	var flight := 2.0 * absf(b.vy) / JUG_GRAV
+	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
+	b.cd = 0.3
+	b.y = minf(b.y, JUG_GROUND - 1.0)
+	sfx("shoot0")
+
+# I'M NOT A PINATA: when he loses a life he tosses up a gift box of his own candy, up to 8 pieces taken from his
+# stash (a gumball, worth 2, costs him 2; with less he throws what he has, with none nothing). The box goes up
+# about 3 rows and bursts; the pieces fly out hitting enemies (1 damage, a gumball 2), then rain down as candy
+# for anyone to catch.
+func pinata(p: Dictionary) -> void:
+	var have := candy_of(p.n)
+	var pieces := []
+	var cost := 0
+	for i in 8:
+		var gum := randf() < 1.0 / 3.0
+		if gum and have - cost < 2:
+			gum = false
+		if have - cost < 1:
+			break
+		cost += 2 if gum else 1
+		pieces.append(gum)
+	if pieces.is_empty():
+		return
+	add_candy(p.n, -cost)
+	G.gifts.append({"x": p.x, "y": 196.0, "top": 196.0 - 66.0, "pieces": pieces, "n": p.n, "dead": false})
+	sfx("treat")
+
+func gifts_and_pieces(dt: float) -> void:
+	for g in G.gifts:
+		g.y -= 160.0 * dt
+		if g.y <= g.top:
+			g.dead = true
+			burst(g.x, g.y, "#f6f1ff", 14)
+			sfx("pop")
+			var n: int = g.pieces.size()
+			for i in n:
+				var a := -PI / 2 + (i - (n - 1) / 2.0) * (PI / 8.0)
+				G.pieces.append({"x": g.x, "y": g.y, "vx": cos(a) * 150.0, "vy": sin(a) * 150.0 - 30.0,
+					"x2": g.pieces[i], "hit": [], "dead": false})
+	for c in G.pieces:
+		c.vy += 300.0 * dt
+		c.x += c.vx * dt
+		c.y += c.vy * dt
+		# on the way out it hits enemies: 1 damage, a gumball 2
+		for e in G.en:
+			if e.dead or e.laugh > 0 or c.hit.any(func(h): return is_same(h, e)):
+				continue
+			var hw: float = 27.0 if e.ty == "B" else 11.0
+			var hh: float = 20.0 if e.ty == "B" else 9.0
+			if absf(c.x - e.x) < hw and absf(c.y - e.y) < hh:
+				c.hit.append(e)
+				e.hp -= 2 if c.x2 else 1
+				e.flash = 0.1
+				if e.hp <= 0:
+					down(e)
+		# once it starts falling it's just candy, raining down for anyone to catch
+		if c.vy >= 0.0:
+			c.dead = true
+			G.candy.append({"x": clampf(c.x, 8.0, 312.0), "y": c.y, "dead": false, "x2": c.x2})
+
 func wiggle(p: Dictionary, dt: float) -> void:
 	if p.get("tl") == null:
 		return
@@ -2259,6 +2394,7 @@ func update(dt: float) -> void:
 		p.inv -= dt
 		helpers(p, dt)
 		wiggle(p, dt)
+		juggle(p, dt)
 		# The shot limit is switched off. The shot limit may not even have been needed for this game: shots just fly
 		# away and vanish, and at the normal fire rate about 3 are out at once anyway. It was:
 		# how many orbs can be out at once: 3 per stream, +1 per 3 FIRE RATE UP boosts, doubled by RESTLESS SHOT
@@ -2541,6 +2677,8 @@ func update(dt: float) -> void:
 		elif d.y > 248:
 			d.dead = true
 
+	gifts_and_pieces(dt)
+
 	var keep := func(o): return not o.dead
 	G.arcs = G.arcs.filter(func(a): return not a.a.dead and not a.b.dead and a.y0 - a.a.y < 24)
 	G.shots = G.shots.filter(keep)
@@ -2548,6 +2686,8 @@ func update(dt: float) -> void:
 	G.en = G.en.filter(keep)
 	G.candy = G.candy.filter(keep)
 	G.drops = G.drops.filter(keep)
+	G.pieces = G.pieces.filter(keep)
+	G.gifts = G.gifts.filter(keep)
 	G.parts = G.parts.filter(func(o): return o.life > 0)
 
 	if mode == "game":
@@ -2574,7 +2714,11 @@ func draw_game() -> void:
 		if i % 3 == 0:
 			var s: Array = stars[i]
 			R(s[0], s[1], 1, 1, "#ffffff", 0.5 + 0.5 * sin(gt * 2 + s[2]))
-	for k in G.candy:
+	for g in G.gifts:
+		var gc: String = "#e0213f" if g.n == 0 else SHOT_COLS[g.n]
+		spr(GIFT, {"W": "#f6f1ff", "r": gc, "R": "#" + Color(gc).darkened(0.3).to_html(false), "g": "#9a93a8"},
+			int(round(g.x)) - 9, int(round(g.y)) - 8, 2)
+	for k in G.candy + G.pieces:
 		var x := int(round(k.x))
 		var y := int(round(k.y))
 		if k.get("x2", false):
@@ -2762,6 +2906,11 @@ func draw_game() -> void:
 				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
 				spr(C.spr, C[h[1]][p.n], hx, hb, 1)
 				spr(h[2], ACCPAL, hx + h[3], hb + h[4], 1)
+		# JUGGLING BALLS don't blink when he does
+		for b in p.get("jb", []):
+			var bc: String = b.col
+			spr(JUGBALL, {"c": bc, "W": "#ffffff", "l": "#" + Color(bc).lerp(Color("#ffffff"), 0.45).to_html(false),
+				"d": "#" + Color(bc).darkened(0.35).to_html(false)}, int(round(b.x)) - 3, int(round(b.y)) - 3, 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
 		var px := int(round(p.x))
