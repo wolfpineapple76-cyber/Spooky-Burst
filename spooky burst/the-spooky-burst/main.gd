@@ -38,6 +38,11 @@ const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "
 	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
+# the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
+const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
+	"CLCCCCCCCRr", ".CLCCCCCCD.", ".CLCCCCCCD.", "..CLCCCCD..", "...DDDDD...", "......D...."]
+const APPLEPAL := {"R": "#e0213f", "r": "#9c1030", "h": "#ffd0dc", "s": "#c8955a", "S": "#8a5a2e",
+	"C": "#d99a3a", "D": "#a8661f", "L": "#f5cf7a"}
 const CAT := ["KK........KK", "KKK......KKK", "KKKKKKKKKKKK", "KKKKKKKKKKKK", "KKyyKKKKyyKK", "KKyoKKKKoyKK", "KKKKKppKKKKK", "KKKKKKKKKKKK",
 	".KKKKKKKKKK.", ".KKKccccKKK.", ".KKKccccKKK.", ".KK.KKKK.KK.", ".KK.KKKK.KK."]
 const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", ".GGoGGGGGGG.", ".GGGGGGGGGG.", ".GGGmmmmGGG.", "..GGGGGGGG..",
@@ -58,7 +63,7 @@ const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING"]
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
 	["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
-const PICK_X := [80, 560, 240, 400]
+const PICK_X := [80, 240, 400, 560]
 # Once a player has every power-up that's ON, pumpkins give small boosts for the rest of the run instead.
 # Each stays below the character power-up it matches (HEAVY ORB, RESTLESS SHOT, QUICK BONES, CAT REFLEXES,
 # BIG ORB, THICK SKIN) and stacks on top of it. [key, name, what one does, HUD code]
@@ -67,11 +72,12 @@ const BOOSTS := [["dmg", "DAMAGE UP", "+5% ORB DAMAGE", "DM"], ["rate", "FIRE RA
 	["size", "ORB SIZE UP", "SLIGHTLY BIGGER ORBS", "OS"], ["safe", "LONGER SAFETY", "+6% LONGER SAFE TIME AFTER A HIT", "LS"]]
 const BOOST_MAX := 10
 # co-op: up to 4 players. Each player slot has its own orb colour (slot 1 uses the character's),
-# its own spot for lives (x of the first life, step) and power-up codes (x, text align).
+# its own quarter along the bottom, P1 to P4 left to right, for lives (x of the first life, step)
+# and power-up codes (x, text align).
 const MAX_PLAYERS := 4
-const SHOT_COLS := ["", "#d6ffe4", "#ffc78a", "#a8d8ff"]
-const LIFE_X := [[6, 14], [302, -14], [88, 14], [232, -14]]
-const CODE_X := [[13, 0], [627, 2], [176, 0], [488, 2]]
+const SHOT_COLS := ["", "#228b22", "#4169e1", "#ff7518"]
+const LIFE_X := [[6, 14], [86, 14], [166, 14], [246, 14]]
+const CODE_X := [[13, 0], [173, 0], [333, 0], [493, 0]]
 # GHOST SHOT: two shots that split a little and weave side to side, leaning up to LEAN_MAX degrees
 # the way the shooter is moving, building up over LEAN_TIME seconds of moving the same way.
 const GS_SPLIT := 18.0
@@ -174,34 +180,34 @@ func _build_chars() -> void:
 	chars = [
 		{"id": "ghost", "name": "GHOST", "spr": GHOST, "orb": "#ffffff",
 			"spr2": _alt(GHOST, {11: "X.XXX.XXX.XX", 12: "..X...X...X."}),
-			"pals": [GPAL, {"X": "#b8ffd0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
-				{"X": "#ffc78a", "o": "#1b0f33", "b": "#ff7f7f", "m": "#1b0f33"}, {"X": "#a8d8ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
+			"pals": [GPAL, {"X": "#a8e6a0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
+				{"X": "#a8bcff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}, {"X": "#ffc08a", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
 			# the save keys (triple, rapid...) are the old names, so upgrades already bought are kept
 			"pow": [["triple", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["rapid", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
 				["pierce", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["magnet", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
 				["twin", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
-			# always a black cat; players 2-4 have a coloured tummy (c) to tell them apart
+			# always a black cat; players 2-4 have a tummy (c) in their colour: forest green, royal blue, halloween orange
 			"pals": [{"K": "#4a4170", "c": "#4a4170", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#d6ffe4", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#ffc78a", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#a8d8ff", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
+				{"K": "#4a4170", "c": "#228b22", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
+				{"K": "#4a4170", "c": "#4169e1", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
+				{"K": "#4a4170", "c": "#ff7518", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
 			"pow": [["big", "BIG ORB", "BIGGER ORBS THAT HIT MORE", "BIG"], ["home", "HOMING ORB", "ORBS CURVE TOWARD ENEMIES", "HOM"],
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
 				["dcandy", "DOUBLE CANDY", "EVERY CANDY COUNTS TWICE", "2XC"]]},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
 			"spr2": _alt(ZOMB, {7: "G.GGGGGGGG.G", 9: "..SSSSSSSS..", 12: ".PPP....PPP."}),
-			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#5b7fb8", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#6ad6c0", "o": "#1b0f33", "m": "#3a1420", "S": "#b85b7f", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#c9d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#d6a13a", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#9fa8e8", "o": "#1b0f33", "m": "#3a1420", "S": "#3ab87f", "P": "#6a5a8a"}],
+			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#3a3450", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#b4d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#228b22", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#8fd6a8", "o": "#1b0f33", "m": "#3a1420", "S": "#4169e1", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#a8d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#ff7518", "P": "#6a5a8a"}],
 			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["heavy", "HEAVY ORB", "ORBS DO DOUBLE DAMAGE", "HVY"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
 				["score", "BRAIN FOOD", "DOUBLE POINTS", "2XP"]]},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
-			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8ffd0", "k": "#1b0f33"}, {"W": "#ffd59e", "k": "#1b0f33"}, {"W": "#c9d8ff", "k": "#1b0f33"}],
+			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
 			"pow": [["fan", "BONE FAN", "TWO EXTRA ORBS OUT TO THE SIDES", "FAN"], ["more", "DEEP POCKETS", "TWO ORBS SIDE BY SIDE", "MOR"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
@@ -703,7 +709,7 @@ func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st
 func start_game(pad: int) -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
-		"high": int(sv("high", 0)), "pk": null, "pk_t": 5.0, "pk_done": false,
+		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
 		"shake": 0.0, "boom": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	add_player(160, pad, "" if pad >= 0 else "both", pick_char(0), 0)
 	mode = "game"
@@ -715,6 +721,8 @@ func next_wave() -> void:
 	var w: int = G.wave
 	G.pk_t = 4.0 + randf() * 4.0
 	G.pk_done = false
+	# about 1 wave in 6 a bonus pumpkin also flies across above all the enemies
+	G.bonus_t = 6.0 + randf() * 6.0 if randf() < 1.0 / 6.0 else -1.0
 	if w > 1 and w % 2 == 1:
 		for p in G.players:
 			if not p.out and p.eq.has("regen") and p.lives < 5:
@@ -980,8 +988,8 @@ func award(p: Dictionary) -> void:
 func give_boost(p: Dictionary) -> void:
 	var opts := BOOSTS.filter(func(b): return bo(p, b[0]) < BOOST_MAX)
 	if opts.is_empty():
-		G.score += 300
-		say("BONUS 300", 1.2)
+		pts(300)
+		say("BONUS %d" % (600 if any_eq("score") else 300), 1.2)
 		return
 	var b: Array = pick(opts)
 	p.bo[b[0]] = bo(p, b[0]) + 1
@@ -1054,11 +1062,31 @@ func game_over() -> void:
 	sv_set("high", maxi(G.high, G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
 
+func launch_pk(y: float, bob: float) -> void:
+	var d := 1 if randf() < 0.5 else -1
+	G.pks.append({"x": -12.0 if d > 0 else 332.0, "y": y, "base": y, "bob": bob, "dir": d, "hp": 2, "flash": 0.0})
+
+# the normal pumpkin flies in somewhere between just below the lowest enemy still alive (or below the boss)
+# and its old height, so it's never hidden behind the formation; clearing the bottom rows lets it fly higher
+func pk_height() -> float:
+	var low := 30.0
+	for e in G.en:
+		if e.dead:
+			continue
+		if e.ty == "B":
+			low = maxf(low, minf(e.y, 92.0) + 40.0)
+		else:
+			low = maxf(low, e.hy + 22.0)
+	return randf_range(minf(low, 160.0), 160.0)
+
 func corn(e: Dictionary) -> void:
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
 
-func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null) -> void:
-	G.eb.append({"x": e.x if x == null else x, "y": e.y + 20 if y == null else y, "vx": vx, "vy": vy, "k": k, "ph": randf() * TAU, "dead": false})
+# cap: a boss shot that only drifts sideways for 2 character widths (24 px), then falls straight down
+func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null, cap := false) -> void:
+	var sx: float = e.x if x == null else x
+	G.eb.append({"x": sx, "y": e.y + 20 if y == null else y, "vx": vx, "vy": vy, "k": k, "ph": randf() * TAU, "dead": false,
+		"x0": sx, "cap": cap})
 
 func wave_drop() -> void:
 	var low := false
@@ -1085,15 +1113,16 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 	if d.k == "h":
 		if p.lives < 5:
 			p.lives += 1
-		say("HEALTH CANDY: +1 LIFE", 1.4)
+		say("CANDIED APPLE: +1 LIFE", 1.4)
 		sfx("life")
 		return
 	var r := randf()
 	if r < 0.5:
-		add_candy(p.n, 5)
-		p.got += 5
+		var c := 10 if p.eq.has("dcandy") else 5
+		add_candy(p.n, c)
+		p.got += c
 		pts(100)
-		say("TREAT: 5 CANDY", 1.4)
+		say("TREAT: %d CANDY" % c, 1.4)
 		sfx("treat")
 	elif r < 0.7:
 		pts(300)
@@ -1171,7 +1200,8 @@ func boss(e: Dictionary, dt: float) -> void:
 				var dx: float = tg.x - e.x + (i - 1) * 26
 				var dy: float = 209 - e.y
 				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-				bshot(e, dx / d * 105, dy / d * 105, K)
+				# only the WITCH QUEEN's aimed shots stop drifting sideways after a bit
+				bshot(e, dx / d * 105, dy / d * 105, K, null, null, e.bk == 1)
 		sfx("spread")
 	elif m == 3:
 		if e.bk == 1:
@@ -1375,8 +1405,11 @@ func update(dt: float) -> void:
 		p.cd -= dt
 		p.inv -= dt
 		helpers(p, dt)
-		# SOUL MATE's and GHOSTRESS's shots don't count toward the limit
-		var lim := 3 * vxs_of(p).size() * (2 if p.eq.has("more") else 1)
+		# how many orbs can be out at once: 3 per stream, +1 per 3 FIRE RATE UP boosts, doubled by RESTLESS SHOT
+		# (otherwise faster shooting just hits the limit) and DEEP POCKETS.
+		# SOUL MATE's and GHOSTRESS's shots don't count toward it.
+		var per := 3 + bo(p, "rate") / 3
+		var lim := per * vxs_of(p).size() * (2 if p.eq.has("more") else 1) * (2 if p.eq.has("rapid") else 1)
 		var mine := 0
 		for s in G.shots:
 			if s.o == p.n and not s.h:
@@ -1405,31 +1438,33 @@ func update(dt: float) -> void:
 		if s.y < -6 or s.x < -6 or s.x > 326:
 			s.dead = true
 
-	# the glowing pumpkin that carries a power-up
-	if G.pk == null and not G.pk_done:
+	# the glowing pumpkins that carry a power-up: one each wave, plus a rare bonus one up high
+	if not G.pk_done:
 		G.pk_t -= dt
 		if G.pk_t <= 0:
-			var d := 1 if randf() < 0.5 else -1
-			G.pk = {"x": -12.0 if d > 0 else 332.0, "y": 160.0, "dir": d, "hp": 2, "flash": 0.0}
 			G.pk_done = true
-	if G.pk != null:
-		var k: Dictionary = G.pk
+			launch_pk(pk_height(), 8.0)
+	if G.bonus_t > 0:
+		G.bonus_t -= dt
+		if G.bonus_t <= 0:
+			launch_pk(26.0, 3.0)
+	for k in G.pks.duplicate():
 		k.x += k.dir * 55 * dt
-		k.y = 160 + sin(G.t * 3) * 8
+		k.y = k.base + sin(G.t * 3) * k.bob
 		k.flash -= dt
 		if k.x < -16 or k.x > 336:
-			G.pk = null
-		else:
-			for s in G.shots:
-				if not s.dead and absf(s.x - k.x) < 11 and absf(s.y - k.y) < 10:
-					s.dead = true
-					k.hp -= 1
-					k.flash = 0.1
-					if k.hp <= 0:
-						burst(k.x, k.y, "#ffb84a", 14)
-						G.pk = null
-						G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false})
-					break
+			G.pks = G.pks.filter(func(o): return not is_same(o, k))
+			continue
+		for s in G.shots:
+			if not s.dead and absf(s.x - k.x) < 11 and absf(s.y - k.y) < 10:
+				s.dead = true
+				k.hp -= 1
+				k.flash = 0.1
+				if k.hp <= 0:
+					burst(k.x, k.y, "#ffb84a", 14)
+					G.pks = G.pks.filter(func(o): return not is_same(o, k))
+					G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false})
+				break
 
 	# enemies
 	var sway := sin(G.t * 0.8) * 22
@@ -1525,6 +1560,9 @@ func update(dt: float) -> void:
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
+		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
+			b.x = b.x0 + signf(b.x - b.x0) * 24.0
+			b.vx = 0.0
 		if b.y > 246 or b.y < -60 or b.x < -6 or b.x > 326:
 			b.dead = true
 
@@ -1588,7 +1626,7 @@ func update(dt: float) -> void:
 			var c := 2 if catcher.eq.has("dcandy") else 1
 			add_candy(catcher.n, c)
 			catcher.got += c
-			G.score += 10
+			pts(10)
 			sfx("candy")
 		elif k.y > 246:
 			k.dead = true
@@ -1686,17 +1724,11 @@ func draw_game() -> void:
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
 			pumpkin(x, y, 6, 5, true, gt * 2, 4)
 		else:
-			R(x - 5, y - 4, 4, 3, "#ff4d7a")
-			R(x + 1, y - 4, 4, 3, "#ff4d7a")
-			R(x - 5, y - 2, 10, 3, "#ff4d7a")
-			R(x - 3, y + 1, 6, 2, "#ff4d7a")
-			R(x - 1, y + 3, 2, 1, "#ff4d7a")
-			R(x - 4, y - 3, 1, 1, "#ffffff")
+			spr(APPLE, APPLEPAL, x - 5, y - 7, 1)
 		if int(floor(gt * 6)) % 2 == 1:
 			R(x + 9, y - 9, 1, 1, "#ffffff")
 			R(x - 10, y + 3, 1, 1, "#ffffff")
-	if G.pk != null:
-		var k: Dictionary = G.pk
+	for k in G.pks:
 		pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
 		if k.flash > 0:
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)

@@ -50,6 +50,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   With 2 or more characters there's also RANDOM, which picks one of yours each game.
 - Nothing unlocks during a game. Every run starts with no upgrades; shoot the glowing pumpkin each wave and
   it drops one. Whoever catches it gets one of their bought, ON upgrades straight away.
+  The pumpkin flies in below the lowest enemy still alive, so clearing the bottom rows lets it come in higher.
+  About 1 wave in 6 a bonus pumpkin also flies across above all the enemies.
 - Once you have all of those, pumpkins give small boosts for the rest of the run instead, picked at random.
   Each one stacks up to 10 times and stays below the character upgrade it matches, stacking on top of it
   (so the Black Cat with BIG ORB has the biggest orbs):
