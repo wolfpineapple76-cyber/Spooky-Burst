@@ -21,13 +21,17 @@ PROGRESSION
 - Each player number (P1-P4) has its own candy, characters and upgrades.
 - Candy goes to whoever catches it.
 - Unlocks happen only in the menu between games, never during play.
-- Characters cost 400 candy and upgrades cost 100. Every character's first upgrade is free,
-  and characters can be bought in any order.
+- Characters cost 500 candy and upgrades cost 100, with no free upgrades. Characters can be bought in any order.
+- Each character is a bit better at one thing, worth 2 boosts: Ghost fire rate, Cat move speed,
+  Zombie damage, Skeleton shot speed. Its page in UPGRADES hints at it in a line, never in the join picker.
+- PRESTIGE: once a character and all its upgrades are bought, it can be relocked for +1 of every boost
+  for that character, up to 10 times. Prices for it go up 10% of the base each time. Not your only
+  character unless you have the candy to buy one back. Shows as PRESTIGE 1/10 on its page, PRE 1 in game.
 - ON/OFF in the menu decides which upgrades can drop. You don't start a run with them.
 - The pumpkin drops a catchable power-up, with no equip screen.
 - After all your upgrades are collected, pumpkins give small boosts that stack slowly. That way late waves still matter.
-- A boost never beats the character ability it matches. It stacks on top of it,
-  so the Black Cat with BIG ORB has the biggest orbs.
+- A boost collected during a run never beats the character ability it matches. It stacks on top of it,
+  so the Black Cat with BIG ORB has the biggest orbs. Prestige can go past that.
 
 MENUS AND CONTROLS
 - The title screen has a proper QUIT, and Start/Esc gives you options.

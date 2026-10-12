@@ -5,9 +5,12 @@ extends Node2D
 
 # a new save file for the candy shop version, so everyone starts fresh (the old spooky_burst.cfg is left alone)
 const SAVE_PATH := "user://spooky_burst_v2.cfg"
-# what things cost in the UPGRADES menu. Each character's first upgrade is free.
-const CHAR_COST := 400
+# what things cost in the UPGRADES menu, before PRESTIGE: each prestige level of a character
+# adds 10% of these to its price and its upgrades' prices
+const CHAR_COST := 500
 const POW_COST := 100
+# PRESTIGE: relock a character and all its upgrades for +1 of every boost for it, up to this many times
+const PRESTIGE_MAX := 10
 
 # ---------------------------------------------------------------- sprites
 const GHOST := ["...XXXXXX...", "..XXXXXXXX..", ".XXXXXXXXXX.", ".XXoXXXXoXX.", "XXXoXXXXoXXX", "XXbXXXXXXbXX", "XXXXXmmXXXXX",
@@ -27,7 +30,9 @@ const HATPAL := {"P": "#7a35d6", "O": "#ff8a1f", "K": "#5a5285", "R": "#e0364f",
 const HANGBAT := ["...X.X...", "...XXX...", "..XXXXX..", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", "..XXXXX..", "..XlXrX..", "..XXXXX..", "..X...X.."]
 const BATA := ["X...X.X...X", "XX.XXXXX.XX", "XXXXXXXXXXX", ".XXXeXeXXX.", "..X.XXX.X.."]
 const BATB := ["....X.X....", "...XXXXX...", ".XXXeXeXXX.", "XXXXXXXXXXX", "XX..XXX..XX", "X.........X"]
-const WITCH := [".....P.....", "....PPP....", "...POOOP...", "..PPPPPPP..", "...GGGGG...", "...GkGkG...", "...PPPPP...", "BBBBBBBBBYY"]
+# the witch enemy: a small witch riding a broomstick, facing right (WITCH) or left (WITCH_L)
+const WITCH := ["P...........", ".PP.........", "..PPP.......", "..OOOO......", "PPPPPPPP....", "...GkGGG....", "..PPPPP.....", "YYYBBBBBBBBB", "YY..PPk....."]
+const WITCH_L := ["...........P", ".........PP.", ".......PPP..", "......OOOO..", "....PPPPPPPP", "....GGGkG...", ".....PPPPP..", "BBBBBBBBBYYY", ".....kPP..YY"]
 const VAMP := ["...KKKKK...", "...SSSSS...", "...SrSrS...", "...SWSWS...", ".RRKKKKKRR.", "RRRKKRKKRRR", "RRRKKKKKRRR", "R.R.K.K.R.R"]
 const VLORD := ["....KKKKKKK....", "...KKKKKKKKK...", "...KSSSSSSSK...", "...SrrSSSrrS...", "...SSSSSSSSS...", "...SWSmmmSWS...", "R...SSSSSSS...R",
 	"RR.KKKRRRKKK.RR", "RRRKKKKRKKKKRRR", "RRRKKKKYKKKKRRR", "RRRRKKKKKKKRRRR", "RR.RKKKKKKKR.RR", "R...KK...KK...R"]
@@ -38,6 +43,11 @@ const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "
 	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
+# the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
+const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
+	"CLCCCCCCCRr", ".CLCCCCCCD.", ".CLCCCCCCD.", "..CLCCCCD..", "...DDDDD...", "......D...."]
+const APPLEPAL := {"R": "#e0213f", "r": "#9c1030", "h": "#ffd0dc", "s": "#c8955a", "S": "#8a5a2e",
+	"C": "#d99a3a", "D": "#a8661f", "L": "#f5cf7a"}
 const CAT := ["KK........KK", "KKK......KKK", "KKKKKKKKKKKK", "KKKKKKKKKKKK", "KKyyKKKKyyKK", "KKyoKKKKoyKK", "KKKKKppKKKKK", "KKKKKKKKKKKK",
 	".KKKKKKKKKK.", ".KKKccccKKK.", ".KKKccccKKK.", ".KK.KKKK.KK.", ".KK.KKKK.KK."]
 const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", ".GGoGGGGGGG.", ".GGGGGGGGGG.", ".GGGmmmmGGG.", "..GGGGGGGG..",
@@ -45,27 +55,45 @@ const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", "
 const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", ".WWWWkkWWWW.", "..WWWWWWWW..", "..WkWkWkWW..", "....WWWW....",
 	"W.WWWWWWWW.W", "W..kWWWWk..W", "W.WWWWWWWW.W", "...WW..WW...", "...WW..WW..."]
 const GPAL := {"X": "#f6f1ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}
+# GHOST SHOT orbs are little ghosts in the shot colour (c)
+const GSHOT := [".ccc.", "ckckc", "ccccc", "cckcc", "ccccc", "c.c.c"]
+# SOUL MATE's bow and GHOSTRESS's black rose clip, drawn on top of a small ghost at (x + 3, y - 2) and (x + 6, y - 2)
+const BOW := ["BB.BB", "BBdBB", ".B.B."]
+const ROSE := ["gg...", "gRRR.", ".RrR.", ".RRRg", "...gg"]
+const ACCPAL := {"B": "#ff4f9a", "d": "#b02670", "R": "#140a1a", "r": "#7a5a8e", "g": "#3d8b3a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
 const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING"]
-const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
-	["QUIT", "quit"]]
+const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["PLAYER SETUP", "setup"], ["SETTINGS", "settings"],
+	["RESET SAVE", "reset"], ["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
-const PICK_X := [80, 560, 240, 400]
+const PICK_X := [80, 240, 400, 560]
 # Once a player has every power-up that's ON, pumpkins give small boosts for the rest of the run instead.
-# Each stays below the character power-up it matches (HEAVY ORB, RAPID FIRE, QUICK BONES, CAT REFLEXES,
+# Each stays below the character power-up it matches (HEAVY ORB, RESTLESS SHOT, QUICK BONES, CAT REFLEXES,
 # BIG ORB, THICK SKIN) and stacks on top of it. [key, name, what one does, HUD code]
 const BOOSTS := [["dmg", "DAMAGE UP", "+5% ORB DAMAGE", "DM"], ["rate", "FIRE RATE UP", "+5% FASTER SHOOTING", "FR"],
 	["shot", "SHOT SPEED UP", "+4% FASTER ORBS", "SS"], ["move", "MOVE SPEED UP", "+4% FASTER MOVING", "MS"],
 	["size", "ORB SIZE UP", "SLIGHTLY BIGGER ORBS", "OS"], ["safe", "LONGER SAFETY", "+6% LONGER SAFE TIME AFTER A HIT", "LS"]]
 const BOOST_MAX := 10
 # co-op: up to 4 players. Each player slot has its own orb colour (slot 1 uses the character's),
-# its own spot for lives (x of the first life, step) and power-up codes (x, text align).
+# its own quarter along the bottom, P1 to P4 left to right, for lives (x of the first life, step)
+# and power-up codes (x, text align).
 const MAX_PLAYERS := 4
-const SHOT_COLS := ["", "#d6ffe4", "#ffc78a", "#a8d8ff"]
-const LIFE_X := [[6, 14], [302, -14], [88, 14], [232, -14]]
-const CODE_X := [[13, 0], [627, 2], [176, 0], [488, 2]]
+const SHOT_COLS := ["", "#228b22", "#4169e1", "#ff7518"]
+const LIFE_X := [[6, 14], [86, 14], [166, 14], [246, 14]]
+const CODE_X := [[13, 0], [173, 0], [333, 0], [493, 0]]
+# GHOST SHOT: two shots that split a little and weave side to side, leaning up to LEAN_MAX degrees
+# the way the shooter is moving, building up over LEAN_TIME seconds of moving the same way.
+const GS_SPLIT := 18.0
+const WEAVE_A := 5.0
+const WEAVE_F := 11.0
+const LEAN_MAX := 15.0
+const LEAN_TIME := 1.0
+# SOUL MATE and GHOSTRESS: small ghosts that trail you along the ground. HELP_Y is the middle of them.
+const HELP_Y := 212.0
+# SOUL MATE fires 3 volleys back for every enemy shot or enemy that touches her, this far apart
+const SOUL_GAP := 0.07
 
 # 5x7 pixel font, drawn in code so the project needs no font file.
 const GLYPHS := {
@@ -108,7 +136,8 @@ var sel := 0
 var stab := 0           # UPGRADES menu: which player's tab
 var sch := -1           # UPGRADES menu: -1 on the character list, else the character whose upgrades are open
 var scur := 0           # UPGRADES menu: cursor
-var smsg := ""          # UPGRADES menu: a short message like NEED 400 CANDY
+var smsg := ""          # UPGRADES menu: a short message like NEED 500 CANDY
+var spre := -1          # UPGRADES menu: the PRESTIGE confirm, -1 closed, else its cursor (0 NO, 1 YES)
 var rsel := 0
 var ssel := 0
 var qsel := 0
@@ -126,6 +155,9 @@ var sfx_players := {}
 var open_cache: Array = [true, false, false, false]
 var open_cache_t := -99.0
 var lcg := 7
+# PLAYER SETUP, only for this session: player slot -> the device that plays it ({"pad", "side"})
+var assign := {}
+var setup_sel := 0
 
 # ---------------------------------------------------------------- setup
 func _ready() -> void:
@@ -157,36 +189,48 @@ func _build_chars() -> void:
 	chars = [
 		{"id": "ghost", "name": "GHOST", "spr": GHOST, "orb": "#ffffff",
 			"spr2": _alt(GHOST, {11: "X.XXX.XXX.XX", 12: "..X...X...X."}),
-			"pals": [GPAL, {"X": "#b8ffd0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
-				{"X": "#ffc78a", "o": "#1b0f33", "b": "#ff7f7f", "m": "#1b0f33"}, {"X": "#a8d8ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
-			"pow": [["triple", "TRIPLE SHOT", "THREE ORBS IN A SPREAD", "TRI"], ["rapid", "RAPID FIRE", "SHOOT MUCH FASTER", "RAP"],
-				["pierce", "PIERCING ORB", "ORBS PASS THROUGH ENEMIES", "PRC"], ["magnet", "CANDY MAGNET", "PULLS CANDY TO YOU", "MAG"],
-				["twin", "TWIN GHOST", "A BUDDY COPIES YOUR SHOTS", "TWN"]]},
+			"pals": [GPAL, {"X": "#a8e6a0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
+				{"X": "#a8bcff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}, {"X": "#ffc08a", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
+			# tr: what each character is a bit better at, counted in boosts. desc shows in UPGRADES.
+			"tr": {"rate": 2}, "desc": "FIRES QUICK AND HAS FRIENDS",
+			# the save keys (triple, rapid...) are the old names, so upgrades already bought are kept
+			"pow": [["triple", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["rapid", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
+				["pierce", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["magnet", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
+				["twin", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
-			# always a black cat; players 2-4 have a coloured tummy (c) to tell them apart
+			# always a black cat; players 2-4 have a tummy (c) in their colour: forest green, royal blue, halloween orange
 			"pals": [{"K": "#4a4170", "c": "#4a4170", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#d6ffe4", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#ffc78a", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
-				{"K": "#4a4170", "c": "#a8d8ff", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
+				{"K": "#4a4170", "c": "#228b22", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
+				{"K": "#4a4170", "c": "#4169e1", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
+				{"K": "#4a4170", "c": "#ff7518", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
+			"tr": {"move": 2}, "desc": "AGILE AND DOESN'T LIKE BEING ATTACKED",
 			"pow": [["big", "BIG ORB", "BIGGER ORBS THAT HIT MORE", "BIG"], ["home", "HOMING ORB", "ORBS CURVE TOWARD ENEMIES", "HOM"],
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
 				["dcandy", "DOUBLE CANDY", "EVERY CANDY COUNTS TWICE", "2XC"]]},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
 			"spr2": _alt(ZOMB, {7: "G.GGGGGGGG.G", 9: "..SSSSSSSS..", 12: ".PPP....PPP."}),
-			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#5b7fb8", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#6ad6c0", "o": "#1b0f33", "m": "#3a1420", "S": "#b85b7f", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#c9d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#d6a13a", "P": "#6a5a8a"},
-				{"d": "#5a4a3a", "G": "#9fa8e8", "o": "#1b0f33", "m": "#3a1420", "S": "#3ab87f", "P": "#6a5a8a"}],
+			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#3a3450", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#b4d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#228b22", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#8fd6a8", "o": "#1b0f33", "m": "#3a1420", "S": "#4169e1", "P": "#6a5a8a"},
+				{"d": "#5a4a3a", "G": "#a8d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#ff7518", "P": "#6a5a8a"}],
+			"tr": {"dmg": 2}, "desc": "POWERFUL AND NOT AFRAID OF DEATH",
 			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["heavy", "HEAVY ORB", "ORBS DO DOUBLE DAMAGE", "HVY"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
 				["score", "BRAIN FOOD", "DOUBLE POINTS", "2XP"]]},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
-			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8ffd0", "k": "#1b0f33"}, {"W": "#ffd59e", "k": "#1b0f33"}, {"W": "#c9d8ff", "k": "#1b0f33"}],
+			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
+			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
 			"pow": [["fan", "BONE FAN", "TWO EXTRA ORBS OUT TO THE SIDES", "FAN"], ["more", "DEEP POCKETS", "TWO ORBS SIDE BY SIDE", "MOR"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
+	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
+	for tint in [["smp", "#ff9ec2"], ["grp", "#b07cff"]]:
+		chars[0][tint[0]] = chars[0].pals.map(func(pal):
+			var o: Dictionary = pal.duplicate()
+			o.X = "#" + Color(pal.X).lerp(Color(tint[1]), 0.2).to_html(false)
+			return o)
 	for ch in chars:
 		var sil := {}
 		for k in ch.pals[0].keys():
@@ -285,9 +329,11 @@ func candy_of(n: int) -> int:
 func add_candy(n: int, c: int) -> void:
 	sv_set(pkey(n, "candy"), candy_of(n) + c)
 
-# the Ghost is free, the rest are bought
+# the Ghost starts free (until it's prestiged, then it's bought back like the rest), the rest are bought
 func has_char(n: int, i: int) -> bool:
-	return i == 0 or lst(pkey(n, "chars")).has(chars[i].id)
+	if i == 0:
+		return not sv(pkey(n, "ghost.gone"), false)
+	return lst(pkey(n, "chars")).has(chars[i].id)
 
 func owned_chars(n: int) -> Array:
 	return range(chars.size()).filter(func(i): return has_char(n, i))
@@ -298,7 +344,10 @@ func char_pref(n: int) -> int:
 	if i < 0 and owned_chars(n).size() >= 2:
 		return -1
 	i = clampi(i, 0, chars.size() - 1)
-	return i if has_char(n, i) else 0
+	if has_char(n, i):
+		return i
+	var o := owned_chars(n)
+	return o[0] if not o.is_empty() else 0
 
 # the character they actually play this time (RANDOM picks one of theirs)
 func pick_char(n: int) -> int:
@@ -312,11 +361,19 @@ func pick_opts(n: int) -> Array:
 		o.append(-1)
 	return o
 
-# upgrades this player owns for a character; the first one is free
+# upgrades this player owns for a character
 func owns(n: int, ch: int) -> Dictionary:
-	var o := to_obj(lst(pkey(n, "own." + chars[ch].id)))
-	o[chars[ch].pow[0][0]] = true
-	return o
+	return to_obj(lst(pkey(n, "own." + chars[ch].id)))
+
+# how many times this player has prestiged a character
+func prestige(n: int, ch: int) -> int:
+	return int(sv(pkey(n, "pre." + chars[ch].id), 0))
+
+func char_cost(n: int, ch: int) -> int:
+	return CHAR_COST + CHAR_COST / 10 * prestige(n, ch)
+
+func pow_cost(n: int, ch: int) -> int:
+	return POW_COST + POW_COST / 10 * prestige(n, ch)
 
 func is_on(n: int, ch: int, k: String) -> bool:
 	return owns(n, ch).has(k) and not lst(pkey(n, "off." + chars[ch].id)).has(k)
@@ -612,10 +669,16 @@ func say(s: String, dur: float) -> void:
 # for their character. eq: upgrades they have this run. bo: how many of each boost this run. got: candy this run.
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
-		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false}
+		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
+		"ld": 1, "md": 0, "mv": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
+
+# how many boosts' worth of k a player has: this run's boosts (up to 10), their character's trait,
+# and +1 for each time they've prestiged that character (up to 10 more)
+func lvl(p: Dictionary, k: String) -> int:
+	return bo(p, k) + int(chars[p.ch].tr.get(k, 0)) + prestige(p.n, p.ch)
 
 func add_player(x: float, pad: int, kb: String, ch: int, slot: int) -> Dictionary:
 	var np := mk_player(x, slot, kb, pad, ch)
@@ -623,11 +686,27 @@ func add_player(x: float, pad: int, kb: String, ch: int, slot: int) -> Dictionar
 	return np
 
 # the lowest player number nobody is using or about to use
-func free_slot() -> int:
+# the slot a device joins as: its PLAYER SETUP slot if that's free, otherwise the lowest free slot
+# that isn't set up for a different device. -1 if there's none.
+func free_slot(dev: Dictionary) -> int:
+	var used := func(s): return not G.players.filter(func(p): return p.n == s).is_empty() or not G.picks.filter(func(k): return k.slot == s).is_empty()
+	var a := slot_of(dev)
+	if a >= 0 and not used.call(a):
+		return a
 	for s in MAX_PLAYERS:
-		if G.players.filter(func(p): return p.n == s).is_empty() and G.picks.filter(func(k): return k.slot == s).is_empty():
+		if not used.call(s) and not assign.has(s):
 			return s
-	return 0
+	return -1
+
+func same_dev(a: Dictionary, b: Dictionary) -> bool:
+	return a.pad == b.pad and (a.pad >= 0 or a.side == b.side)
+
+# the slot PLAYER SETUP gave this device, or -1
+func slot_of(dev: Dictionary) -> int:
+	for s in assign:
+		if same_dev(assign[s], dev):
+			return s
+	return -1
 
 # the spot furthest from everyone already playing
 func open_x() -> float:
@@ -675,12 +754,23 @@ func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
 		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false}
 
-func start_game(pad: int) -> void:
+func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
-		"high": int(sv("high", 0)), "pk": null, "pk_t": 5.0, "pk_done": false,
+		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
 		"shake": 0.0, "boom": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
-	add_player(160, pad, "" if pad >= 0 else "both", pick_char(0), 0)
+	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
+	# everyone they had is prestiged and not bought back yet: off to UPGRADES to buy one
+	if owned_chars(slot).is_empty():
+		panel = "shop"
+		stab = slot
+		sch = -1
+		scur = 0
+		spre = -1
+		smsg = "P%d HAS NO CHARACTERS: BUY ONE TO PLAY." % (slot + 1)
+		sfx("deny")
+		return
+	add_player(160, pad, "" if pad >= 0 else "both", pick_char(slot), slot)
 	mode = "game"
 	panel = ""
 	next_wave()
@@ -690,6 +780,8 @@ func next_wave() -> void:
 	var w: int = G.wave
 	G.pk_t = 4.0 + randf() * 4.0
 	G.pk_done = false
+	# about 1 wave in 6 a bonus pumpkin also flies across above all the enemies
+	G.bonus_t = 6.0 + randf() * 6.0 if randf() < 1.0 / 6.0 else -1.0
 	if w > 1 and w % 2 == 1:
 		for p in G.players:
 			if not p.out and p.eq.has("regen") and p.lives < 5:
@@ -788,6 +880,10 @@ func join_block(dev: Dictionary) -> String:
 		return "ALREADY PLAYING"
 	if (p == null or not p.out) and G.players.size() + G.picks.filter(func(k): return k.rejoin == null).size() >= MAX_PLAYERS:
 		return "%d PLAYERS MAX" % MAX_PLAYERS
+	if (p == null or not p.out) and free_slot(dev) < 0:
+		return "NO FREE PLAYER SLOT"
+	if owned_chars(p.n if p != null and p.out else free_slot(dev)).is_empty():
+		return "BUY A CHARACTER FIRST"
 	if not spare_life():
 		return "NO LIVES TO SHARE"
 	return ""
@@ -807,7 +903,7 @@ func open_picker(dev: Dictionary) -> void:
 	var split: bool = dev.pad < 0 and p != null and not p.out and p.kb == "both"
 	if split:
 		p.kb = "wasd"
-	var slot: int = rejoin.n if rejoin != null else free_slot()
+	var slot: int = rejoin.n if rejoin != null else free_slot(dev)
 	var ch: int = rejoin.ch if rejoin != null else char_pref(slot)
 	G.picks.append({"dev": dev, "slot": slot, "ch": ch, "rejoin": rejoin, "split": split})
 	sfx("select")
@@ -907,10 +1003,11 @@ func close_menu() -> void:
 
 func pause_rows() -> Array:
 	var dev: Dictionary = G.menu.dev
-	return [["RESUME", "", false], ["JOIN", "", join_block(dev) != ""], ["QUIT", "", dev_player(dev) == null], ["MAIN MENU", "", false]]
+	return [["RESUME", "", false], ["JOIN", "", join_block(dev) != ""], ["PLAYER SETUP", "", false], ["QUIT", "", dev_player(dev) == null],
+		["MAIN MENU", "", false]]
 
 func pause_move(d: int) -> void:
-	G.menu.sel = posmod(G.menu.sel + d, 4)
+	G.menu.sel = posmod(G.menu.sel + d, pause_rows().size())
 	sfx("move")
 
 func pause_choose() -> void:
@@ -918,13 +1015,18 @@ func pause_choose() -> void:
 	if pause_rows()[m.sel][2]:
 		sfx("deny")
 		return
+	if m.sel == 2:
+		m.setup = true
+		setup_sel = 0
+		sfx("select")
+		return
 	G.menu = null
 	mode = "game"
 	if m.sel == 0:
 		sfx("select")
 	elif m.sel == 1:
 		open_picker(m.dev)
-	elif m.sel == 2:
+	elif m.sel == 3:
 		leave(dev_player(m.dev))
 	else:
 		sfx("back")
@@ -955,8 +1057,8 @@ func award(p: Dictionary) -> void:
 func give_boost(p: Dictionary) -> void:
 	var opts := BOOSTS.filter(func(b): return bo(p, b[0]) < BOOST_MAX)
 	if opts.is_empty():
-		G.score += 300
-		say("BONUS 300", 1.2)
+		pts(300)
+		say("BONUS %d" % (600 if any_eq("score") else 300), 1.2)
 		return
 	var b: Array = pick(opts)
 	p.bo[b[0]] = bo(p, b[0]) + 1
@@ -998,7 +1100,7 @@ func hurt(p: Dictionary) -> void:
 		sfx("shield")
 		return
 	p.lives -= 1
-	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * bo(p, "safe"))
+	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe"))
 	burst(p.x, 209, "#ffffff", 16)
 	sfx("hurt")
 	G.shake = 0.25
@@ -1029,11 +1131,31 @@ func game_over() -> void:
 	sv_set("high", maxi(G.high, G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
 
+func launch_pk(y: float, bob: float) -> void:
+	var d := 1 if randf() < 0.5 else -1
+	G.pks.append({"x": -12.0 if d > 0 else 332.0, "y": y, "base": y, "bob": bob, "dir": d, "hp": 2, "flash": 0.0})
+
+# the normal pumpkin flies in somewhere between just below the lowest enemy still alive (or below the boss)
+# and its old height, so it's never hidden behind the formation; clearing the bottom rows lets it fly higher
+func pk_height() -> float:
+	var low := 30.0
+	for e in G.en:
+		if e.dead:
+			continue
+		if e.ty == "B":
+			low = maxf(low, minf(e.y, 92.0) + 40.0)
+		else:
+			low = maxf(low, e.hy + 22.0)
+	return randf_range(minf(low, 160.0), 160.0)
+
 func corn(e: Dictionary) -> void:
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
 
-func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null) -> void:
-	G.eb.append({"x": e.x if x == null else x, "y": e.y + 20 if y == null else y, "vx": vx, "vy": vy, "k": k, "ph": randf() * TAU, "dead": false})
+# cap: a boss shot that only drifts sideways for 2 character widths (24 px), then falls straight down
+func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null, cap := false) -> void:
+	var sx: float = e.x if x == null else x
+	G.eb.append({"x": sx, "y": e.y + 20 if y == null else y, "vx": vx, "vy": vy, "k": k, "ph": randf() * TAU, "dead": false,
+		"x0": sx, "cap": cap})
 
 func wave_drop() -> void:
 	var low := false
@@ -1060,15 +1182,16 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 	if d.k == "h":
 		if p.lives < 5:
 			p.lives += 1
-		say("HEALTH CANDY: +1 LIFE", 1.4)
+		say("CANDIED APPLE: +1 LIFE", 1.4)
 		sfx("life")
 		return
 	var r := randf()
 	if r < 0.5:
-		add_candy(p.n, 5)
-		p.got += 5
+		var c := 10 if p.eq.has("dcandy") else 5
+		add_candy(p.n, c)
+		p.got += c
 		pts(100)
-		say("TREAT: 5 CANDY", 1.4)
+		say("TREAT: %d CANDY" % c, 1.4)
 		sfx("treat")
 	elif r < 0.7:
 		pts(300)
@@ -1146,7 +1269,8 @@ func boss(e: Dictionary, dt: float) -> void:
 				var dx: float = tg.x - e.x + (i - 1) * 26
 				var dy: float = 209 - e.y
 				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-				bshot(e, dx / d * 105, dy / d * 105, K)
+				# only the WITCH QUEEN's aimed shots stop drifting sideways after a bit
+				bshot(e, dx / d * 105, dy / d * 105, K, null, null, e.bk == 1)
 		sfx("spread")
 	elif m == 3:
 		if e.bk == 1:
@@ -1181,8 +1305,112 @@ func boss(e: Dictionary, dt: float) -> void:
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form")
 
+# sideways speeds of one volley's orbs (before DEEP POCKETS pairs them)
+func vxs_of(p: Dictionary) -> Array:
+	var vxs := [-GS_SPLIT, GS_SPLIT] if p.eq.has("triple") else [0.0]
+	if p.eq.has("fan"):
+		vxs.append(-95.0)
+		vxs.append(95.0)
+	return vxs
+
+func orb_dmg(p: Dictionary) -> float:
+	return (2.0 if p.eq.has("heavy") else 1.0) * (1.0 + 0.05 * lvl(p, "dmg"))
+
+# one volley of p's orbs from x, y. lean (degrees, + is right) only bends GHOST SHOT.
+# helper is true for SOUL MATE's and GHOSTRESS's volleys.
+func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
+	var xs := [x]
+	# DEEP POCKETS: every orb comes out as a pair side by side
+	if p.eq.has("more"):
+		xs = [x - 4, x + 4]
+	var gs: bool = p.eq.has("triple")
+	var vxs := vxs_of(p)
+	var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
+	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
+	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
+	for ox in xs:
+		for i in vxs.size():
+			# the two GHOST SHOTs weave as mirror images of each other
+			G.shots.append({"x": ox, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col, "pc": 3 if p.eq.has("pierce") else 1, "big": p.eq.has("big"),
+				"grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p), "sp": sp, "last": null, "dead": false,
+				"h": helper, "gs": gs, "ph": PI * i})
+
+# how long o (a player or a helper ghost) has kept moving the same way; v is its speed this frame
+func track_lean(o: Dictionary, v: float, dt: float) -> void:
+	var d := 0 if absf(v) < 15 else int(signf(v))
+	if d == 0 or d != o.md:
+		o.mv = 0.0
+	else:
+		o.mv += dt
+	o.md = d
+
+func lean(o: Dictionary) -> float:
+	return LEAN_MAX * minf(1.0, o.mv / LEAN_TIME) * o.md
+
+# SOUL MATE ("sm") and GHOSTRESS ("gr") trail behind you on springs, so they catch up and slightly
+# pass you when you stop or turn. SOUL MATE also veers off for falling candy and drops, and fights back:
+# every enemy shot that passes through her and every enemy that touches her adds 3 volleys to fire.
+# She can't be hurt, and enemy shots keep going. An enemy touching her also takes one volley's damage.
+func helpers(p: Dictionary, dt: float) -> void:
+	for k in ["magnet", "twin"]:
+		var key := "sm" if k == "magnet" else "gr"
+		if not p.eq.has(k):
+			p.erase(key)
+			continue
+		if not p.has(key):
+			p[key] = {"x": p.x, "v": 0.0, "md": 0, "mv": 0.0, "q": 0, "qt": 0.0}
+		var h: Dictionary = p[key]
+		var tx: float = p.x - p.ld * (14.0 if key == "sm" else 26.0)
+		if key == "sm":
+			var best = null
+			for o in G.candy + G.drops:
+				if o.y > 120 and absf(o.x - h.x) < 70 and (best == null or absf(o.x - h.x) < absf(best.x - h.x)):
+					best = o
+			if best != null:
+				tx = best.x
+		h.v += (tx - h.x) * (18.0 if key == "sm" else 14.0) * dt
+		h.v = clampf(h.v - h.v * (4.0 if key == "sm" else 3.5) * dt, -220, 220)
+		h.x = clampf(h.x + h.v * dt, 6, 314)
+		track_lean(h, h.v, dt)
+		if key == "gr":
+			continue
+		var tag := "s%d" % p.n
+		for b in G.eb:
+			if not b.dead and not b.has(tag) and absf(b.x - h.x) < 6 and absf(b.y - HELP_Y) < 7:
+				b[tag] = true
+				h.q += 3
+		for e in G.en:
+			var big: bool = e.ty == "B"
+			var on: bool = not e.dead and absf(e.x - h.x) < (30 if big else 10) and absf(e.y - HELP_Y) < (28 if big else 11)
+			if not on:
+				e.erase(tag)
+			elif not e.has(tag):
+				e[tag] = true
+				h.q += 3
+				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("more") else 1)
+				e.flash = 0.1
+				if e.hp <= 0:
+					kill(e)
+				else:
+					sfx("bosshit")
+		h.qt -= dt
+		if h.q > 0 and h.qt <= 0:
+			volley(p, h.x, HELP_Y - 8, lean(h), true)
+			h.q -= 1
+			h.qt = SOUL_GAP
+			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
+
+# the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
+# player, so falling things reach a player standing under them first.
+func soul_catch(o: Dictionary):
+	for p in live():
+		if p.has("sm") and absf(o.x - p.sm.x) < 8 and absf(o.y - HELP_Y) < 7:
+			return p
+	return null
+
+# dir is -1 to 1: keys and the d-pad are always full speed, the left stick gives finer speeds
 func player_input(p: Dictionary) -> Dictionary:
-	var dir := 0
+	var dir := 0.0
 	var fire := false
 	if p.kb != "":
 		var w: bool = p.kb != "arrows"
@@ -1195,13 +1423,10 @@ func player_input(p: Dictionary) -> Dictionary:
 			fire = true
 	if p.pad >= 0 and pads.has(p.pad):
 		var g: Dictionary = pads[p.pad]
-		if g.left:
-			dir -= 1
-		if g.right:
-			dir += 1
+		dir += g.mx
 		if g.ok:
 			fire = true
-	return {"dir": clampi(dir, -1, 1), "fire": fire}
+	return {"dir": clampf(dir, -1, 1), "fire": fire}
 
 # ---------------------------------------------------------------- game update
 func update(dt: float) -> void:
@@ -1236,40 +1461,31 @@ func update(dt: float) -> void:
 		if p.out:
 			continue
 		var I := player_input(p)
-		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * bo(p, "move")) * dt
+		var ox: float = p.x
+		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * lvl(p, "move")) * dt
 		if p.sh > 0:
 			p.sh -= dt
 		p.x = clampf(p.x, 14, 306)
+		track_lean(p, (p.x - ox) / dt if dt > 0 else 0.0, dt)
+		if I.dir != 0:
+			p.ld = int(signf(I.dir))
 		p.cd -= dt
 		p.inv -= dt
-		var vxs := [-45.0, 0.0, 45.0] if p.eq.has("triple") else [0.0]
-		if p.eq.has("fan"):
-			vxs.append(-95.0)
-			vxs.append(95.0)
-		var lim := 3 * vxs.size() * (2 if p.eq.has("twin") else 1) * (2 if p.eq.has("more") else 1)
+		helpers(p, dt)
+		# how many orbs can be out at once: 3 per stream, +1 per 3 FIRE RATE UP boosts, doubled by RESTLESS SHOT
+		# (otherwise faster shooting just hits the limit) and DEEP POCKETS.
+		# SOUL MATE's and GHOSTRESS's shots don't count toward it.
+		var per := 3 + lvl(p, "rate") / 3
+		var lim := per * vxs_of(p).size() * (2 if p.eq.has("more") else 1) * (2 if p.eq.has("rapid") else 1)
 		var mine := 0
 		for s in G.shots:
-			if s.o == p.n:
+			if s.o == p.n and not s.h:
 				mine += 1
 		if I.fire and p.cd <= 0 and mine < lim:
-			var xs := [p.x]
-			if p.eq.has("twin"):
-				xs.append(p.x + (20 if p.x < 290 else -20))
-			# DEEP POCKETS: every orb comes out as a pair side by side
-			if p.eq.has("more"):
-				var pairs := []
-				for x in xs:
-					pairs.append(x - 4)
-					pairs.append(x + 4)
-				xs = pairs
-			var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
-			var dmg := (2.0 if p.eq.has("heavy") else 1.0) * (1.0 + 0.05 * bo(p, "dmg"))
-			var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * bo(p, "shot"))
-			for x in xs:
-				for vx in vxs:
-					G.shots.append({"x": x, "y": 194.0, "vx": vx, "o": p.n, "col": col, "pc": 3 if p.eq.has("pierce") else 1, "big": p.eq.has("big"),
-						"grow": 0.4 * bo(p, "size"), "hm": p.eq.has("home"), "dmg": dmg, "sp": sp, "last": null, "dead": false})
-			p.cd = (0.13 if p.eq.has("rapid") else 0.26) / (1.0 + 0.05 * bo(p, "rate"))
+			volley(p, p.x, 194.0, lean(p), false)
+			if p.has("gr"):
+				volley(p, p.gr.x, HELP_Y - 8, lean(p.gr), true)
+			p.cd = (0.13 if p.eq.has("rapid") else 0.26) / (1.0 + 0.05 * lvl(p, "rate"))
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 
 	# orbs
@@ -1283,34 +1499,39 @@ func update(dt: float) -> void:
 				s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
 		s.y -= s.sp * dt
 		s.x += s.vx * dt
+		if s.gs:
+			s.ph += WEAVE_F * dt
+			s.x += cos(s.ph) * WEAVE_A * WEAVE_F * dt
 		if s.y < -6 or s.x < -6 or s.x > 326:
 			s.dead = true
 
-	# the glowing pumpkin that carries a power-up
-	if G.pk == null and not G.pk_done:
+	# the glowing pumpkins that carry a power-up: one each wave, plus a rare bonus one up high
+	if not G.pk_done:
 		G.pk_t -= dt
 		if G.pk_t <= 0:
-			var d := 1 if randf() < 0.5 else -1
-			G.pk = {"x": -12.0 if d > 0 else 332.0, "y": 160.0, "dir": d, "hp": 2, "flash": 0.0}
 			G.pk_done = true
-	if G.pk != null:
-		var k: Dictionary = G.pk
+			launch_pk(pk_height(), 8.0)
+	if G.bonus_t > 0:
+		G.bonus_t -= dt
+		if G.bonus_t <= 0:
+			launch_pk(26.0, 3.0)
+	for k in G.pks.duplicate():
 		k.x += k.dir * 55 * dt
-		k.y = 160 + sin(G.t * 3) * 8
+		k.y = k.base + sin(G.t * 3) * k.bob
 		k.flash -= dt
 		if k.x < -16 or k.x > 336:
-			G.pk = null
-		else:
-			for s in G.shots:
-				if not s.dead and absf(s.x - k.x) < 11 and absf(s.y - k.y) < 10:
-					s.dead = true
-					k.hp -= 1
-					k.flash = 0.1
-					if k.hp <= 0:
-						burst(k.x, k.y, "#ffb84a", 14)
-						G.pk = null
-						G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false})
-					break
+			G.pks = G.pks.filter(func(o): return not is_same(o, k))
+			continue
+		for s in G.shots:
+			if not s.dead and absf(s.x - k.x) < 11 and absf(s.y - k.y) < 10:
+				s.dead = true
+				k.hp -= 1
+				k.flash = 0.1
+				if k.hp <= 0:
+					burst(k.x, k.y, "#ffb84a", 14)
+					G.pks = G.pks.filter(func(o): return not is_same(o, k))
+					G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false})
+				break
 
 	# enemies
 	var sway := sin(G.t * 0.8) * 22
@@ -1330,6 +1551,8 @@ func update(dt: float) -> void:
 				e.x += sin(e.t * 1.7) * 10
 				e.y += sin(e.t * 3.4) * 5
 		elif e.st == "fly":
+			# witches face the way they're flying, and keep that facing in formation
+			e.face = e.dir
 			e.x += e.dir * 105 * dt
 			e.y += ((e.fy + sin(e.t * 5) * 14) - e.y) * minf(1.0, 4 * dt)
 			e.drop -= dt
@@ -1354,6 +1577,8 @@ func update(dt: float) -> void:
 			var dx: float = tx - e.x
 			var dy: float = ty - e.y
 			var d := sqrt(dx * dx + dy * dy)
+			if absf(dx) > 2:
+				e.face = int(signf(dx))
 			if d < 4:
 				e.st = "form"
 			else:
@@ -1406,6 +1631,9 @@ func update(dt: float) -> void:
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
+		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
+			b.x = b.x0 + signf(b.x - b.x0) * 24.0
+			b.vx = 0.0
 		if b.y > 246 or b.y < -60 or b.x < -6 or b.x > 326:
 			b.dead = true
 
@@ -1460,17 +1688,16 @@ func update(dt: float) -> void:
 		k.y += 45 * dt
 		var catcher = null
 		for p in live():
-			if p.eq.has("magnet") and absf(k.x - p.x) < 90:
-				k.x += signf(p.x - k.x) * minf(absf(p.x - k.x), 130 * dt)
-				k.y += 50 * dt
 			if absf(k.x - p.x) < 13 and absf(k.y - 209) < 14:
 				catcher = p
+		if catcher == null:
+			catcher = soul_catch(k)
 		if catcher != null:
 			k.dead = true
 			var c := 2 if catcher.eq.has("dcandy") else 1
 			add_candy(catcher.n, c)
 			catcher.got += c
-			G.score += 10
+			pts(10)
 			sfx("candy")
 		elif k.y > 246:
 			k.dead = true
@@ -1484,6 +1711,8 @@ func update(dt: float) -> void:
 		for p in live():
 			if absf(d.x - p.x) < 14 and absf(d.y - 209) < 14:
 				got = p
+		if got == null:
+			got = soul_catch(d)
 		if got != null:
 			catch_drop(d, got)
 		elif d.y > 248:
@@ -1556,7 +1785,10 @@ func draw_game() -> void:
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
 		else:
-			spr(WITCH if e.ty == "w" else VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+			if e.ty == "w":
+				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, EPAL, x - 1, int(round(e.y)) - 9, 2, fl)
+			else:
+				spr(VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
@@ -1566,17 +1798,11 @@ func draw_game() -> void:
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
 			pumpkin(x, y, 6, 5, true, gt * 2, 4)
 		else:
-			R(x - 5, y - 4, 4, 3, "#ff4d7a")
-			R(x + 1, y - 4, 4, 3, "#ff4d7a")
-			R(x - 5, y - 2, 10, 3, "#ff4d7a")
-			R(x - 3, y + 1, 6, 2, "#ff4d7a")
-			R(x - 1, y + 3, 2, 1, "#ff4d7a")
-			R(x - 4, y - 3, 1, 1, "#ffffff")
+			spr(APPLE, APPLEPAL, x - 5, y - 7, 1)
 		if int(floor(gt * 6)) % 2 == 1:
 			R(x + 9, y - 9, 1, 1, "#ffffff")
 			R(x - 10, y + 3, 1, 1, "#ffffff")
-	if G.pk != null:
-		var k: Dictionary = G.pk
+	for k in G.pks:
 		pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
 		if k.flash > 0:
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
@@ -1594,9 +1820,13 @@ func draw_game() -> void:
 	for s in G.shots:
 		var x := int(round(s.x))
 		var y := int(round(s.y))
+		var col: String = s.col
+		# GHOST SHOT has no glow trail, which made it look like a sign on a post
+		if s.gs:
+			spr(GSHOT, {"c": col, "k": "#1b0f33"}, x - 2, y - 3, 1)
+			continue
 		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
 		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
-		var col: String = s.col
 		R(x - 2, y - 1, 5, 3, col)
 		R(x - 1, y - 2, 3, 5, col)
 		# ORB SIZE boosts show a little at 5+, always smaller than BIG ORB, and grow BIG ORB further
@@ -1611,12 +1841,17 @@ func draw_game() -> void:
 		var p: Dictionary = G.players[i]
 		if p.out or mode == "over":
 			continue
+		var C: Dictionary = chars[p.ch]
+		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you
+		for h in [["gr", "grp", ROSE, 6, -2], ["sm", "smp", BOW, 3, -2]]:
+			if p.has(h[0]):
+				var hx := int(round(p[h[0]].x)) - 6
+				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
+				spr(C.spr, C[h[1]][p.n], hx, hb, 1)
+				spr(h[2], ACCPAL, hx + h[3], hb + h[4], 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
-		var C: Dictionary = chars[p.ch]
 		var px := int(round(p.x))
-		if p.eq.has("twin"):
-			spr(C.spr, C.pals[p.n], px + (14 if p.x < 290 else -26), 206, 1)
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.eq.has("shield") and p.sh <= 0:
 			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt)
@@ -1670,12 +1905,16 @@ func draw_hud() -> void:
 		for w in chars[p.ch].pow:
 			if p.eq.has(w[0]):
 				codes += w[3] + " "
-		T(codes.strip_edges(), CODE_X[p.n][0], 432, 1, "#ffd92e", CODE_X[p.n][1])
+		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
+		# their prestige level for this character, which counts for every stat
+		var pr := prestige(p.n, p.ch)
+		if pr > 0:
+			T("PRE %d" % pr, CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
 		var boosts := ""
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:
 				boosts += "%s%d " % [b[3], bo(p, b[0])]
-		T(boosts.strip_edges(), CODE_X[p.n][0], 420, 1, "#7df2ff", CODE_X[p.n][1])
+		T(boosts.strip_edges(), CODE_X[p.n][0], 408, 1, "#7df2ff", CODE_X[p.n][1])
 	if G.players.size() == 1 and mode == "game":
 		T("TO JOIN: START ON A CONTROLLER, OR BACKSPACE ON THE KEYBOARD", 320, 466, 1, "#9d8cc4", 1)
 	if G.toast != null and mode == "game":
@@ -1712,15 +1951,17 @@ func draw_panel(title: String, rows: Array, footer: String, cursor := -1, note :
 		T(footer, 80, ry + 6, 1, "#9d8cc4")
 
 # ---------------------------------------------------------------- UPGRADES menu
-# A tab for each player. The first page lists characters (buy for CHAR_COST, or open one);
-# a character's page lets you play as it and buy upgrades (POW_COST) or switch them ON / OFF.
+# A tab for each player. The first page lists characters (buy for char_cost, or open one);
+# a character's page lets you play as it and buy upgrades (pow_cost) or switch them ON / OFF.
+# Once all its upgrades are bought, a PRESTIGE row shows at the bottom (and stays from then on):
+# confirming relocks the character and its upgrades for +1 of every boost for that character.
 func shop_rows() -> Array:
 	var rows := []
 	var c := candy_of(stab)
 	if sch < 0:
 		for i in chars.size():
 			if not has_char(stab, i):
-				rows.append([chars[i].name, "%d CANDY" % CHAR_COST, c < CHAR_COST])
+				rows.append([chars[i].name, "%d CANDY" % char_cost(stab, i), c < char_cost(stab, i)])
 			else:
 				rows.append([chars[i].name, "PLAYING" if char_pref(stab) == i else "OWNED", false])
 		if owned_chars(stab).size() >= 2:
@@ -1732,42 +1973,75 @@ func shop_rows() -> Array:
 		if got:
 			rows.append(["PLAY AS " + chars[sch].name, "PLAYING" if char_pref(stab) == sch else "", false])
 		else:
-			rows.append(["BUY " + chars[sch].name, "%d CANDY" % CHAR_COST, c < CHAR_COST])
+			rows.append(["BUY " + chars[sch].name, "%d CANDY" % char_cost(stab, sch), c < char_cost(stab, sch)])
 		var own := owns(stab, sch)
+		var pc := pow_cost(stab, sch)
 		for w in chars[sch].pow:
 			if not own.has(w[0]):
-				rows.append([w[1], "%d CANDY" % POW_COST, not got or c < POW_COST])
+				rows.append([w[1], "%d CANDY" % pc, not got or c < pc])
 			else:
 				var on := is_on(stab, sch, w[0])
 				rows.append([w[1], "ON" if on else "OFF", not got or not on])
+		if pre_shown(stab, sch):
+			rows.append(["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != ""])
 	rows.append(["BACK", "", false])
 	return rows
+
+func maxed(n: int, ch: int) -> bool:
+	return has_char(n, ch) and owns(n, ch).size() == chars[ch].pow.size()
+
+# the PRESTIGE row: hidden at 0 until the character is maxed, always there after its first prestige
+func pre_shown(n: int, ch: int) -> bool:
+	return prestige(n, ch) > 0 or maxed(n, ch)
+
+# why this character can't be prestiged right now, or "" if it can
+func pre_why(n: int, ch: int) -> String:
+	if prestige(n, ch) >= PRESTIGE_MAX:
+		return "%s IS AT PRESTIGE %d/%d, THE MOST THERE IS." % [chars[ch].name, PRESTIGE_MAX, PRESTIGE_MAX]
+	if not maxed(n, ch):
+		return "BUY %s AND ALL ITS UPGRADES TO PRESTIGE AGAIN." % chars[ch].name
+	# their only character: only if they could buy one straight back (this one costs 10% more after)
+	if owned_chars(n).size() <= 1:
+		var cheapest := CHAR_COST + CHAR_COST / 10 * (prestige(n, ch) + 1)
+		for i in chars.size():
+			if i != ch:
+				cheapest = mini(cheapest, char_cost(n, i))
+		if candy_of(n) < cheapest:
+			return "YOUR ONLY CHARACTER: SAVE %d CANDY TO BUY ONE BACK FIRST." % cheapest
+	return ""
 
 func shop_note() -> String:
 	if smsg != "":
 		return smsg
 	if sch >= 0 and scur >= 1 and scur <= chars[sch].pow.size():
 		return chars[sch].pow[scur - 1][2] + "."
+	if sch >= 0 and scur == chars[sch].pow.size() + 1 and pre_shown(stab, sch):
+		var why := pre_why(stab, sch)
+		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch < 0 and scur == chars.size() and owned_chars(stab).size() >= 2:
 		return "PLAY A RANDOM ONE OF YOUR CHARACTERS EACH GAME."
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
 	if sch >= 0:
 		return "ON UPGRADES CAN COME FROM THE GLOWING PUMPKIN. OFF ONES NEVER DO."
-	return "LB / RB OR LEFT / RIGHT: SWITCH PLAYER.  EACH CHARACTER'S FIRST UPGRADE IS FREE."
+	return "LB / RB OR LEFT / RIGHT: SWITCH PLAYER."
 
 func draw_shop() -> void:
 	var rows := shop_rows()
 	var y := 104.0
-	draw_box(y, 116 + rows.size() * 26)
+	# a character's page has its description line under the name, so its rows start a bit lower
+	var dy := 10 if sch >= 0 else 0
+	draw_box(y, 116 + dy + rows.size() * 26)
 	T("UPGRADES", 80, y + 18, 3, "#ff8a1f")
 	T("LB", 318, y + 26, 1, "#9d8cc4", 1)
 	for i in MAX_PLAYERS:
 		T("P%d" % (i + 1), 356 + i * 46, y + 22, 2, "#ffd92e" if i == stab else "#5a4d80")
 	T("RB", 556, y + 26, 1, "#9d8cc4", 1)
 	T("CHARACTERS" if sch < 0 else chars[sch].name, 80, y + 52, 2, "#f6f1ff")
+	if sch >= 0:
+		T(chars[sch].desc, 80, y + 72, 1, "#9d8cc4")
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
-	var ry := y + 84
+	var ry := y + 84 + dy
 	for i in rows.size():
 		var r: Array = rows[i]
 		var dim: bool = r[2]
@@ -1776,8 +2050,19 @@ func draw_shop() -> void:
 			T(r[1], 560, ry + 3, 2, "#9d8cc4" if dim else "#ffd92e", 2)
 		ry += 26
 	T(shop_note(), 80, ry + 4, 1, "#ff8a1f" if smsg != "" else "#f6f1ff")
+	if spre >= 0:
+		var n := prestige(stab, sch) + 1
+		draw_panel("PRESTIGE", [["NO, KEEP IT", ""], ["YES, PRESTIGE", "%d/%d" % [n, PRESTIGE_MAX]]], "", spre,
+			"RELOCK %s AND ALL %d UPGRADES FOR A +1 BOOST TO ALL STATS? PRICES GO UP 10%%." % [chars[sch].name, chars[sch].pow.size()])
 
 func shop_choose() -> void:
+	if spre >= 0:
+		if spre == 1:
+			do_prestige(stab, sch)
+		else:
+			sfx("back")
+		spre = -1
+		return
 	var rows := shop_rows()
 	smsg = ""
 	if scur == rows.size() - 1:
@@ -1811,18 +2096,26 @@ func shop_choose() -> void:
 			cur = sch
 		sfx("select")
 		return
+	if scur == chars[sch].pow.size() + 1:
+		if pre_why(stab, sch) != "":
+			sfx("deny")
+		else:
+			spre = 0
+			sfx("select")
+		return
 	var k: String = chars[sch].pow[scur - 1][0]
 	var id: String = chars[sch].id
 	if not owns(stab, sch).has(k):
-		if c >= POW_COST:
-			add_candy(stab, -POW_COST)
+		var pc := pow_cost(stab, sch)
+		if c >= pc:
+			add_candy(stab, -pc)
 			var own := lst(pkey(stab, "own." + id))
 			own.append(k)
 			sv_set(pkey(stab, "own." + id), own)
 			smsg = chars[sch].pow[scur - 1][1] + " UNLOCKED!"
 			sfx("unlock")
 		else:
-			smsg = "NEED %d CANDY, P%d HAS %d." % [POW_COST, stab + 1, c]
+			smsg = "NEED %d CANDY, P%d HAS %d." % [pc, stab + 1, c]
 			sfx("deny")
 		return
 	var off := lst(pkey(stab, "off." + id))
@@ -1835,19 +2128,45 @@ func shop_choose() -> void:
 
 func buy_char(i: int) -> void:
 	var c := candy_of(stab)
-	if c < CHAR_COST:
-		smsg = "NEED %d CANDY, P%d HAS %d." % [CHAR_COST, stab + 1, c]
+	var cost := char_cost(stab, i)
+	if c < cost:
+		smsg = "NEED %d CANDY, P%d HAS %d." % [cost, stab + 1, c]
 		sfx("deny")
 		return
-	add_candy(stab, -CHAR_COST)
-	var have := lst(pkey(stab, "chars"))
-	have.append(chars[i].id)
-	sv_set(pkey(stab, "chars"), have)
+	add_candy(stab, -cost)
+	if i == 0:
+		sv_set(pkey(stab, "ghost.gone"), false)
+	else:
+		var have := lst(pkey(stab, "chars"))
+		have.append(chars[i].id)
+		sv_set(pkey(stab, "chars"), have)
 	smsg = chars[i].name + " UNLOCKED!"
+	if stab == 0:
+		cur = char_pref(0)
+	sfx("unlock")
+
+# relock the character and all its upgrades, and count one more prestige for it
+func do_prestige(n: int, ch: int) -> void:
+	var id: String = chars[ch].id
+	sv_set(pkey(n, "pre." + id), prestige(n, ch) + 1)
+	if ch == 0:
+		sv_set(pkey(n, "ghost.gone"), true)
+	else:
+		var have := lst(pkey(n, "chars"))
+		have.erase(id)
+		sv_set(pkey(n, "chars"), have)
+	sv_set(pkey(n, "own." + id), [])
+	sv_set(pkey(n, "off." + id), [])
+	if n == 0:
+		cur = char_pref(0)
+	scur = 0
+	smsg = "%s IS NOW PRESTIGE %d/%d!" % [chars[ch].name, prestige(n, ch), PRESTIGE_MAX]
 	sfx("unlock")
 
 # switch player tab, staying on the same page and row
 func shop_tab(d: int) -> void:
+	if spre >= 0:
+		return
 	stab = posmod(stab + d, MAX_PLAYERS)
 	smsg = ""
 	scur = mini(scur, shop_rows().size() - 1)
@@ -1856,7 +2175,9 @@ func shop_tab(d: int) -> void:
 # back from a character's page goes to the character list, from there out of the menu
 func shop_back() -> void:
 	smsg = ""
-	if sch >= 0:
+	if spre >= 0:
+		spre = -1
+	elif sch >= 0:
 		scur = sch
 		sch = -1
 	else:
@@ -1882,6 +2203,8 @@ func draw_ui() -> void:
 				], "PRESS SPACE TO GO BACK")
 		elif panel == "shop":
 			draw_shop()
+		elif panel == "setup":
+			draw_setup()
 		elif panel == "settings":
 			var fs: bool = sv("fullscreen", false)
 			var k := win_scale()
@@ -1898,13 +2221,25 @@ func draw_ui() -> void:
 				note = "ON KEEPS EVERY PIXEL THE SAME SIZE, WITH A BIGGER BORDER."
 			draw_panel("SETTINGS", rows, "", ssel, note)
 		elif panel == "reset":
-			draw_panel("RESET SAVE", [["NO, KEEP IT", ""], ["YES, ERASE", ""]], "", rsel, "ERASE YOUR HIGH SCORE, CANDY, POWER-UPS AND CHARACTERS?")
+			var rr := [["NO, KEEP IT", ""]]
+			for i in MAX_PLAYERS:
+				rr.append(["ERASE P%d" % (i + 1), ""])
+			rr.append(["ERASE ALL", ""])
+			var note := "ERASE ONE PLAYER, OR EVERYTHING?"
+			if rsel >= 1 and rsel <= MAX_PLAYERS:
+				note = "ERASE P%d'S CANDY, CHARACTERS, UPGRADES AND PRESTIGE?" % rsel
+			elif rsel == 5:
+				note = "ERASE EVERY PLAYER, THE HIGH SCORE AND THE SETTINGS?"
+			draw_panel("RESET SAVE", rr, "", rsel, note)
 		elif panel == "quit":
 			draw_panel("QUIT GAME", [["NO, KEEP PLAYING", ""], ["YES, QUIT", ""]], "", qsel, "CLOSE THE SPOOKY BURST?")
 		return
 	draw_hud()
 	if mode == "pause" and G.menu != null:
-		draw_pause()
+		if G.menu.get("setup", false):
+			draw_setup()
+		else:
+			draw_pause()
 	elif mode == "over":
 		var rows := [["SCORE", "%06d" % G.score], ["HIGH SCORE", "%06d" % maxi(G.high, G.score)], ["WAVE REACHED", str(G.wave)]]
 		var ps: Array = G.players.duplicate()
@@ -1934,13 +2269,13 @@ func draw_pause() -> void:
 	var why := ""
 	if m.sel == 1:
 		why = join_block(m.dev)
-	elif m.sel == 2 and who == null:
+	elif m.sel == 3 and who == null:
 		why = "YOU ARE NOT PLAYING"
 	if why != "":
 		T(why, 300, y + 58 + m.sel * 26, 1, "#ff8a1f")
 	ry += 8
 	for line in ["KEYBOARD LEFT: A D MOVE, SPACE OR W SHOOT, ESC JOINS OR MENU", "KEYBOARD RIGHT: ARROWS MOVE, UP OR ENTER SHOOT, BACKSPACE JOINS OR MENU",
-			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y SHOOT, START JOINS OR MENU",
+			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y OR R2 SHOOT, START JOINS OR MENU",
 			"BOOSTS: DM DAMAGE  FR FIRE RATE  SS SHOT SPEED  MS MOVE  OS ORB SIZE  LS SAFETY"]:
 		T(line, 80, ry, 1, "#9d8cc4")
 		ry += 16
@@ -2041,17 +2376,19 @@ func menu_move(d: int) -> void:
 	sfx("move")
 	if panel == "":
 		sel = posmod(sel + d, MENU.size())
+	elif panel == "shop" and spre >= 0:
+		spre = 1 - spre
 	elif panel == "shop":
 		scur = posmod(scur + d, shop_rows().size())
 		smsg = ""
 	elif panel == "reset":
-		rsel = 1 - rsel
+		rsel = posmod(rsel + d, 6)
 	elif panel == "quit":
 		qsel = 1 - qsel
 	elif panel == "settings":
 		ssel = posmod(ssel + d, 4)
 
-func menu_choose(pad: int) -> void:
+func menu_choose(pad: int, side := "wasd") -> void:
 	if mode == "over":
 		sfx("back")
 		to_menu()
@@ -2062,16 +2399,18 @@ func menu_choose(pad: int) -> void:
 		var go: String = MENU[sel][1]
 		sfx("select")
 		if go == "play":
-			start_game(pad)
+			start_game(pad, side)
 		else:
 			panel = go
 			stab = 0
 			sch = -1
 			scur = 0
 			smsg = ""
+			spre = -1
 			rsel = 0
 			ssel = 0
 			qsel = 0
+			setup_sel = 0
 	elif panel == "score":
 		panel = ""
 		sfx("back")
@@ -2084,13 +2423,22 @@ func menu_choose(pad: int) -> void:
 		else:
 			settings_change(1)
 	elif panel == "reset":
-		if rsel == 1:
+		# 1-4 erase that player's candy, characters, upgrades and prestige; 5 erases everything
+		if rsel == 5:
 			cfg = ConfigFile.new()
 			cfg.save(SAVE_PATH)
-			cur = 0
+			sfx("deny")
+		elif rsel >= 1:
+			var pre := pkey(rsel - 1, "")
+			if cfg.has_section("save"):
+				for key in cfg.get_section_keys("save"):
+					if key.begins_with(pre):
+						cfg.erase_section_key("save", key)
+			cfg.save(SAVE_PATH)
 			sfx("deny")
 		else:
 			sfx("back")
+		cur = char_pref(0)
 		panel = ""
 	elif panel == "quit":
 		if qsel == 1:
@@ -2114,6 +2462,98 @@ func menu_back() -> void:
 		qsel = 0
 		sfx("select")
 
+# ---------------------------------------------------------------- PLAYER SETUP
+# From the title menu or the game menu: pick a slot (P1-P4), then press A on a controller, or Space
+# (left keys) or Enter (right keys) on the keyboard, and that device plays that slot until the game
+# is closed. A device that had another slot swaps with whoever had this one; pressing again on its
+# own slot clears it. In a game it also moves that player's controls over straight away.
+# Whoever opened it moves the cursor and backs out; any device can take a slot.
+func dev_name(dev: Dictionary) -> String:
+	if dev.pad >= 0:
+		return "CONTROLLER %d" % (dev.pad + 1)
+	return "KEYBOARD LEFT" if dev.side == "wasd" else "KEYBOARD RIGHT"
+
+func setup_move(d: int) -> void:
+	setup_sel = posmod(setup_sel + d, MAX_PLAYERS + 1)
+	sfx("move")
+
+func setup_back() -> void:
+	if mode == "pause":
+		G.menu.setup = false
+	else:
+		panel = ""
+	sfx("back")
+
+func setup_choose(dev: Dictionary) -> void:
+	if setup_sel == MAX_PLAYERS:
+		setup_back()
+		return
+	var s := setup_sel
+	if assign.has(s) and same_dev(assign[s], dev):
+		assign.erase(s)
+		sfx("back")
+		return
+	var old := slot_of(dev)
+	var prev = assign.get(s)
+	assign[s] = dev
+	if old >= 0:
+		if prev != null:
+			assign[old] = prev
+		else:
+			assign.erase(old)
+	if mode == "pause":
+		move_controls(s, dev)
+	sfx("select")
+
+# in a game: the player in slot s now plays with dev, and whoever used dev gets s's old controls
+func move_controls(s: int, dev: Dictionary) -> void:
+	var p = null
+	for q in G.players:
+		if q.n == s:
+			p = q
+	if p == null:
+		return
+	var q = dev_player(dev)
+	if q != null and is_same(q, p):
+		return
+	var was := {"pad": p.pad, "kb": p.kb}
+	p.pad = dev.pad
+	p.kb = "" if dev.pad >= 0 else dev.side
+	if q != null:
+		q.pad = was.pad
+		q.kb = was.kb
+
+func setup_key(k: int) -> void:
+	if k == KEY_SPACE or k == KEY_ENTER:
+		setup_choose({"pad": -1, "side": "wasd" if k == KEY_SPACE else "arrows"})
+	elif mode == "pause" and G.menu.dev.pad >= 0:
+		return
+	elif k == KEY_UP or k == KEY_W:
+		setup_move(-1)
+	elif k == KEY_DOWN or k == KEY_S:
+		setup_move(1)
+	elif k == KEY_ESCAPE or k == KEY_BACKSPACE or k == KEY_P:
+		setup_back()
+
+func setup_pad(d: int, hit: Callable) -> void:
+	if hit.call("sel"):
+		setup_choose({"pad": d, "side": ""})
+	elif mode == "pause" and G.menu.dev.pad != d:
+		return
+	elif hit.call("up"):
+		setup_move(-1)
+	elif hit.call("down"):
+		setup_move(1)
+	elif hit.call("b") or hit.call("start") or hit.call("back"):
+		setup_back()
+
+func draw_setup() -> void:
+	var rows := []
+	for s in MAX_PLAYERS:
+		rows.append(["P%d" % (s + 1), dev_name(assign[s]) if assign.has(s) else "NONE", not assign.has(s)])
+	rows.append(["BACK", "", false])
+	draw_panel("PLAYER SETUP", rows, "", setup_sel, "A ON A CONTROLLER, SPACE (LEFT KEYS) OR ENTER (RIGHT KEYS) TAKES THE SLOT.")
+
 # ---------------------------------------------------------------- input
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -2125,6 +2565,9 @@ func on_key(k: int) -> void:
 		return
 	if k == KEY_F11 or (k == KEY_ENTER and Input.is_key_pressed(KEY_ALT)):
 		toggle_fullscreen()
+		return
+	if (mode == "pause" and G.menu.get("setup", false)) or (mode == "menu" and panel == "setup"):
+		setup_key(k)
 		return
 	if mode == "pause":
 		if G.menu.dev.pad >= 0:
@@ -2174,13 +2617,17 @@ func on_key(k: int) -> void:
 	elif (k == KEY_Q or k == KEY_E) and mode == "menu" and panel == "shop":
 		shop_tab(-1 if k == KEY_Q else 1)
 	elif k == KEY_SPACE or k == KEY_ENTER:
-		menu_choose(-1)
+		menu_choose(-1, "wasd" if k == KEY_SPACE else "arrows")
 	elif k == KEY_ESCAPE or k == KEY_BACKSPACE:
 		menu_back()
 
-# A, X and Y select in menus, B goes back. During play all four shoot ("ok").
+# A, X and Y select in menus, B goes back. During play all four and R2 shoot ("ok").
+# mx is how far to move in play: the d-pad is full speed, the left stick is finer the less it's pushed.
 const PAD_OFF := {"up": false, "down": false, "left": false, "right": false, "ok": false, "sel": false, "b": false,
-	"start": false, "back": false, "lb": false, "rb": false}
+	"start": false, "back": false, "lb": false, "rb": false, "mx": 0.0}
+# left stick in play: ignored inside STICK_DEAD (so a resting stick doesn't drift), full speed from STICK_FULL
+const STICK_DEAD := 0.2
+const STICK_FULL := 0.9
 
 func poll_pads() -> void:
 	pads = {}
@@ -2190,12 +2637,18 @@ func poll_pads() -> void:
 		var a := Input.is_joy_button_pressed(d, JOY_BUTTON_A)
 		var b := Input.is_joy_button_pressed(d, JOY_BUTTON_B)
 		var xy := Input.is_joy_button_pressed(d, JOY_BUTTON_X) or Input.is_joy_button_pressed(d, JOY_BUTTON_Y)
+		var rt := Input.get_joy_axis(d, JOY_AXIS_TRIGGER_RIGHT) > 0.5
+		var dl := Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_LEFT)
+		var dr := Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_RIGHT)
+		var mx := signf(ax) * clampf((absf(ax) - STICK_DEAD) / (STICK_FULL - STICK_DEAD), 0, 1)
+		if dl != dr:
+			mx = -1.0 if dl else 1.0
 		var now := {
 			"up": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_UP) or ay < -0.5,
 			"down": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_DOWN) or ay > 0.5,
-			"left": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_LEFT) or ax < -0.35,
-			"right": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_RIGHT) or ax > 0.35,
-			"ok": a or b or xy, "sel": a or xy, "b": b,
+			"left": dl or ax < -0.35,
+			"right": dr or ax > 0.35,
+			"ok": a or b or xy or rt, "sel": a or xy, "b": b, "mx": mx,
 			"start": Input.is_joy_button_pressed(d, JOY_BUTTON_START),
 			"back": Input.is_joy_button_pressed(d, JOY_BUTTON_BACK),
 			"lb": Input.is_joy_button_pressed(d, JOY_BUTTON_LEFT_SHOULDER),
@@ -2208,6 +2661,9 @@ func poll_pads() -> void:
 # what one controller's newly pressed buttons do (now: held this frame, pv: held last frame)
 func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 	var hit := func(k): return now[k] and not pv[k]
+	if (mode == "pause" and G.menu.get("setup", false)) or (mode == "menu" and panel == "setup"):
+		setup_pad(d, hit)
+		return
 	if mode == "pause":
 		if G.menu.dev.pad != d:
 			return

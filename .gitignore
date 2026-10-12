@@ -1,0 +1,15 @@
+# Godot 4 editor cache / imported asset data (regenerated automatically)
+.godot/
+
+# Godot editor binaries (download from godotengine.org instead)
+/spooky burst/godot/
+
+# Godot 3 leftovers / Mono / generated translations
+.import/
+.mono/
+*.translation
+
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store
