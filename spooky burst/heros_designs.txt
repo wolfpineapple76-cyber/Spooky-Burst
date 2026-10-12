@@ -46,7 +46,9 @@ WAVES AND ENEMIES
 - Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the
   waves just before it, as a warning, and only then (spiders replaced up to 6 only before the BLACK WIDOW,
   the extra vampire row only before the VAMPIRE LORD, the extra witch row only before the WITCH QUEEN).
-  After the PUMPKIN KING it loops back to the full lineup.
+  After the PUMPKIN KING comes Sammie's HAUNTED MANSION (waves 26-50, bosses SPIDER BEAST, THE TWINS,
+  BAT CAT, PUPPET DOLL, GRIM REAPER). After the last stage it starts over in the graveyard at wave 1's
+  lineup with every enemy tougher (+1 HP per PUMPKIN KING beaten).
 - Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players
   (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
   Only the PUMPKIN KING gets a ring of shots. The VAMPIRE LORD stays distant and commanding, so he doesn't

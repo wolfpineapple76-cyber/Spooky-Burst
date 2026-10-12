@@ -68,8 +68,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
     BLACK WIDOW) a killed spider is replaced, up to 6.
   - Before the VAMPIRE LORD the top bat row is vampires instead, before the WITCH QUEEN it's witches
     instead, and before the PUMPKIN KING it's witches, vampires, witches, vampires and one row of bats.
-  - After the PUMPKIN KING it loops back to the full lineup before the PRIMAL BAT, and every enemy
-    has +1 HP for each PUMPKIN KING beaten.
+  - After the PUMPKIN KING comes the HAUNTED MANSION (below), and after that it starts over in the
+    graveyard from wave 1's lineup, with every enemy +1 HP for each PUMPKIN KING beaten.
 - The PRIMAL BAT swoops down at you, flies off one side and comes back in from the other to strafe across
   the whole screen dropping slow sound waves at you, fires spreads and 3-shots of dark orbs, and calls
   swarms of bats into formation. The BLACK WIDOW hangs on her thread, spits venom, dangles spiders down
@@ -79,6 +79,14 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   random breather, and her candy corn rain always leaves a clear lane.
   The PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders,
   and they act just like the ones in a normal wave.
+- THE HAUNTED MANSION (Sammie's level 2), waves 26-50: a room inside the mansion, where spiders, possessed dolls
+  and ghosts take the place of the bats, witches and vampires (4 to a row in a checkerboard). Spiders drop
+  straight down on their threads, dolls shoot buttons and swoop down in a U, ghosts cry three tears at a time.
+  The pick-ups are candles: a candelabra for the power-up pumpkin and a brass candle for the treat bucket.
+  Its bosses: SPIDER BEAST (wave 30) throws sticky webs that slow you down for a moment, THE TWINS (35) shoot
+  mirror-image bows, BAT CAT (40) swoops at you and scratches along the floor, PUPPET DOLL (45) shoots big
+  buttons and sewing needles, and the GRIM REAPER (50) warns on half the floor, then slashes across it.
+  After the GRIM REAPER it's back to the graveyard.
 
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and

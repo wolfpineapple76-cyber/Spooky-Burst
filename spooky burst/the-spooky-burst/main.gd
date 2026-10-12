@@ -108,6 +108,142 @@ const JUGBALL := ["..ccc..", ".cWlcc.", "cWlcccc", "clccccc", "cccccdc", ".ccccd
 const JUG_COLS := ["#228b22", "#4169e1", "#ff7518"]
 # I'M NOT A PINATA's gift box: white with a ribbon (red for P1, the player's colour for P2-4)
 const GIFT := [".rr...rr.", "..rrRrr..", "WWWWrWWWW", "WWWWrWWWW", "rrrrrrrrr", "WWWWrWWWW", "WWWWrWWWW", "ggggrgggg"]
+# ---------------------------------------------------------------- THE HAUNTED MANSION (Sammie's level 2)
+# new monsters for the next level (top row of designs/monster_designs.png)
+# spider beast
+const SPIDER_A := ["..............kl...............", "..............kl...............", "..............kl...............",
+	"..............kl...............", "............gggggg.............", "..........gffffbbbgg...........", "....a....gffffffbbbbg..........",
+	"...ada..gffffffffbbbbg..ada....", "....ada.gfffffeefbbbbg.adaa....", "...aaadgbbfffeeeebbbbbgda.aa...", "...a..agbbbfffeebbbbbbga...a...",
+	"..adda.gbbbbbbeebbbbbbg..ddaa..", "..aaaddgbbbbbeeeebbbbbgddaaaa..", ".aaa...dgbbbbbeebbbbbgdaa..aaa.", "..aa....gbbbbhhhhbbbbga....aa..",
+	".aa......gbhhcccchhbg.......aa.", ".aaaaaaaaajccjccjccj........aa.", "aa.ddddddhcmeccccmechdddddda.aa", "aa.aa....hceecjjceechaaaaaaa.aa",
+	"..aa....ahceecccceech......aa..", "..aa.aaddhcccccccccchdd....aa..", "..aa.dd..hcccccccccch.adda.aa..", "..aa.aa...hcccccccch....aa.aa..",
+	".aa..aa....hiccccih.....aa..aa.", ".aa..aa.....iihhii......aa..aa.", "....aa......i....i.......aa....", "....aa...................aa....",
+	"....aa......e....e.......aa....", "....aa......e............aa....", ".................e.............", ".................e............."]
+const SPIDERPAL := {"a": "#4a3484", "b": "#3a2466", "c": "#2a1a4a", "d": "#8a66e0", "e": "#7dff5a", "f": "#4d3288", "g": "#241640", "h": "#170d2c",
+	"i": "#f6f1ff", "j": "#b6ff7a", "k": "#cfc6ea", "l": "#8f84b8", "m": "#eaffd8"}
+# twin ghosts
+const TWIN_A := ["....f...f..........g...g....", "....fffff..........ggggg....", "..bbfbbbfbb......bbgbbbgbb..", ".bbbbbbbbbbb....bbbbbbbbbbb.",
+	".bbbbbbbbbbb....bbbbbbbbbbb.", ".bbbbbbbbbbb....bbbbbbbbbbb.", ".bccbcbcbccb....bccbcbcbccb.", "bbcheccchecbb..bbcheccchecbb",
+	"bbceeccceecbb..bbceeccceecbb", "bbceeccceecbb..bbceeccceecbb", "bbcccececccbb..bbcccceccccbb", "bbbcccecccbbb..bbbccececcbbb",
+	"bbbdddddddbbb..bbbdddddddbbb", "bbbdddidddbbb..bbbdddidddbbb", "bbbaaaiaaabbb..bbbaaaiaaabbb", "bbcaaaaaaacbb..bbcaaaaaaacbb",
+	"bcaaaaaaaaacb..bcaaaaaaaaacb", "bcaaaaaaaaa.c..c.aaaaaaaaacb", "c.aaaaaaaaa..cc..aaaaaaaaa.c", "caaaaaaaaaaa....aaaaaaaaaaac",
+	".aaaaaaaaaaa....aaaaaaaaaaa.", ".aaaaaaaaaaa....aaaaaaaaaaa.", "ddddddddddddd..ddddddddddddd", "aaaaaaaaaaaaa..aaaaaaaaaaaaa",
+	"aaaaaaaaaaaaa..aaaaaaaaaaaaa", "aaaaaaaaaaaaa..aaaaaaaaaaaaa", "aa..aa..aa..a..aa..aa..aa..a", "a...a...a...a..a...a...a...a"]
+const TWINPAL := {"a": "#cfd6ff", "b": "#1b0f33", "c": "#eef0ff", "d": "#a9b2e8", "e": "#0b0616", "f": "#ff5c8a", "g": "#5cc8ff", "h": "#ff3b5c",
+	"i": "#ffffff"}
+# mummy
+const MUMMY_A := ["............aaaaaaaa............", "...........aaaaabbbbbbb.........", ".........bbbbbbbaabbb...........",
+	"...........aaabbbbaaa...........", "...........bcfccccfca...........", "...........acddccddca...........", "...........acccccccca...........",
+	"...........aaaaabbbbbbb.........", ".........bbbbbbbaaaaa...........", "...........aaaaaaaaaaa..........", "...........aaaaaaaaaa.aaa.......",
+	".........aaaaaaaaaaaaaa.a.......", ".......abbeaaaaabbbbbbbaaa......", ".....abbabbbbbbbaaaaaaabbaa.....", ".aaabbabbaaaaaaaaaaaabbbabbaaaa.",
+	".aababbaaaaaaaaabbbbbbbabbabbaa.", ".aabbaaa.bbbbbbbbbaaaaa.aabbaaa.", ".abaaa...aabbbaaaaaaaaa...aabba.", ".aaa.....bbaaaaabbbbbbb.....aaa.",
+	".a.......bbbbbbbaaaaaaa.......a.", "a........aaaaaaaaaaaaaa........a", "a........aaaaaaabbbbbeb........a", "a........bbbbbbbaaaaaaa.........",
+	".a........aaaaa..aaeaaa.........", ".a........aaabb.bbbbbbba........", "..a......bbbbbbb.abbaa..a.......", "..........baaaa.bbbbbbb.a.......",
+	".........bbbbbbb.aaaaa.a........", "..........aaaaa..aaaaa.a........", ".........aaaeaa..aaaaaa........."]
+const MUMMYPAL := {"a": "#e8dcb0", "b": "#b3a172", "c": "#1b0f33", "d": "#ffb52e", "e": "#7d6f4a", "f": "#ff6a1f"}
+# frankenstein
+const FRANK_A := [".......bbbbbbbbbbbb.......", ".......bbbbbbbbbbbb.......", ".......bbbbbbbfbbbb.......", ".......bbbbbbbbfffb.......",
+	".......bcbbcbbfbfcb.......", ".......ccbcccbcfbfc.......", ".......eeeeeeeeeeee.......", ".......cciicccciicc.......",
+	".......ccilceecilcc.......", "...j...cccccecccccc...j...", "..j....cccffffffccc....j..", "....khhhcccccccccchhhk....",
+	"....khhh..eeeeee..hhhk....", "...j......eeeeee......j...", "...aaaaaaaggggggaaaaaaa...", ".aaaadaaaaaggggaaaaadaaaa.",
+	".aaaadaaaaaggggaaaaadaaaa.", ".aaaadaaaaaaggaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.",
+	".aaaadaaaaahddaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.", ".aaaadaaaaahddaaaaaadaaaa.", "cfffcaaaaaaaddaaaaaaacfffc",
+	"ccccc.dddddd..dddddd.ccccc", "ccccc.dddddd..dddddd.ccccc", "ecece.dddddd..dddddd.ecece", "......dddddd..dddddd......",
+	"....bbbbbbbb..bbbbbbbb....", "....bbbbbbbb..bbbbbbbb...."]
+const FRANKPAL := {"a": "#3b3350", "b": "#2a2238", "c": "#86c96a", "d": "#2a2440", "e": "#5e9a4c", "f": "#2c3a22", "g": "#5a5470", "h": "#b9c2cc",
+	"i": "#ffe45c", "j": "#7df2ff", "k": "#7d8791", "l": "#1b0f33"}
+# level 2 enemies (the mansion, waves 26-49)
+# black widow spider, hanging head-down (moves like the bats)
+const SPIDER2 := ["....kkkkk....", "...kkrrrkk...", "l..kkkrkkk..l", ".l.kkrrrkk.l.", "..lkKkkkKkl..", "l..lkkkkkl..l", ".l..lkkkl..l.",
+	"..llkekekll..", "l...lkkkl...l", ".l..l...l..l.", "..l.......l.."]
+# possessed doll: red pigtails, pink bows, stitched smile (moves like the witches)
+const DOLL2 := ["....HHHHH....", "...HHHHHHH...", "pp.HHHHHHH.pp", "HHHHSSSSSHHHH", "II.SkSSSkS.II", "I..SaSSSaS..I", "...SSrrrSS...",
+	"...uduuudu...", "..SuydddyuS..", "...ddddddd...", "...ddUdUdd...", "...dd...dd...", "...kk...kk..."]
+# poltergeist: tattered sheet with red eyes (moves like the vampires)
+const GHOST2 := ["...zzzzzz...", "..zzzzzzzz..", ".zzrzzzzrzz.", ".zzrzzzzrzz.", "zzzzzzzzzzzz", "zzzzzmmzzzzz", "zzzzzmmzzzzz", "zzzzzzzzzzzz",
+	"zZzzZzzZzzZz", "z.zZ.zZ.zZ.z", "...z..z..z.."]
+const L2PAL := {"H": "#e0482a", "I": "#a8301c", "K": "#5a4a8a", "S": "#f3e2d4", "U": "#33519c", "Z": "#a8c8e8dd", "a": "#ffb3c9", "d": "#4a6fc4",
+	"e": "#ff5c5c", "k": "#14101f", "l": "#7a6aa8", "m": "#b8a890", "p": "#ff7fb5", "r": "#ff3355", "u": "#f0f0f0", "y": "#ffd92e", "z": "#e8f6ffdd"}
+# mansion bosses: the bat cat in a witch hat (wave 40) and the giant puppet doll (wave 45)
+const CATBOSS := ["..............................................", ".....................vvv......................",
+	".....................vvv......................", "...................vvvvvvvv...................",
+	"...................vvvvvvvv...................", ".Q..............KkKvvvvvvvvKkK..............Q.",
+	".qQq............KkkvvvvvvvvkkK............qQq.", ".qqQQqq........KkkkOOOOOOOOkkkK........qqQQqq.",
+	".qqqqQqqq......vvvvvvvvvvvvvvvv......qqqQqqqq.", ".qqqqqQqqq....KvvvvvvvvvvvvvvvvK....qqqQqqqqq.",
+	".qqqqqqQqqq...KkkkkkkkkkkkkkkkkK...qqqQqqqqqq.", ".qqqqqqqQqQq....KKkkkkkkkkkkKK....qQqQqqqqqqq.",
+	"qqqqqqqqqqqQq...KkkkkkkkkkkkkK...qQqqqqqqqqqqq", "qqqqqqqqqqqqQq.KkkkkkkkkkkkkkkK.qQqqqqqqqqqqqq",
+	"qqqqqqqqqqqqqQqKkkkYXkkkkXYkkkKqQqqqqqqqqqqqqq", "qqqqqqqqqqqqqqQKkkkYYkkkkYYkkkKQqqqqqqqqqqqqqq",
+	"qqq.QQQQQQQqqqqKkkkkkkkkkkkkkkKqqqqQQQQQQQ.qqq", "qq..qqqqqqqQQQQKkkkkkkkkkkkkkkKQQQQqqqqqqq..qq",
+	"q...qqqqqqqqQQQQKkkkkkKKkkkkkKQQQQqqqqqqqq...q", "....qqqqq.QQqqqqKKkkkkkkkkkkKKqqqqQQ.qqqqq....",
+	".....qqq..qqqqqqqKKkkkkkkkkKKqqqqqqq..qqq.....", ".....qq....qqqqqq.KKkkkkkkKK.qqqqqq....qq.....",
+	".....q.....qqqqqKKkkkkkkkkkkKKqqqqq.....q.....", "...........qqqqKKkkkkkkkkkkkkKKqqqq...........",
+	"............qqqKkkkkkkkkkkkkkkKqqq............", "............qqKkkkkkkkkkkkkkkkkKqq............",
+	"..............KkkkkkkkkkkkkkkkkK..............", "..............KkkkkkkkkkkkkkkkkK..............",
+	"..............KkkkkkkkkkkkkkkkkK..............", "..............KkkkkkkkkkkkkkkkkK..............",
+	"...............KkkkkkkkkkkkkkKK...............", "...............KKkkkkkkkkkkkkKK.......K.......",
+	"................KKkkkkkkkkkkKK.K.....KK.......", "..................KKkkkkkkKK...K.K.K.K........",
+	"....................KKKKKK.......K.K..........", ".............................................."]
+const CATPAL := {"K": "#4a4170", "O": "#ff8a1f", "Q": "#3a1a6a", "X": "#000000", "Y": "#ffd92e", "k": "#14101f", "q": "#5a2a9a", "v": "#7a35d6"}
+const DOLLBOSS := ["......nnnnnnnnnnnnnnnnnnnn......", "......nnnnnnnnnnnnnnnnnnnn......", ".......t.......tt.......t.......",
+	".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......",
+	".......t.......tt.......t.......", ".......t....HHHHHHHH....t.......", ".......t.HHHHHHHHHHHHHH.t.......", ".......tHHHHHHHHHHHHHHHHt.......",
+	".......tHHHHHHHHHHHHHHHHt.......", "......HtHHHHHHHHHHHHHHHHtH......", "......HtHHHHHHHHHHHHHHHHtH......", ".pppppHtHHHHHHHHHHHHHHHHtHppppp.",
+	"PpppppPtHHHHHHHHHHHHHHHHtPpppppP", ".ppppp.tHHHHHHHHHHHHHHHHt.ppppp.", "..HHH.StHHHHHHHHHHHHHHHHtS.HHH..", "..HHH.StSSSSHHHHHHHHSSSStS.HHH..",
+	".HHHHHStSSSSSSSSSSSSSSSStSHHHHH.", ".HHHHHStSSkkkSSSSSSkkkSStSHHHHH.", ".HHHHHStSSkrkSSSSSSkrkSStSHHHHH.", ".HHIHHStSSkkkSSSSSSkkkSStSHHIHH.",
+	".HIIIHStSSSSSSSSSSSSSSSStSHIIIH.", ".HIIIH.taaSSSSSSSSSSSSaat.HIIIH.", ".HIIIH.tSSSSSSSSSSSSSSSSt.HIIIH.", ".HIIIH.tSSSkSkSkSkSkSSSSt.HIIIH.",
+	".HIIIH.t.SSrrrrrrrrrrSS.t.HIIIH.", "..III..t..SkSkSkSkSkSS..t..III..", "..III..t...SSSSSSSSSS...t..III..", "...I...t.....SSSSSS.....t...I...",
+	".......t.uuuduuuuuuduuu.t.......", "......SSSuudddddddddduuSSS......", "......SSSuudyddddddyduuSSS......", "......SSSuudddddddddduuSSS......",
+	"...........dddddddddd...........", "...........ddddUUdddd...........", "...........ddddUUdddd...........", "...........ddddUUdddd...........",
+	"...........UUUd..dUUU...........", "...........UUUd..dUUU...........", "..........kkkk....kkkk.........."]
+const DOLLPAL := {"H": "#e0482a", "I": "#a8301c", "P": "#c94f8a", "S": "#f3e2d4", "U": "#33519c", "a": "#ffb3c9", "d": "#4a6fc4", "k": "#14101f",
+	"n": "#6b3f2a", "p": "#ff7fb5", "r": "#ff3355", "t": "#c9b8ee", "u": "#f6f1ff", "y": "#ffd92e"}
+# Spider Beast's web shot: sticks to a player and slows them down for a moment
+const WEBSHOT := ["g...g...g", ".g..g..g.", "..ggGgg..", "gggG.Gggg", "..ggGgg..", ".g..g..g.", "g...g...g"]
+const WEBSHOTPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
+# The Twins' shots: bows like their hair bows, pink from the left twin and blue from the right
+const BOWSHOT := ["a...a", "aa.aa", "aacaa", "aa.aa", "a...a"]
+const BOWPINK := {"a": "#ff5c8a", "c": "#fff0f5"}
+const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
+# Bat Cat's claw swipe: red scratch marks that shoot out along the floor (CLAWL faces left)
+const CLAW := ["P...P...P.", ".P...P...P", ".P...P...P", "..P...P...", "..P...P...", "...P...P.."]
+const CLAWL := [".P...P...P", "P...P...P.", "P...P...P.", "...P...P..", "...P...P..", "..P...P..."]
+const CLAWPAL := {"P": "#ff3355"}
+# Puppet Doll's shots: big pink buttons and silver sewing needles
+const BIGBUTTON := [".pppp.", "pPppPp", "ppwpwp", "pppppp", "ppwpwp", "pPppPp", ".pppp."]
+const BIGBUTTONPAL := {"p": "#ff7fb5", "P": "#c94f8a", "w": "#ffffff"}
+const NEEDLE := [".S.", "S.S", ".S.", ".s.", ".s.", ".s.", ".s.", ".s.", ".s.", ".S."]
+const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
+# mansion pick-ups: the candelabra replaces the power-up pumpkin, the brass candle replaces the treat bucket
+const CANDELABRA := [".y..y..y..", "yoy.yoy.yo", ".w..w..w..", ".w..w..w..", ".g..g..g..", ".gg.g.gg..", "..ggggg...", "....g.....", "....g.....", "...ggg....", "..GGGGG..."]
+const CANDLE := ["....y.....", "...yoy....", "...yfy....", "....o.....", "...www....", "...wwW....", "...wwW....", "...wwW....", "..gggggg..", ".gGGGGGGg.", "..gggggg.."]
+const CANDLEPAL := {"G": "#8a6a2a", "W": "#c9c2b4", "f": "#fff6c8", "g": "#c9a24a", "o": "#ff9a2e", "w": "#f3efe6", "y": "#ffe45c"}
+# mansion boss 5 (wave 50): the Grim Reaper, a skeleton in a hood with a scythe
+const REAPER := ["............nnnnnnnn............", ".sssssssssnnnnnnnnnnnn..........", ".sssssssssnnnWWWWWWnnn..........",
+	".bSSSSS.nnnWWWWWWWWWWnnn........", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b....nnnWWWWWWWWWWWWWWnnn......",
+	".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWkgkWWWWkgkWWnnn......", ".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWWWWWWWWWWWWWnnn......",
+	".b....nnnnWWWWWkkWWWWWnnnn......", ".b....nnnnWWWWkWWkWWWWnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......",
+	".b....nnnnnkwwwnnwwwknnnnn......", ".b....nnnnnnwwwnnwwwnnnnnn......", ".b....nnnnnnnnwwwwnnnnnnnn......", ".b....WWnnnnnnwwwwnnnnnnWW......",
+	".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......",
+	".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......",
+	".b...WWWnnnnnnwwwwnnnnnnWWW.....", ".b...WWWnnWWWWWWWWWWWWnnWWW.....", ".b....nnnnWWWWWWWWWWWWnnnn......", ".b....nnnnWWWWWWWWWWWWnnnn......",
+	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......",
+	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnWWWWnnnnnnWWWWnnn......",
+	"................................"]
+const REAPERPAL := {"S": "#6a7088", "W": "#f0ead8", "b": "#6b3f2a", "g": "#7dff6a", "k": "#14101f", "n": "#1b1424", "s": "#a8b0c0", "w": "#c8c0a8"}
+# Grim Reaper's scythe slash: a black crescent with a purple glow that sweeps half the floor
+const SLASH := ["..............................b.............................", "......................bbbbbbbbbbbbbbbbb.....................",
+	"...................bbbbbbbbbbbbbbbbbbbbbbb..................", "................bbbbbbbbaaaaaaaaaaaaabbbbbbbb...............",
+	"..............bbbbbbaaaaaaaaaaaaaaaaaaaaabbbbbb.............", "............bbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbb...........",
+	"...........bbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb..........", ".........bbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbb........",
+	"........bbbbaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaabbbb.......", ".......bbbbaaaaaaaaaaa.................aaaaaaaaaaabbbb......",
+	"......bbbbaaaaaaaaa.......................aaaaaaaaabbbb.....", ".....bbbbaaaaaaa.............................aaaaaaabbbb....",
+	".....bbbaaaaaa.................................aaaaaabbb....", "....bbbaaaaaa...................................aaaaaabbb...",
+	"...bbbaaaaa.......................................aaaaabbb..", "...bbbaaaa.........................................aaaabbb..",
+	"..bbbaaaa...........................................aaaabbb.", "..bbbaaa.............................................aaabbb.",
+	".bbbaaa...............................................aaabbb", ".bbbaa.................................................aabbb",
+	".bbbaa.................................................aabbb", ".bbba...................................................abbb",
+	".bba.....................................................abb", ".bba.....................................................abb"]
+const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
 # a gumball: the double candy
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
@@ -203,7 +339,17 @@ const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4]
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
 # boss kinds (bk): the first three are the old bosses, so their code keeps its numbers
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "PRIMAL BAT", "BLACK WIDOW"]
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "PRIMAL BAT", "BLACK WIDOW",
+	"SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL", "GRIM REAPER"]
+# The game is a loop of 50 waves: the graveyard (1-25, its bosses every 5th wave) then the HAUNTED MANSION (26-50,
+# bosses 5-9 above). After the GRIM REAPER it starts over in the graveyard with every enemy 1 HP tougher
+# (each PUMPKIN KING beaten adds 1).
+const LOOP_WAVES := 50
+const YARD_WAVES := 25
+# which graveyard boss each mansion boss moves and attacks like (her VAMPIRE LORD, WITCH QUEEN and PUMPKIN KING)
+const MBOSS_STYLE := [0, 1, 2, 1, 0]
+# mansion enemies (spiders, dolls and ghosts) all have the same health, before PUMPKIN KING kills add to it
+const MANSION_HP := 4
 # every 5th wave is a boss, in this order, then it loops (and the PUMPKIN KING makes enemies +1 HP)
 const BOSS_ORDER := [3, 4, 0, 1, 2]
 # health of each enemy (bat, witch, vampire, spider) before PUMPKIN KING kills add to it.
@@ -326,6 +472,7 @@ var sw_open := false       # PLAYER SETUP: the colour swatch is open
 var sw_r := 0
 var sw_c := 1
 var pal_cache := {}
+var mansion_tex: Texture2D
 
 # ---------------------------------------------------------------- setup
 func _ready() -> void:
@@ -871,6 +1018,14 @@ func draw_menu_scene() -> void:
 			draw_patch_figure(o)
 
 # ---------------------------------------------------------------- graveyard
+# level 2: the haunted mansion room (Sammie's mansion.png, 320x240)
+func draw_mansion(boss_here: bool) -> void:
+	if mansion_tex == null:
+		mansion_tex = load("res://mansion.png")
+	draw_texture(mansion_tex, Vector2.ZERO)
+	if boss_here:
+		R(0, 0, 320, 240, "#ff1133", 0.07)
+
 func draw_graveyard(boss_here: bool) -> void:
 	draw_sky(0.9)
 	ellipse(56, 46, 34, 34, "#fff6c8", 0.08)
@@ -916,7 +1071,7 @@ func say(s: String, dur: float) -> void:
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
-		"ld": 1, "md": 0, "mv": 0.0, "tl": null}
+		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -1004,7 +1159,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
-		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [],
+		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to CHARACTERS to buy one
@@ -1036,30 +1191,54 @@ func next_wave() -> void:
 	G.webs = []
 	G.sp_q = []
 	G.sp_more = 0
+	# where this wave is in the loop: 1-25 the graveyard, 26-50 the mansion
+	var c := stage_wave(w)
 	if w % 5 == 0:
 		G.bm = boss_mult()
 		var hp := int(round((72 + w * 8) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		b.bk = BOSS_ORDER[(w / 5 - 1) % BOSS_ORDER.size()]
+		b.bk = BOSS_ORDER[c / 5 - 1] if c <= YARD_WAVES else 5 + (c / 5 - 6)
 		b.t = 0.0
 		G.en.append(b)
 		say(BOSS_NAMES[b.bk], 2.2)
 		sfx("roar")
 		G.shake = 1.0
 		return
-	var rows := wave_rows(w)
+	if c > YARD_WAVES:
+		mansion_wave()
+		say("WAVE %d" % w, 1.4)
+		return
+	var rows := wave_rows(c)
 	for r in rows.size():
 		var ty: String = rows[r]
 		var xs: Array = SLOT_V4 if ty == "v4" else (SLOT_V5 if ty == "v5" else SLOT8)
 		for i in xs.size():
 			G.en.append(arrive(ty.left(1), xs[i], 44 + r * 22, i, r))
 	# spiders from wave 3; in the waves before the BLACK WIDOW each one killed is replaced, up to 6 in all
-	if w >= 3:
+	if c >= 3:
 		for spot in SPIDER_SPOTS.size():
 			G.en.append(new_spider(spot))
-		if ((w - 1) % 25) / 5 == 1:
+		if ((c - 1) % YARD_WAVES) / 5 == 1:
 			G.sp_more = 3
 	say("WAVE %d" % w, 1.4)
+
+# where wave w is in the 50-wave loop (1-50)
+func stage_wave(w: int) -> int:
+	return (w - 1) % LOOP_WAVES + 1
+
+# level 2 is the HAUNTED MANSION: waves 26-50 of each loop
+func in_mansion() -> bool:
+	return stage_wave(G.wave) > YARD_WAVES
+
+# a mansion wave (Sammie's): a ghost row, a doll row and three spider rows, 4 to a row in a checkerboard so
+# they're spread across the room, dropping in from above
+func mansion_wave() -> void:
+	var rows := ["v", "w", "b", "b", "b"]
+	for r in rows.size():
+		for q in 8:
+			if (q + r) % 2 == 1:
+				continue
+			G.en.append(new_enemy(rows[r], 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, MANSION_HP + G.hpup, "enter"))
 
 # The rows of a normal wave, top to bottom (b bats, w witches, v4 / v5 vampire rows of 4 / 5).
 # The first four waves ease in. After that the full lineup, and the waves just before a boss warn of it with
@@ -1405,6 +1584,7 @@ func kill(e: Dictionary, fist := false) -> void:
 				burst(o.x, o.y, "#8a66e0", 8)
 		for b in G.eb:
 			b.dead = true
+		G.slash = null
 		G.webs = []
 		G.sp_q = []
 		G.sp_more = 0
@@ -1588,6 +1768,9 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.n = 0
 			sfx("roar")
 			G.shake = 0.8
+		return
+	if e.bk >= 5:
+		mboss(e, dt)
 		return
 	var rage: bool = e.hp < e.max / 2.0
 	# what each boss shoots: blood, candy corn, sonic rings (PRIMAL BAT) or venom (BLACK WIDOW)
@@ -1797,6 +1980,155 @@ func strafe(e: Dictionary, bx: float, by: float, dt: float) -> void:
 		e.y = lerpf(e.sy, by, k)
 		if e.sb >= 1.3:
 			e.sf = 0
+
+# The HAUNTED MANSION's bosses (Sammie's): each moves and attacks like one of her graveyard bosses (MBOSS_STYLE:
+# 0 like her VAMPIRE LORD, 1 her WITCH QUEEN, 2 her PUMPKIN KING) with attacks of its own. mb: 0 SPIDER BEAST,
+# 1 THE TWINS, 2 BAT CAT, 3 PUPPET DOLL, 4 GRIM REAPER.
+func mboss(e: Dictionary, dt: float) -> void:
+	var mb: int = e.bk - 5
+	var rage: bool = e.hp < e.max / 2.0
+	var sty: int = MBOSS_STYLE[mb]
+	var K := "pbtn" if mb == 3 else ("r" if sty == 0 else "c")
+	if rage and not e.raged:
+		e.raged = true
+		say("ENRAGED!", 1.2)
+		sfx("roar")
+		G.shake = 0.6
+	e.ph += dt * (1.25 if rage else 1.0)
+	var bx := 0.0
+	var by := 0.0
+	if sty == 1:
+		bx = 160 + sin(e.ph * 1.0) * 112
+		by = 70 + sin(e.ph * 2.0) * 18
+	elif sty == 2:
+		bx = 160 + sin(e.ph * 1.1) * 108
+		by = 62 + absf(sin(e.ph * 2.4)) * 26
+	else:
+		bx = 160 + sin(e.ph * 0.7) * 112
+		by = 66 + sin(e.ph * 1.9) * 10
+	if e.dz > 0:
+		e.dz -= dt
+		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
+		if mb == 2:
+			# BAT CAT: swoops at the player it picked (e.vx), and swipes its claws along the floor
+			bx = lerpf(bx, e.vx, sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)))
+			if e.dz < 0.8 and e.pass == 0:
+				e.pass = 1
+				for side in [-1, 1]:
+					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.45})
+				sfx("dash")
+	e.x = bx
+	e.y = by
+	kicked(e)
+	if e.sp > 0:
+		e.sp -= dt
+		e.spt -= dt
+		if e.spt <= 0:
+			e.spt = 0.09
+			e.spa += 0.5
+			var a := sin(e.spa) * 1.15
+			if mb == 1:
+				# THE TWINS: two streams sweeping as mirror images, at half the rate so it stays fair
+				e.spt = 0.18
+				bshot(e, sin(a) * 95, cos(a) * 95, "tp", e.x - 14)
+				bshot(e, -sin(a) * 95, cos(a) * 95, "tb", e.x + 14)
+			else:
+				bshot(e, sin(a) * 95, cos(a) * 95, K)
+	if e.dz > 0 or e.sp > 0:
+		return
+	e.at -= dt
+	if e.at > 0:
+		return
+	e.at = 0.95 if rage else 1.5
+	e.n += 1
+	var m: int = e.n % 5
+	if m == 1 and mb == 1:
+		# THE TWINS: pink fans to the right, blue to the left, crossing in an X
+		for a in [0.1, 0.35, 0.6]:
+			bshot(e, sin(a) * 85, cos(a) * 85, "tp", e.x - 14)
+			bshot(e, -sin(a) * 85, cos(a) * 85, "tb", e.x + 14)
+		sfx("spread")
+	elif m == 1:
+		var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if sty == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
+		for a in angs:
+			bshot(e, sin(a) * 85, cos(a) * 85, K)
+		sfx("spread")
+	elif m == 2 and mb == 1:
+		# THE TWINS: each aims one bow from her own side
+		var alive_t := live()
+		if not alive_t.is_empty():
+			var tg: Dictionary = pick(alive_t)
+			for side in [-1, 1]:
+				var sx: float = e.x + side * 14
+				var dx: float = tg.x - sx
+				var dy: float = 209 - e.y
+				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+				bshot(e, dx / d * 105, dy / d * 105, "tp" if side < 0 else "tb", sx)
+		sfx("spread")
+	elif m == 2:
+		var alive_p := live()
+		if not alive_p.is_empty():
+			var tg: Dictionary = pick(alive_p)
+			# SPIDER BEAST throws sticky webs, PUPPET DOLL sewing needles
+			var K2 := "web" if mb == 0 else ("ndl" if mb == 3 else K)
+			for i in 3:
+				var dx: float = tg.x - e.x + (i - 1) * 26
+				var dy: float = 209 - e.y
+				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+				bshot(e, dx / d * 105, dy / d * 105, K2)
+		sfx("spread")
+	elif m == 3:
+		if sty == 1:
+			for i in 2:
+				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, HP.w + G.hpup, "fly")
+				w.dir = 1 if i == 1 else -1
+				w.fy = 120.0 + i * 24
+				G.en.append(w)
+			sfx("cackle")
+		else:
+			for i in (4 if rage else 3):
+				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + G.hpup, "dive"))
+			sfx("squeak")
+	elif m == 4:
+		if mb == 4:
+			# GRIM REAPER: warns on the half of the floor it's floating over, then slashes across it
+			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false}
+			e.at = 1.6
+			sfx("deny")
+		elif sty == 0:
+			e.dz = 1.6
+			sfx("dash")
+		elif mb == 1:
+			# THE TWINS: two diagonal lines of bows sweep down from the top corners and cross in an X
+			for i in 6:
+				bshot(e, 55, 95, "tp", 16 + i * 18, -8 - i * 30)
+				bshot(e, -55, 95, "tb", 304 - i * 18, -8 - i * 30)
+			sfx("ring")
+		elif sty == 1:
+			for i in 9:
+				bshot(e, 0, 95 + randf() * 30, "ndl" if mb == 3 else "c", 20 + randf() * 280, -8 - randf() * 40)
+			sfx("cackle")
+		elif mb == 2:
+			var alive_c := live()
+			e.vx = (pick(alive_c).x if not alive_c.is_empty() else 160.0)
+			e.pass = 0
+			e.dz = 1.6
+			sfx("squeak")
+	else:
+		e.sp = 1.4
+		e.spt = 0.0
+
+# a mansion doll's button, shot at one of the players
+func button(e: Dictionary) -> void:
+	var alive_p := live()
+	if alive_p.is_empty():
+		return
+	var tg: Dictionary = pick(alive_p)
+	var dx: float = tg.x - e.x
+	var dy: float = 209 - e.y
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	var sp: float = 85.0 + stage_wave(G.wave) * 3
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "btn", "ph": 0.0, "dead": false})
 
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form" and e.get("wait", 0.0) <= 0)
@@ -2137,12 +2469,15 @@ func enemy_attacks(dt: float, w: int) -> void:
 	var bats := formed("b")
 	var ws := formed("w")
 	var vs := formed("v")
-	var diving: int = G.en.filter(func(o): return o.ty == "b" and o.st == "dive").size()
-	var flying: int = G.en.filter(func(o): return o.ty == "w" and o.st == "fly").size()
+	var indoors := in_mansion()
+	var diving: int = G.en.filter(func(o): return o.ty == "b" and (o.st == "dive" or o.st == "drop")).size()
+	var flying: int = G.en.filter(func(o): return o.ty == "w" and (o.st == "fly" or o.st == "swoop")).size()
 	var pd := dt / (maxf(0.55, 2.1 - w * 0.14) * 8)
 	for e in bats:
 		if diving < ceili(bats.size() / 8.0) + 1 and randf() < pd:
-			e.st = "dive"
+			# a mansion spider drops straight down on its thread instead
+			e.st = "drop" if indoors else "dive"
+			e.n = 0
 			e.vx = 0.0
 			diving += 1
 			sfx("squeak")
@@ -2150,14 +2485,27 @@ func enemy_attacks(dt: float, w: int) -> void:
 	var pf := dt / (maxf(1.6, 3.6 - w * 0.2) * 8)
 	for e in ws:
 		if G.gap.c <= 0 and randf() < pc:
-			corn(e)
+			# a mansion doll shoots a button at you
+			if indoors:
+				button(e)
+			else:
+				corn(e)
 			G.gap.c = 0.12
 		if flying < ceili(ws.size() / 8.0) + 1 and randf() < pf:
-			e.st = "fly"
-			e.dir = 1 if e.x < 160 else -1
-			e.fy = 118 + randf() * 30
-			e.pass = 0
-			e.drop = 0.3
+			if indoors:
+				# a mansion doll swoops down in a U toward the players and back up on the other side
+				e.st = "swoop"
+				e.dir = 1 if e.x < 160 else -1
+				e.spa = e.x
+				e.fy = e.y
+				e.dz = (292.0 - e.x) if e.dir > 0 else (e.x - 28.0)
+				e.spt = 0.0
+			else:
+				e.st = "fly"
+				e.dir = 1 if e.x < 160 else -1
+				e.fy = 118 + randf() * 30
+				e.pass = 0
+				e.drop = 0.3
 			flying += 1
 			sfx("cackle")
 	var alive_p := live()
@@ -2168,7 +2516,13 @@ func enemy_attacks(dt: float, w: int) -> void:
 			var dx: float = tg.x - e.x
 			var dy: float = 209 - e.y
 			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
+			if indoors:
+				# a mansion ghost: three spectral tears in a small spread
+				var a := atan2(dy, dx)
+				for da in [-0.25, 0.0, 0.25]:
+					G.eb.append({"x": e.x, "y": e.y + 8, "vx": cos(a + da) * 62, "vy": sin(a + da) * 62, "k": "t", "ph": 0.0, "dead": false})
+			else:
+				G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 			G.gap.v = 0.12
 
 # LUCKY COIN's knock back: each shove slides the enemy over at SHOVE_SPEED px a second rather than jumping.
@@ -2456,7 +2810,10 @@ func update(dt: float) -> void:
 			continue
 		var I := player_input(p)
 		var ox: float = p.x
-		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * lvl(p, "move")) * dt
+		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a SPIDER BEAST web
+		if p.web > 0:
+			p.web -= dt
+		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * lvl(p, "move")) * stuck * dt
 		if p.sh > 0:
 			p.sh -= dt
 		p.x = clampf(p.x, 14, 306)
@@ -2586,6 +2943,30 @@ func update(dt: float) -> void:
 				e.y = -14
 				e.x = tx
 				e.st = "return"
+		elif e.st == "drop":
+			# mansion spider: straight down on its thread, a short hang at the players' height, then back up
+			if e.n == 0:
+				e.y += (120 + stage_wave(w) * 4) * dt
+				if e.y >= 200:
+					e.y = 200
+					e.n = 1
+					e.spt = 0.5
+			elif e.n == 1:
+				e.spt -= dt
+				if e.spt <= 0:
+					e.n = 2
+			else:
+				e.y -= 80 * dt
+				if e.y <= ty + 4:
+					e.st = "return"
+		elif e.st == "swoop":
+			# mansion doll: a U-shaped swoop down toward the players and back up on the other side
+			e.spt += dt
+			var k := minf(1.0, e.spt / 1.6)
+			e.x = e.spa + e.dir * e.dz * k
+			e.y = e.fy + (196 - e.fy) * sin(PI * k)
+			if k >= 1.0:
+				e.st = "return"
 		else:
 			var dx: float = tx - e.x
 			var dy: float = ty - e.y
@@ -2622,7 +3003,26 @@ func update(dt: float) -> void:
 			G.sp_q.erase(q)
 			G.en.append(new_spider(q.spot))
 
+	# the GRIM REAPER's slash: a warning on half the floor, then the slash across it
+	if G.slash != null:
+		var sl: Dictionary = G.slash
+		sl.t += dt
+		if sl.t >= 0.75 and not sl.hit:
+			sl.hit = true
+			sfx("dash")
+			G.shake = 0.4
+		if sl.t >= 0.75 and sl.t <= 1.05:
+			for p in live():
+				if p.inv <= 0 and (p.x > 160 if sl.side > 0 else p.x < 160):
+					hurt(p)
+		if sl.t > 1.2:
+			G.slash = null
+
 	for b in G.eb:
+		if b.k == "claw":
+			b.life -= dt
+			if b.life <= 0:
+				b.dead = true
 		if b.k == "c" or b.k == "s" or b.k == "sm":
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
 		if b.k == "g":
@@ -2714,6 +3114,11 @@ func update(dt: float) -> void:
 		for b in G.eb:
 			if not b.dead and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
 				b.dead = true
+				# SPIDER BEAST's web sticks to you and slows you down for a moment instead of hurting
+				if b.k == "web":
+					p.web = 2.0
+					sfx("deny")
+					continue
 				hurt(p)
 				was_hit = true
 				break
@@ -2722,7 +3127,7 @@ func update(dt: float) -> void:
 		for e in G.en:
 			if e.dead:
 				continue
-			if e.ty != "B" and e.st == "dive" and absf(e.x - p.x) < 14 and absf(e.y - 209) < 13:
+			if e.ty != "B" and (e.st == "dive" or e.st == "drop" or e.st == "swoop") and absf(e.x - p.x) < 14 and absf(e.y - 209) < 13:
 				kill(e)
 				hurt(p)
 				break
@@ -2797,9 +3202,13 @@ func draw_game() -> void:
 	for e in G.en:
 		if e.ty == "B":
 			B = e
-	draw_graveyard(B != null)
+	var indoors := in_mansion()
+	if indoors:
+		draw_mansion(B != null)
+	else:
+		draw_graveyard(B != null)
 	for i in stars.size():
-		if i % 3 == 0:
+		if i % 3 == 0 and not indoors:
 			var s: Array = stars[i]
 			R(s[0], s[1], 1, 1, "#ffffff", 0.5 + 0.5 * sin(gt * 2 + s[2]))
 	for g in G.gifts:
@@ -2832,7 +3241,11 @@ func draw_game() -> void:
 			var by := int(round(e.y)) - 26
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
-			if e.bk == 2:
+			if e.bk >= 5:
+				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS, REAPER][e.bk - 5]
+				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL, REAPERPAL][e.bk - 5]
+				spr(brows, bpal, int(round(e.x)) - brows[0].length(), int(round(e.y)) - brows.size(), 2, fl)
+			elif e.bk == 2:
 				# candle-light flicker behind the carved face
 				var fk := (sin(gt * 9 + 7) + sin(gt * 5.3 + 1)) * 0.5
 				var moldy: bool = e.p2 or e.laugh > 0
@@ -2855,6 +3268,18 @@ func draw_game() -> void:
 					spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
 					spr(CROWN, EPAL, bx + 20, by - 8, 4, fl)
+		elif indoors and e.ty != "s":
+			# in the mansion the bats, witches and vampires are spiders, dolls and ghosts
+			var ex := int(round(e.x))
+			var ey := int(round(e.y))
+			if e.ty == "b":
+				if e.st == "dive" or e.st == "drop":
+					R(ex, 0, 1, maxi(0, ey - 10), "#c9b8ee", 0.6)   # dropping down on its thread
+				spr(SPIDER2, L2PAL, ex - 13, ey - 11, 2, fl)
+			elif e.ty == "w":
+				spr(DOLL2, L2PAL, ex - 13, ey - 13, 2, fl)
+			else:
+				spr(GHOST2, L2PAL, ex - 12, ey - 11, 2, fl)
 		elif e.ty == "b" or e.get("bat", false):
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
 			if e.ty == "v":
@@ -2884,7 +3309,13 @@ func draw_game() -> void:
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
-		if d.k == "b":
+		# in the mansion the brass candle replaces the treat bucket and the candelabra the power-up pumpkin
+		if d.k == "b" and indoors:
+			spr(CANDLE, CANDLEPAL, x - 10, y - 11, 2)
+		elif d.k == "p" and indoors:
+			ellipse(x, y, 11, 11, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
+			spr(CANDELABRA, CANDLEPAL, x - 10, y - 11, 2)
+		elif d.k == "b":
 			spr(BUCKET, BUCKETPAL, x - 10, y - 9, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
@@ -2895,13 +3326,37 @@ func draw_game() -> void:
 			R(x + 9, y - 9, 1, 1, "#ffffff")
 			R(x - 10, y + 3, 1, 1, "#ffffff")
 	for k in G.pks:
+		if indoors:
+			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
+			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
+			continue
 		pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
 		if k.flash > 0:
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "c":
+		if b.k == "pbtn":
+			spr(BIGBUTTON, BIGBUTTONPAL, x - 7, y - 7, 2)
+		elif b.k == "ndl":
+			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
+		elif b.k == "claw":
+			spr(CLAW if b.vx > 0 else CLAWL, CLAWPAL, x - 10, y - 6, 2)
+		elif b.k == "tp" or b.k == "tb":
+			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
+		elif b.k == "web":
+			spr(WEBSHOT, WEBSHOTPAL, x - 9, y - 7, 2)
+		elif b.k == "btn":
+			R(x - 1, y - 2, 3, 5, "#ffd92e")
+			R(x - 2, y - 1, 5, 3, "#ffd92e")
+			R(x - 1, y, 1, 1, "#8a5a10")
+			R(x + 1, y, 1, 1, "#8a5a10")
+		elif b.k == "t":
+			R(x - 2, y - 2, 5, 5, "#7df2ff", 0.25)
+			R(x - 1, y - 1, 3, 3, "#7df2ff")
+			R(x, y - 3, 1, 2, "#7df2ff")
+			R(x, y, 1, 1, "#ffffff")
+		elif b.k == "c":
 			R(x - 2, y - 3, 5, 2, "#ffd92e")
 			R(x - 1, y - 1, 3, 2, "#ff8a1f")
 			R(x, y + 1, 1, 2, "#fffaf0")
@@ -2926,6 +3381,16 @@ func draw_game() -> void:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")
 			R(x - 1, y, 1, 1, "#ff8fa0")
+	# the GRIM REAPER's slash: the half of the floor it's over flashes red, then the scythe sweeps across it
+	if G.slash != null:
+		var sl: Dictionary = G.slash
+		var hx := 160 if sl.side > 0 else 0
+		if sl.t < 0.75:
+			R(hx, 192, 160, 32, "#ff2244", 0.12 + 0.10 * (int(floor(sl.t * 10)) % 2))
+		elif sl.t <= 1.05:
+			var sk: float = (sl.t - 0.75) / 0.3
+			var cx: float = 160 + sl.side * (10 + 130 * sk)
+			spr(SLASH, SLASHPAL, int(round(cx)) - SLASH[0].length(), 224 - SLASH.size() * 2, 2)
 	# RIBBED SHOT: a faint white rib arcing between the side shots as they leave
 	for a in G.arcs:
 		var al: float = 1.0 - (a.y0 - a.a.y) / 24.0
@@ -3007,6 +3472,9 @@ func draw_game() -> void:
 			draw_tail(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.get("tl"))
 		elif p.get("tl") != null:
 			draw_swoop(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.tl)
+		# stuck in a SPIDER BEAST web
+		if p.web > 0:
+			spr(WEBSHOT, WEBSHOTPAL, px - 9, 203 + bob, 2)
 		var fr := int(floor(gt * 4 + i)) % 2
 		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
 		spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
