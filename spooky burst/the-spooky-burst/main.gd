@@ -59,6 +59,9 @@ const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "
 	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420", "D": "#3a2252", "N": "#4a2f5a",
 	"H": "#e0213f", "L": "#7a5a8e", "Q": "#2a1830"}
 const WEBPAL := {"w": "#e6e0f5"}
+# the PRIMAL BAT's sound wave shot: three little arcs
+const SOUND := ["..b...b..", "...bbb...", ".a.....a.", "..aaaaa..", "c.......c", ".ccccccc."]
+const SOUNDPAL := {"a": "#c77dff", "b": "#e3b8ff", "c": "#8a4fd6"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 # the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
@@ -785,7 +788,7 @@ func burst(x: float, y: float, col: String, n: int) -> void:
 func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st: String) -> Dictionary:
 	return {"ty": ty, "hx": hx, "hy": hy, "x": x, "y": y, "hp": hp, "max": hp, "st": st, "t": randf() * 6.0, "vx": 0.0, "flash": 0.0,
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
-		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false}
+		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "vol": []}
 
 func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
@@ -840,19 +843,18 @@ func next_wave() -> void:
 		var xs: Array = SLOT_V4 if ty == "v4" else (SLOT_V5 if ty == "v5" else SLOT8)
 		for i in xs.size():
 			G.en.append(arrive(ty.left(1), xs[i], 44 + r * 22, i, r))
-	# spiders from wave 3; after the first boss each one killed is replaced, up to 6 in all
+	# spiders from wave 3; in the waves before the BLACK WIDOW each one killed is replaced, up to 6 in all
 	if w >= 3:
 		for spot in SPIDER_SPOTS.size():
 			G.en.append(new_spider(spot))
-		if (w - 1) % 25 >= 5:
+		if ((w - 1) % 25) / 5 == 1:
 			G.sp_more = 3
 	say("WAVE %d" % w, 1.4)
 
 # The rows of a normal wave, top to bottom (b bats, w witches, v4 / v5 vampire rows of 4 / 5).
-# The first four waves ease in. After that each boss brings its own kind into the waves before the next
-# boss: after the PRIMAL BAT (and on every later loop before him) the full lineup, after the BLACK WIDOW the top
-# bat row turns to vampires, after the VAMPIRE LORD the next one to witches, after the WITCH QUEEN it's
-# witches and vampires with one bat row. After the PUMPKIN KING it loops.
+# The first four waves ease in. After that the full lineup, and the waves just before a boss warn of it with
+# an extra row of its kind: before the VAMPIRE LORD the top bat row is vampires, before the WITCH QUEEN it's
+# witches, and before the PUMPKIN KING it's witches and vampires with one bat row. After him it loops.
 func wave_rows(w: int) -> Array:
 	if w <= 4:
 		return [["b", "b"], ["w", "b", "b"], ["w", "b", "b"], ["v4", "w", "b", "b"]][w - 1]
@@ -860,7 +862,7 @@ func wave_rows(w: int) -> Array:
 		2:
 			return ["v4", "w", "v5", "b", "b"]
 		3:
-			return ["v4", "w", "v5", "w", "b"]
+			return ["v4", "w", "w", "b", "b"]
 		4:
 			return ["w", "v4", "w", "v5", "b"]
 	return ["v4", "w", "b", "b", "b"]
@@ -1349,8 +1351,12 @@ func boss(e: Dictionary, dt: float) -> void:
 	if e.dz > 0:
 		e.dz -= dt
 		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
-	e.x = bx
-	e.y = by
+	# the PRIMAL BAT's strafe run takes over his flying until he's settled back in
+	if e.get("sf", 0) > 0:
+		strafe(e, bx, by, dt)
+	else:
+		e.x = bx
+		e.y = by
 	if e.sp > 0:
 		e.sp -= dt
 		e.spt -= dt
@@ -1359,14 +1365,21 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.spa += 0.5
 			var a := sin(e.spa) * 1.15
 			bshot(e, sin(a) * 95, cos(a) * 95, K)
-	if e.dz > 0 or e.sp > 0:
+			e.vol.append(G.eb[-1])
+	if e.dz > 0 or e.sp > 0 or e.get("sf", 0) > 0:
+		return
+	# The next attack waits until the last one's shots have got past the players (all but the aimed
+	# 3-shot, which you just step away from), then for a short random breather. So there's always a gap.
+	e.vol = e.get("vol", []).filter(func(b): return not b.dead and b.y < 222)
+	if not e.vol.is_empty():
 		return
 	e.at -= dt
 	if e.at > 0:
 		return
-	e.at = 0.95 if rage else 1.5
+	e.at = randf_range(0.4, 0.8) if rage else randf_range(0.6, 1.2)
 	e.n += 1
 	var m: int = e.n % 5
+	var before: int = G.eb.size()
 	if m == 1:
 		if e.bk == 4:
 			for a in [-0.6, -0.3, 0.0, 0.3, 0.6]:
@@ -1375,6 +1388,11 @@ func boss(e: Dictionary, dt: float) -> void:
 			var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 or e.bk == 3 else [-0.6, -0.3, 0.0, 0.3, 0.6]
 			for a in angs:
 				bshot(e, sin(a) * 85, cos(a) * 85, K)
+		sfx("spread")
+	elif m == 2 and e.bk == 3:
+		# the PRIMAL BAT's 3-shot isn't aimed: three sound waves straight down, lightly spread
+		for a in [-0.12, 0.0, 0.12]:
+			bshot(e, sin(a) * 105, cos(a) * 105, "p")
 		sfx("spread")
 	elif m == 2 and e.bk == 4:
 		for i in 3:
@@ -1430,8 +1448,15 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.dz = 1.6
 			sfx("dash")
 		elif e.bk == 1:
-			for i in 9:
-				bshot(e, 0, 95 + randf() * 30, "c", 20 + randf() * 280, -8 - randf() * 40)
+			# the WITCH QUEEN's candy corn rain always leaves one clear lane about 50 px wide somewhere
+			var lane := randf_range(40, 280)
+			var n := 0
+			while n < 8:
+				var x := randf_range(20, 300)
+				if absf(x - lane) < 26:
+					continue
+				bshot(e, 0, 95 + randf() * 30, "c", x, -8 - randf() * 40)
+				n += 1
 			sfx("cackle")
 		else:
 			for i in 12:
@@ -1443,14 +1468,53 @@ func boss(e: Dictionary, dt: float) -> void:
 		web_wall(e.x)
 		sfx("move")
 	elif e.bk == 3:
-		# the PRIMAL BAT screeches a slow ring of sound
-		for i in 10:
-			var a := i / 10.0 * TAU
-			bshot(e, cos(a) * 70, sin(a) * 70, "p")
-		sfx("ring")
+		# the PRIMAL BAT strafes: off the nearer side, then across the whole screen from the other
+		e.sf = 1
+		e.sd = -1.0 if e.x < 160 else 1.0
+		sfx("dash")
 	else:
 		e.sp = 1.4
 		e.spt = 0.0
+	# every attack but the aimed 3-shot is waited out before the next one
+	e.vol = [] if m == 2 else G.eb.slice(before)
+
+# The PRIMAL BAT's strafe run: off the nearer side, across the whole screen from the other side at about his
+# usual height (a touch higher or lower) firing the odd slow sound wave at a player, off the far side,
+# then back in, settling into his usual flying. (bx, by is where his usual flying has got to.)
+func strafe(e: Dictionary, bx: float, by: float, dt: float) -> void:
+	if e.sf == 1:
+		e.x += e.sd * 220 * dt
+		e.y += (58 - e.y) * minf(1.0, 3 * dt)
+		if e.x < -50 or e.x > 370:
+			e.sf = 2
+			e.x = 370.0 if e.sd < 0 else -50.0
+			e.sd = -e.sd
+			e.sy = 58 + randf_range(-8, 8)
+			e.sft = 0.3
+	elif e.sf == 2:
+		e.x += e.sd * 150 * dt
+		e.y = e.sy
+		e.sft -= dt
+		var alive_p := live()
+		if e.sft <= 0 and e.x > 10 and e.x < 310 and not alive_p.is_empty():
+			var tg: Dictionary = pick(alive_p)
+			var dx: float = tg.x - e.x
+			var dy: float = 209 - e.y
+			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+			bshot(e, dx / d * 60, dy / d * 60, "p", e.x, e.y + 14)
+			e.vol.append(G.eb[-1])
+			e.sft = 0.55
+		if (e.sd > 0 and e.x > 370) or (e.sd < 0 and e.x < -50):
+			e.sf = 3
+			e.sb = 0.0
+			e.sx0 = e.x
+	else:
+		e.sb += dt
+		var k := smoothstep(0.0, 1.0, e.sb / 1.3)
+		e.x = lerpf(e.sx0, bx, k)
+		e.y = lerpf(e.sy, by, k)
+		if e.sb >= 1.3:
+			e.sf = 0
 
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form" and e.get("wait", 0.0) <= 0)
@@ -2127,9 +2191,7 @@ func draw_game() -> void:
 			R(x, y - 3, 1, 2, "#5fd63a")
 			R(x - 1, y - 1, 1, 1, "#c8ff9a")
 		elif b.k == "p":
-			R(x - 2, y - 1, 5, 3, "#c77dff", 0.8)
-			R(x - 1, y - 2, 3, 5, "#c77dff", 0.8)
-			R(x, y, 1, 1, "#f3dcff")
+			spr(SOUND, SOUNDPAL, x - 4, y - 3, 1)
 		else:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")
