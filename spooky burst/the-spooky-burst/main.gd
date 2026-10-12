@@ -356,7 +356,7 @@ func _build_chars() -> void:
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
 			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
 			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
-			"pow": [["ribs", "RIBBED: FOR THEIR PAIN", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
+			"pow": [["ribs", "RIBBED SHOT", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
 	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
@@ -1506,7 +1506,8 @@ func boss(e: Dictionary, dt: float) -> void:
 		strafe(e, bx, by, dt)
 	else:
 		e.x = bx
-		e.y = maxf(minf(by, 44.0), by - e.get("kick", 0.0))
+		e.y = by
+		kicked(e)
 	if e.sp > 0:
 		e.sp -= dt
 		e.spt -= dt
@@ -1714,7 +1715,7 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 			var s := {"x": sx, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col,
 				"pc": 3 if p.eq.has("spectral") or p.eq.has("punch") else 1, "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
 				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p),
-				"sp": sp, "last": null, "dead": false, "h": helper, "gs": gs, "ph": PI * i}
+				"sp": sp, "last": null, "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y}
 			G.shots.append(s)
 			row.append(s)
 		made.append(row)
@@ -1723,7 +1724,7 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 		for i in made[0].size():
 			made[0][i].mate = made[1][i]
 			made[1][i].mate = made[0][i]
-	# RIBBED: a faint white rib arcs between the two side shots as they leave, fading by 24 px up
+	# RIBBED SHOT: a faint white rib arcs between the two side shots as they leave, fading by 24 px up
 	if p.eq.has("ribs"):
 		var row: Array = made[0]
 		G.arcs.append({"a": row[row.size() - 2], "b": made[made.size() - 1][row.size() - 1], "y0": y})
@@ -1802,10 +1803,10 @@ func got_candy(k: Dictionary, p: Dictionary) -> void:
 	sfx("candy")
 
 # WIGGLE TAIL: falling candy or a drop that comes within one character width (24 px) beyond the Cat's body,
-# as high as his head, is collected straight away, and his tail flicks out toward where it was (0.12 s) and back
-# (0.18 s). The flick is only for show: a cat's tail can't hold things.
-const TAIL_OUT := 0.12
-const TAIL_BACK := 0.18
+# as high as his head, is collected straight away, and his tail swipes all the way out to where it was (0.25 s)
+# and back (0.25 s). The swipe is only for show: a cat's tail can't hold things.
+const TAIL_OUT := 0.25
+const TAIL_BACK := 0.25
 func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
 		if p.eq.has("tail") and absf(o.x - p.x) < 36 and o.y > 188 and o.y < 224:
@@ -1877,13 +1878,29 @@ func enemy_attacks(dt: float, w: int) -> void:
 			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 			G.gap.v = 0.12
 
-# LUCKY COIN's knock back: anything held to a spot (formation, a hanging spider, a boss) is nudged up and drifts
-# back over about half a second, up to 24 px; anything flying about is just moved up. Never above the top row.
-func shove(e: Dictionary, d: float) -> void:
+# LUCKY COIN's knock back: anything held to a spot (formation, a hanging spider, a boss) gets an offset from it
+# that adds up with every shove and drifts back at KICK_BACK px a second, slower than steady hits push it, so
+# keeping at one enemy drives it away. Anything flying about is just moved and carries on. Never off screen.
+const KICK_BACK := 15.0
+func shove(e: Dictionary, d: Vector2) -> void:
 	if e.ty == "B" or e.st == "form":
-		e.kick = minf(e.get("kick", 0.0) + d, 24.0)
+		e.kick = e.get("kick", Vector2.ZERO) + d
 	else:
-		e.y = maxf(44.0, e.y - d)
+		e.x += d.x
+		e.y += d.y
+		on_screen(e)
+
+# where a shoved enemy held to a spot actually is: its spot plus its knock back, kept on screen
+func kicked(e: Dictionary) -> void:
+	var k: Vector2 = e.get("kick", Vector2.ZERO)
+	if k != Vector2.ZERO:
+		e.x += k.x
+		e.y += k.y
+		on_screen(e)
+
+func on_screen(e: Dictionary) -> void:
+	e.x = clampf(e.x, 10.0, 310.0)
+	e.y = maxf(e.y, 10.0)
 
 func form_sway() -> float:
 	return sin(G.t * 0.8) * 22
@@ -1911,7 +1928,8 @@ func spider(e: Dictionary, dt: float) -> void:
 			e.st = "form"
 	e.x = a[0] + sin(e.t * 1.3) * 3
 	if e.st == "form":
-		e.y = maxf(minf(a[1], 44.0), a[1] - e.get("kick", 0.0))
+		e.y = a[1]
+		kicked(e)
 	e.silk -= dt
 	if e.st != "form":
 		return
@@ -2126,7 +2144,7 @@ func update(dt: float) -> void:
 			continue
 		e.t += dt
 		e.flash -= dt
-		e.kick = maxf(0.0, e.get("kick", 0.0) - 48 * dt)
+		e.kick = e.get("kick", Vector2.ZERO).move_toward(Vector2.ZERO, KICK_BACK * dt)
 		if e.ty == "B":
 			boss(e, dt)
 			continue
@@ -2141,7 +2159,7 @@ func update(dt: float) -> void:
 			if e.ty == "w":
 				e.x += sin(e.t * 1.7) * 10
 				e.y += sin(e.t * 3.4) * 5
-			e.y = maxf(minf(e.y, 44.0), e.y - e.kick)
+			kicked(e)
 		elif e.st == "fly":
 			# witches face the way they're flying, and keep that facing in formation
 			e.face = e.dir
@@ -2242,9 +2260,9 @@ func update(dt: float) -> void:
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and absf(s.y - e.y) < hh:
 				e.hp -= s.dmg
-				# LUCKY COIN: half the time the hit shoves the enemy up 4 px per point of damage (up to 24)
+				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 8 px per point of damage
 				if s.coin and randf() < 0.5:
-					shove(e, minf(4.0 * s.dmg, 24.0))
+					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 8.0 * s.dmg)
 				s.pc -= 1
 				s.last = e
 				# SPECTRAL SHOT: each enemy it goes through halves it, and it stops under 1 damage or after 3
@@ -2466,7 +2484,7 @@ func draw_game() -> void:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")
 			R(x - 1, y, 1, 1, "#ff8fa0")
-	# RIBBED: a faint white rib arcing between the side shots as they leave
+	# RIBBED SHOT: a faint white rib arcing between the side shots as they leave
 	for a in G.arcs:
 		var al: float = 1.0 - (a.y0 - a.a.y) / 24.0
 		for i in 13:
@@ -2563,12 +2581,12 @@ func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
 	var sw := int(round(sin(gt * 3) * 1))
 	var pts := [Vector2(px + 8, by + 20), Vector2(px + 14, by + 15), Vector2(px + 16, by + 6), Vector2(px + 14, by - 2),
 		Vector2(px + 8 + sw, by - 7), Vector2(px + sw, by - 9), Vector2(px - 6 + sw, by - 8), Vector2(px - 9 + sw, by - 4)]
-	# WIGGLE TAIL with NINE LIVES: the curl leans over toward what he collected, keeping its shape, and back
+	# WIGGLE TAIL with NINE LIVES: the curl leans all the way over to what he collected, keeping its shape, and back
 	if tl != null:
 		var k := tail_reach(tl)
 		var dx: float = clampf(tl.tx - px, -36.0, 36.0)
 		for j in range(1, pts.size()):
-			pts[j].x += dx * 0.5 * k * clampf((pts[0].y - pts[j].y) / 30.0, 0.0, 1.0)
+			pts[j].x += dx * k * clampf((pts[0].y - pts[j].y) / 30.0, 0.0, 1.0)
 			pts[j].y += sin(gt * 20 + j) * k
 	smooth_line(pts, col, 4)
 
