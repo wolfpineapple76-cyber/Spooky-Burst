@@ -206,6 +206,10 @@ const DOLLPAL := {"H": "#e0482a", "I": "#a8301c", "P": "#c94f8a", "S": "#f3e2d4"
 # Spider Beast's web shot: sticks to a player and slows them down for a moment
 const WEBSHOT := ["g...g...g", ".g..g..g.", "..ggGgg..", "gggG.Gggg", "..ggGgg..", ".g..g..g.", "g...g...g"]
 const WEBPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
+# The Twins' shots: bows like their hair bows, pink from the left twin and blue from the right
+const BOWSHOT := ["a...a", "aa.aa", "aacaa", "aa.aa", "a...a"]
+const BOWPINK := {"a": "#ff5c8a", "c": "#fff0f5"}
+const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1355,7 +1359,13 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.spt = 0.09
 			e.spa += 0.5
 			var a := sin(e.spa) * 1.15
-			bshot(e, sin(a) * 95, cos(a) * 95, K)
+			if e.bk == 4:
+				# The Twins: two streams sweeping as mirror images, at half the rate so it stays fair
+				e.spt = 0.18
+				bshot(e, sin(a) * 95, cos(a) * 95, "tp", e.x - 14)
+				bshot(e, -sin(a) * 95, cos(a) * 95, "tb", e.x + 14)
+			else:
+				bshot(e, sin(a) * 95, cos(a) * 95, K)
 	if e.dz > 0 or e.sp > 0:
 		return
 	e.at -= dt
@@ -1364,10 +1374,28 @@ func boss(e: Dictionary, dt: float) -> void:
 	e.at = (0.95 if rage else 1.5) / fast
 	e.n += 1
 	var m: int = e.n % 5
-	if m == 1:
+	if m == 1 and e.bk == 4:
+		# The Twins: pink fans to the right, blue to the left, crossing in an X
+		for a in [0.1, 0.35, 0.6]:
+			bshot(e, sin(a) * 85, cos(a) * 85, "tp", e.x - 14)
+			bshot(e, -sin(a) * 85, cos(a) * 85, "tb", e.x + 14)
+		sfx("spread")
+	elif m == 1:
 		var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if sty == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
 		for a in angs:
 			bshot(e, sin(a) * 85, cos(a) * 85, K)
+		sfx("spread")
+	elif m == 2 and e.bk == 4:
+		# The Twins: each aims one bow from her own side
+		var alive_t := live()
+		if not alive_t.is_empty():
+			var tg: Dictionary = pick(alive_t)
+			for side in [-1, 1]:
+				var sx: float = e.x + side * 14
+				var dx: float = tg.x - sx
+				var dy: float = 209 - e.y
+				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+				bshot(e, dx / d * 105, dy / d * 105, "tp" if side < 0 else "tb", sx)
 		sfx("spread")
 	elif m == 2:
 		var alive_p := live()
@@ -1396,6 +1424,12 @@ func boss(e: Dictionary, dt: float) -> void:
 		if sty == 0:
 			e.dz = 1.6
 			sfx("dash")
+		elif e.bk == 4:
+			# The Twins: two diagonal lines of bows sweep down from the top corners and cross in an X
+			for i in 6:
+				bshot(e, 55, 95, "tp", 16 + i * 18, -8 - i * 30)
+				bshot(e, -55, 95, "tb", 304 - i * 18, -8 - i * 30)
+			sfx("ring")
 		elif sty == 1:
 			for i in 9:
 				bshot(e, 0, 95 + randf() * 30, "c", 20 + randf() * 280, -8 - randf() * 40)
@@ -1904,7 +1938,9 @@ func draw_game() -> void:
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "web":
+		if b.k == "tp" or b.k == "tb":
+			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
+		elif b.k == "web":
 			spr(WEBSHOT, WEBPAL, x - 9, y - 7, 2)
 		elif b.k == "btn":
 			R(x - 1, y - 2, 3, 5, "#ffd92e")
