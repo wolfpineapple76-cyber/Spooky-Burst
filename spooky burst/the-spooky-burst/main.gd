@@ -164,7 +164,7 @@ const GHOST2 := ["...zzzzzz...", "..zzzzzzzz..", ".zzrzzzzrzz.", ".zzrzzzzrzz.",
 	"zZzzZzzZzzZz", "z.zZ.zZ.zZ.z", "...z..z..z.."]
 const L2PAL := {"H": "#e0482a", "I": "#a8301c", "K": "#5a4a8a", "S": "#f3e2d4", "U": "#33519c", "Z": "#a8c8e8dd", "a": "#ffb3c9", "d": "#4a6fc4",
 	"e": "#ff5c5c", "k": "#14101f", "l": "#7a6aa8", "m": "#b8a890", "p": "#ff7fb5", "r": "#ff3355", "u": "#f0f0f0", "y": "#ffd92e", "z": "#e8f6ffdd"}
-# mansion bosses: the bat cat in a witch hat (wave 40) and the giant puppet doll (wave 45)
+# mansion bosses: the bat cat in a witch hat (wave 10 of the mansion) and the giant puppet doll (wave 15)
 const CATBOSS := ["..............................................", ".....................vvv......................",
 	".....................vvv......................", "...................vvvvvvvv...................",
 	"...................vvvvvvvv...................", ".Q..............KkKvvvvvvvvKkK..............Q.",
@@ -349,7 +349,13 @@ const YARD_WAVES := 25
 # which graveyard boss each mansion boss moves and attacks like (her VAMPIRE LORD, WITCH QUEEN and PUMPKIN KING)
 const MBOSS_STYLE := [0, 1, 2, 1, 0]
 # mansion enemies (spiders, dolls and ghosts) all have the same health, before PUMPKIN KING kills add to it
-const MANSION_HP := 4
+# mansion enemy HP: dolls and ghosts, and the spiders are the grunts (shoot one out of your lane in 2 orbs);
+# "k" is the mansion bat, BAT CAT's kind. Each stage beaten adds 1 to all of them.
+const MHP := {"v": 4, "w": 4, "b": 3, "k": 2}
+# the mansion's bosses in order: SPIDER BEAST, BAT CAT, PUPPET DOLL, THE TWINS, GRIM REAPER (bk 5-9)
+const MBOSS_ORDER := [5, 7, 8, 6, 9]
+# the mansion bat: the graveyard bat in the PRIMAL BAT's colours, a small version of him
+const KBATPAL := {"X": "#5a4a8a", "e": "#ffd92e"}
 # every 5th wave is a boss, in this order, then it loops (and the PUMPKIN KING makes enemies +1 HP)
 const BOSS_ORDER := [3, 4, 0, 1, 2]
 # health of each enemy (bat, witch, vampire, spider) before PUMPKIN KING kills add to it.
@@ -1164,7 +1170,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "after": "", "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
-		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
+		"hpup": 0, "settle": 0.0, "cad": 0.0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to CHARACTERS to buy one
@@ -1187,6 +1193,9 @@ func next_wave() -> void:
 	var w: int = G.wave
 	G.pk_t = 4.0 + randf() * 4.0
 	G.pk_done = false
+	# the formation settles before the first attack, then the volleys start
+	G.settle = 5.0
+	G.cad = 0.0
 	# about 1 wave in 6 a bonus pumpkin also flies across above all the enemies
 	G.bonus_t = 6.0 + randf() * 6.0 if randf() < 1.0 / 6.0 else -1.0
 	if w > 1 and w % 2 == 1:
@@ -1202,7 +1211,7 @@ func next_wave() -> void:
 		G.bm = boss_mult()
 		var hp := int(round((72 + w * 8) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		b.bk = BOSS_ORDER[c / 5 - 1] if c <= YARD_WAVES else 5 + (c / 5 - 6)
+		b.bk = BOSS_ORDER[c / 5 - 1] if c <= YARD_WAVES else MBOSS_ORDER[c / 5 - 6]
 		b.t = 0.0
 		G.en.append(b)
 		say(BOSS_NAMES[b.bk], 2.2)
@@ -1214,6 +1223,9 @@ func next_wave() -> void:
 		say("WAVE %d" % shown_wave(w), 1.4)
 		return
 	var rows := wave_rows(c)
+	# the wave right after a boss is a breather: one row fewer
+	if c > 5 and (c - 1) % 5 == 0:
+		rows = rows.slice(0, rows.size() - 1)
 	for r in rows.size():
 		var ty: String = rows[r]
 		var xs: Array = SLOT_V4 if ty == "v4" else (SLOT_V5 if ty == "v5" else SLOT8)
@@ -1231,6 +1243,28 @@ func next_wave() -> void:
 func shown_wave(w: int) -> int:
 	return (stage_wave(w) - 1) % YARD_WAVES + 1
 
+# ---------------------------------------------------------------- difficulty
+# One number, the wave's LEVEL, drives every attack rate and shot speed. Within a stage it follows the cadence
+# (set 1 relaxed, set 2 medium, set 3 hard, set 4 harder, set 5 find the gap or get hit), and the first wave
+# after a boss is a breather. Every stage beaten adds a step with diminishing returns and a floor, so it never
+# stops climbing and never jumps. No caps anywhere.
+const SET_LEVEL := [0.0, 0.25, 0.5, 0.75, 1.0]
+const WAVE_IN_SET := [-0.1, 0.0, 0.05, 0.1, 0.1]   # breather, then rising; the 5th is the boss
+func level(w: int) -> float:
+	var sw := shown_wave(w)
+	return SET_LEVEL[(sw - 1) / 5] + WAVE_IN_SET[(sw - 1) % 5] + stage_step((w - 1) / YARD_WAVES)
+
+# the step a number of stages beaten adds: quick at first, then a floor of 0.06 a stage, forever
+func stage_step(k: int) -> float:
+	return 0.5 * (1.0 - exp(-k / 2.5)) + 0.06 * k
+
+func lv() -> float:
+	return level(G.wave)
+
+# the set (0-4) this wave is in within its stage
+func set_of(w: int) -> int:
+	return (shown_wave(w) - 1) / 5
+
 # where wave w is in the 50-wave loop (1-50)
 func stage_wave(w: int) -> int:
 	return (w - 1) % LOOP_WAVES + 1
@@ -1242,12 +1276,29 @@ func in_mansion() -> bool:
 # a mansion wave (Sammie's): a ghost row, a doll row and three spider rows, 4 to a row in a checkerboard so
 # they're spread across the room, dropping in from above
 func mansion_wave() -> void:
-	var rows := ["v", "w", "b", "b", "b"]
+	var rows := mansion_rows(shown_wave(G.wave))
 	for r in rows.size():
+		var ty: String = rows[r].left(1)
+		var two: bool = rows[r].length() > 1   # "w2": just the middle two of the row
 		for q in 8:
-			if (q + r) % 2 == 1:
+			if (q + r) % 2 == 1 or (two and (q < 2 or q > 5)):
 				continue
-			G.en.append(new_enemy(rows[r], 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, MANSION_HP + G.hpup, "enter"))
+			var e := new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, MHP[ty] + G.hpup, "enter")
+			e.wait = r * 0.25 + (q / 2) * 0.08
+			G.en.append(e)
+
+# The rows of a mansion wave (sw 1-25 of the stage), top to bottom: v ghosts, w dolls, b spiders, k bats.
+# Waves 1-4 ease in with a slow mix (mostly spiders, dolls join, then ghosts, then the full room). After that
+# the full room, and the waves before a boss have half their enemies of its kind: bats before BAT CAT, dolls
+# before the PUPPET DOLL, ghosts before the GRIM REAPER (THE TWINS' kind is Sammie's to say). The wave right
+# after a boss is a breather: one row fewer.
+func mansion_rows(sw: int) -> Array:
+	if sw <= 4:
+		return [["w2", "b", "b"], ["w", "b", "b"], ["v2", "w", "b", "b"], ["v", "w", "b", "b", "b"]][sw - 1]
+	var rows: Array = [["v", "w", "k", "k", "b"], ["v", "w", "w", "b", "b"], ["v", "w", "b", "b", "b"], ["v", "v", "w", "b", "b"]][(sw - 1) / 5 - 1]
+	if (sw - 1) % 5 == 0:
+		return rows.slice(0, rows.size() - 1)
+	return rows
 
 # The rows of a normal wave, top to bottom (b bats, w witches, v4 / v5 vampire rows of 4 / 5).
 # The first four waves ease in. After that the full lineup, and the waves just before a boss warn of it with
@@ -1270,20 +1321,21 @@ func wave_rows(w: int) -> Array:
 # vampires drop in from above as dark red-eyed bats and turn into vampires when they get there
 func arrive(ty: String, hx: float, hy: float, i: int, r: int) -> Dictionary:
 	var e: Dictionary
-	if ty == "b":
+	var hp: int = (MHP[ty] if in_mansion() else HP[ty]) + G.hpup
+	if ty == "b" or ty == "k":
 		var left := i % 2 == 0
-		e = new_enemy("b", hx, hy, -24.0 if left else 344.0, 16.0 + r * 8, HP.b + G.hpup, "enter")
+		e = new_enemy(ty, hx, hy, -24.0 if left else 344.0, 16.0 + r * 8, hp, "enter")
 		e.wait = r * 0.3 + (i / 2) * 0.1
 		e.es = 330.0
 	elif ty == "w":
 		var left := i % 2 == 0
-		e = new_enemy("w", hx, hy, -24.0 if left else 344.0, 130.0 + randf() * 40, HP.w + G.hpup, "enter")
+		e = new_enemy("w", hx, hy, -24.0 if left else 344.0, 130.0 + randf() * 40, hp, "enter")
 		e.wait = r * 0.3 + i * 0.12
 		e.es = 170.0
 		e.shots = 1 + randi() % 2
 		e.drop = 0.4 + randf() * 0.4
 	else:
-		e = new_enemy("v", hx, hy, hx, -30.0 - r * 18 - i * 8, HP.v + G.hpup, "enter")
+		e = new_enemy("v", hx, hy, hx, -30.0 - r * 18 - i * 8, hp, "enter")
 		e.es = 110.0
 		e.bat = true
 	return e
@@ -1614,9 +1666,9 @@ func kill(e: Dictionary, fist := false) -> void:
 		else:
 			G.boom = {"x": e.x, "y": e.y, "t": 1.2, "n": 0.0}
 		return
-	var base: int = {"b": 50, "w": 80, "v": 150, "s": 120}[e.ty]
+	var base: int = {"b": 50, "w": 80, "v": 150, "s": 120, "k": 50}[e.ty]
 	pts(base * (2 if e.st == "dive" else 1))
-	burst(e.x, e.y, {"b": "#8a66e0", "w": "#8fd66a", "v": "#b3122e", "s": "#6b4a7a"}[e.ty], 10)
+	burst(e.x, e.y, {"b": "#8a66e0", "w": "#8fd66a", "v": "#b3122e", "s": "#6b4a7a", "k": "#5a4a8a"}[e.ty], 10)
 	# after the first boss a dead spider is replaced from the same spot, up to 6 spiders a wave
 	if e.ty == "s" and G.sp_more > 0:
 		G.sp_more -= 1
@@ -1695,7 +1747,7 @@ func pk_height() -> float:
 	return randf_range(minf(low, 160.0), 160.0)
 
 func corn(e: Dictionary, vy := -1.0) -> void:
-	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3 if vy < 0 else vy, "k": "c", "ph": randf() * TAU, "dead": false})
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 88.0 + 70.0 * lv() if vy < 0 else vy, "k": "c", "ph": randf() * TAU, "dead": false})
 
 # a green venom drop: thrown at a player, then falling faster and faster
 func venom(x: float, y: float, ang := 0.0) -> void:
@@ -2056,7 +2108,8 @@ func mboss(e: Dictionary, dt: float) -> void:
 	e.at -= dt
 	if e.at > 0:
 		return
-	e.at = 0.95 if rage else 1.5
+	# the cadence: the SPIDER BEAST (boss 1) takes its time, the GRIM REAPER (boss 5) doesn't
+	e.at = (0.95 if rage else 1.5) * (1.3 - 0.3 * set_of(G.wave) / 4.0)
 	e.n += 1
 	var m: int = e.n % 5
 	if m == 1 and mb == 1:
@@ -2086,8 +2139,11 @@ func mboss(e: Dictionary, dt: float) -> void:
 		var alive_p := live()
 		if not alive_p.is_empty():
 			var tg: Dictionary = pick(alive_p)
-			# SPIDER BEAST throws sticky webs, PUPPET DOLL sewing needles
+			# SPIDER BEAST throws sticky webs, PUPPET DOLL sewing needles, and the GRIM REAPER borrows the other
+			# bosses' attacks in turn: webs, needles, bows
 			var K2 := "web" if mb == 0 else ("ndl" if mb == 3 else K)
+			if mb == 4:
+				K2 = ["web", "ndl", "tp"][(e.n / 5) % 3]
 			for i in 3:
 				var dx: float = tg.x - e.x + (i - 1) * 26
 				var dy: float = 209 - e.y
@@ -2097,14 +2153,21 @@ func mboss(e: Dictionary, dt: float) -> void:
 	elif m == 3:
 		if sty == 1:
 			for i in 2:
-				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, HP.w + G.hpup, "fly")
+				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, MHP.w + G.hpup, "fly")
 				w.dir = 1 if i == 1 else -1
 				w.fy = 120.0 + i * 24
 				G.en.append(w)
 			sfx("cackle")
+		elif mb == 4:
+			# GRIM REAPER: calls a batch of the mansion's kinds in turn (spiders, dolls, ghosts) into formation, and
+			# they act just like the ones in a normal wave
+			summon(e, ["b", "w", "v"][(e.n / 5) % 3], 4 if rage else 3)
+			sfx("roar")
 		else:
+			# BAT CAT calls its bats; the SPIDER BEAST its spiders
+			var kind := "k" if mb == 2 else "b"
 			for i in (4 if rage else 3):
-				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + G.hpup, "dive"))
+				G.en.append(new_enemy(kind, 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, MHP[kind] + G.hpup, "dive"))
 			sfx("squeak")
 	elif m == 4:
 		if mb == 4:
@@ -2144,8 +2207,13 @@ func button(e: Dictionary) -> void:
 	var dx: float = tg.x - e.x
 	var dy: float = 209 - e.y
 	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-	var sp: float = 85.0 + stage_wave(G.wave) * 3
+	var sp: float = 88.0 + 70.0 * lv()
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "btn", "ph": 0.0, "dead": false})
+
+# a mansion ghost cries: three tears in a string, falling straight down its column (the mansion's candy corn)
+func cry(e: Dictionary) -> void:
+	for i in 3:
+		G.eb.append({"x": e.x, "y": e.y + 8 - i * 9, "vx": 0.0, "vy": 60.0 + 40.0 * lv(), "k": "t", "ph": 0.0, "dead": false})
 
 func formed(ty: String) -> Array:
 	return G.en.filter(func(e): return e.ty == ty and e.st == "form" and e.get("wait", 0.0) <= 0)
@@ -2480,26 +2548,47 @@ func soul_catch(o: Dictionary):
 # worth of a kind averages one attack per interval (the intervals shorten in later waves). So more of a
 # kind means more attacks, and a wave calms down as it's cleared. A cap stops more than one per row
 # (plus one) of bats diving, or of witches swooping, at once, and shots of a kind come at least 0.12s apart.
-func enemy_attacks(dt: float, w: int) -> void:
+# Formation attacks. Every rate comes from the wave's LEVEL, and they come in cadences: a shared volley window
+# (the first CAD_OPEN of each CAD period) in which everything may attack, then a rest. The rests are the gaps.
+# Nothing attacks until the formation has settled.
+const CAD_OPEN := 0.45
+func enemy_attacks(dt: float, _w: int) -> void:
 	for k in G.gap:
 		G.gap[k] -= dt
+	if G.settle > 0:
+		G.settle -= dt
+		if G.en.any(func(o): return o.ty != "B" and (o.st == "enter" or o.get("wait", 0.0) > 0)) and G.settle > 0:
+			return
+		G.settle = 0.0
+		G.cad = 0.0
+	var L := lv()
+	var period := 3.2 / (1.0 + 0.6 * L)
+	G.cad = fmod(G.cad + dt, period)
+	if G.cad > period * CAD_OPEN:
+		return
+	dt /= CAD_OPEN   # the same average rate, packed into the volley
 	var bats := formed("b")
+	var kbats := formed("k")
 	var ws := formed("w")
 	var vs := formed("v")
 	var indoors := in_mansion()
-	var diving: int = G.en.filter(func(o): return o.ty == "b" and (o.st == "dive" or o.st == "drop")).size()
-	var flying: int = G.en.filter(func(o): return o.ty == "w" and (o.st == "fly" or o.st == "swoop")).size()
-	var pd := dt / (maxf(0.55, 2.1 - w * 0.14) * 8)
-	for e in bats:
-		if diving < ceili(bats.size() / 8.0) + 1 and randf() < pd:
-			# a mansion spider drops straight down on its thread instead
-			e.st = "drop" if indoors else "dive"
+	var diving: int = G.en.filter(func(o): return (o.ty == "b" or o.ty == "k") and (o.st == "dive" or o.st == "drop" or o.st == "predrop")).size()
+	var flying: int = G.en.filter(func(o): return o.ty == "w" and (o.st == "fly" or o.st == "swoop" or o.st == "preswoop")).size()
+	var pd := dt / ((2.0 / (1.0 + 2.6 * L)) * 8)
+	for e in bats + kbats:
+		if diving < ceili((bats.size() + kbats.size()) / 8.0) + 1 and randf() < pd:
+			if indoors and e.ty == "b":
+				# a mansion spider wiggles and lets out a bit of thread (the tell), then drops straight down on it
+				e.st = "predrop"
+				e.spt = 0.45
+			else:
+				e.st = "dive"
 			e.n = 0
 			e.vx = 0.0
 			diving += 1
 			sfx("squeak")
-	var pc := dt / (maxf(0.45, 1.25 - w * 0.07) * 8)
-	var pf := dt / (maxf(1.6, 3.6 - w * 0.2) * 8)
+	var pc := dt / ((1.2 / (1.0 + 1.7 * L)) * 8)
+	var pf := dt / ((3.4 / (1.0 + 1.1 * L)) * 8)
 	for e in ws:
 		if G.gap.c <= 0 and randf() < pc:
 			# a mansion doll shoots a button at you
@@ -2510,13 +2599,11 @@ func enemy_attacks(dt: float, w: int) -> void:
 			G.gap.c = 0.12
 		if flying < ceili(ws.size() / 8.0) + 1 and randf() < pf:
 			if indoors:
-				# a mansion doll swoops down in a U toward the players and back up on the other side
-				e.st = "swoop"
-				e.dir = 1 if e.x < 160 else -1
-				e.spa = e.x
+				# a mansion doll lifts and pauses (the tell), then swoops down in a U that bottoms out above where
+				# you were and comes back up on the far side
+				e.st = "preswoop"
+				e.spt = 0.4
 				e.fy = e.y
-				e.dz = (292.0 - e.x) if e.dir > 0 else (e.x - 28.0)
-				e.spt = 0.0
 			else:
 				e.st = "fly"
 				e.dir = 1 if e.x < 160 else -1
@@ -2526,19 +2613,18 @@ func enemy_attacks(dt: float, w: int) -> void:
 			flying += 1
 			sfx("cackle")
 	var alive_p := live()
-	var pv := dt / (maxf(1.2, 2.8 - w * 0.1) * 4)
+	var pv := dt / ((2.7 / (1.0 + 1.25 * L)) * 4)
 	for e in vs:
 		if G.gap.v <= 0 and not alive_p.is_empty() and randf() < pv:
-			var tg: Dictionary = pick(alive_p)
-			var dx: float = tg.x - e.x
-			var dy: float = 209 - e.y
-			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
 			if indoors:
-				# a mansion ghost: three spectral tears in a small spread
-				var a := atan2(dy, dx)
-				for da in [-0.25, 0.0, 0.25]:
-					G.eb.append({"x": e.x, "y": e.y + 8, "vx": cos(a + da) * 62, "vy": sin(a + da) * 62, "k": "t", "ph": 0.0, "dead": false})
+				# a mansion ghost's eyes glow (the tell), then it cries
+				if e.get("cry", 0.0) <= 0:
+					e.cry = 0.5
 			else:
+				var tg: Dictionary = pick(alive_p)
+				var dx: float = tg.x - e.x
+				var dy: float = 209 - e.y
+				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
 				G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 			G.gap.v = 0.12
 
@@ -2701,7 +2787,7 @@ func spider(e: Dictionary, dt: float) -> void:
 	e.wt -= dt
 	if e.wt > 0:
 		return
-	e.wt = maxf(2.2, 4.2 - G.wave * 0.05) + randf()
+	e.wt = 4.1 / (1.0 + 0.9 * lv()) + randf()
 	var spot = web_spot()
 	if spot != null and G.webs.filter(func(o): return is_same(o.own, e)).size() < 2:
 		var wb := {"hx": spot.x, "y": spot.y, "hp": WEB_HP, "own": e, "fixed": false, "g": 0.0}
@@ -2928,6 +3014,10 @@ func update(dt: float) -> void:
 		if e.ty == "B":
 			boss(e, dt)
 			continue
+		if e.get("cry", 0.0) > 0:
+			e.cry -= dt
+			if e.cry <= 0:
+				cry(e)
 		if e.ty == "s":
 			spider(e, dt)
 			continue
@@ -2958,15 +3048,23 @@ func update(dt: float) -> void:
 			var tg := nearest(e.x)
 			e.vx = clampf(e.vx + signf(tg.x - e.x) * 220 * dt, -95, 95)
 			e.x += (e.vx + sin(e.t * 6) * 45) * dt
-			e.y += (95 + w * 6) * dt
+			e.y += (100 + 140 * lv()) * dt
 			if e.y > 252:
 				e.y = -14
 				e.x = tx
 				e.st = "return"
+		elif e.st == "predrop":
+			# the tell: a wiggle on its spot with a bit of thread showing, then the drop
+			e.spt -= dt
+			e.x = tx + sin(e.t * 40) * 2
+			e.y = ty
+			if e.spt <= 0:
+				e.st = "drop"
+				e.n = 0
 		elif e.st == "drop":
 			# mansion spider: straight down on its thread, a short hang at the players' height, then back up
 			if e.n == 0:
-				e.y += (120 + stage_wave(w) * 4) * dt
+				e.y += (120 + 110 * lv()) * dt
 				if e.y >= 200:
 					e.y = 200
 					e.n = 1
@@ -2979,11 +3077,24 @@ func update(dt: float) -> void:
 				e.y -= 80 * dt
 				if e.y <= ty + 4:
 					e.st = "return"
+		elif e.st == "preswoop":
+			# the tell: lifts a little and pauses, then the swoop, aimed at where the nearest player is now
+			e.spt -= dt
+			e.x = tx
+			e.y = e.fy - 6 * sin(PI * minf(1.0, (0.4 - e.spt) / 0.4))
+			if e.spt <= 0:
+				e.st = "swoop"
+				e.dir = 1 if e.x < 160 else -1
+				e.spa = e.x
+				e.dz = (292.0 - e.x) if e.dir > 0 else (e.x - 28.0)
+				e.tx = nearest(e.x).x
+				e.spt = 0.0
 		elif e.st == "swoop":
-			# mansion doll: a U-shaped swoop down toward the players and back up on the other side
+			# mansion doll: a U-shaped swoop that bottoms out above where you were when it started (so a step
+			# aside dodges it, like a Galaga dive) and comes back up on the far side
 			e.spt += dt
 			var k := minf(1.0, e.spt / 1.6)
-			e.x = e.spa + e.dir * e.dz * k
+			e.x = lerpf(e.spa, e.tx, k * 2) if k < 0.5 else lerpf(e.tx, e.spa + e.dir * e.dz, (k - 0.5) * 2)
 			e.y = e.fy + (196 - e.fy) * sin(PI * k)
 			if k >= 1.0:
 				e.st = "return"
@@ -3011,7 +3122,7 @@ func update(dt: float) -> void:
 				e.x += dx / d * sp
 				e.y += dy / d * sp
 				# bats flutter on the way in, witches swoop
-				if e.st == "enter" and e.ty == "b":
+				if e.st == "enter" and (e.ty == "b" or e.ty == "k"):
 					e.y += sin(e.t * 9) * 40 * dt
 				elif e.st == "enter" and e.ty == "w":
 					e.y += sin(e.t * 4) * 30 * dt
@@ -3295,11 +3406,23 @@ func draw_game() -> void:
 			if e.ty == "b":
 				if e.st == "dive" or e.st == "drop":
 					R(ex, 0, 1, maxi(0, ey - 10), "#c9b8ee", 0.6)   # dropping down on its thread
+				elif e.st == "predrop":
+					R(ex, ey + 10, 1, int(3 + 9 * (1.0 - e.spt / 0.45)), "#c9b8ee", 0.8)   # letting out thread: the tell
 				spr(SPIDER2, L2PAL, ex - 13, ey - 11, 2, fl)
+			elif e.ty == "k":
+				var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
+				spr(BATB if f == 1 else BATA, KBATPAL, x, ey - 6, 2, fl)
 			elif e.ty == "w":
 				spr(DOLL2, L2PAL, ex - 13, ey - 13, 2, fl)
 			else:
 				spr(GHOST2, L2PAL, ex - 12, ey - 11, 2, fl)
+				if e.get("cry", 0.0) > 0:
+					# its eyes glow before it cries: the tell
+					var ga := 0.6 + 0.4 * sin(gt * 30)
+					R(ex - 8, ey - 9, 6, 8, "#ff5c5c", ga * 0.55)
+					R(ex + 2, ey - 9, 6, 8, "#ff5c5c", ga * 0.55)
+					R(ex - 6, ey - 7, 2, 4, "#ffffff", ga)
+					R(ex + 4, ey - 7, 2, 4, "#ffffff", ga)
 		elif e.ty == "b" or e.get("bat", false):
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
 			if e.ty == "v":
@@ -3372,10 +3495,14 @@ func draw_game() -> void:
 			R(x - 1, y, 1, 1, "#8a5a10")
 			R(x + 1, y, 1, 1, "#8a5a10")
 		elif b.k == "t":
-			R(x - 2, y - 2, 5, 5, "#7df2ff", 0.25)
-			R(x - 1, y - 1, 3, 3, "#7df2ff")
-			R(x, y - 3, 1, 2, "#7df2ff")
-			R(x, y, 1, 1, "#ffffff")
+			# a teardrop with a trail, blue so it's nobody's orb
+			R(x - 1, y - 12, 3, 4, "#6fb6ff", 0.2)
+			R(x - 1, y - 8, 3, 4, "#6fb6ff", 0.4)
+			R(x, y - 4, 1, 2, "#6fb6ff")
+			R(x - 1, y - 2, 3, 2, "#6fb6ff")
+			R(x - 2, y, 5, 3, "#6fb6ff")
+			R(x - 1, y + 3, 3, 1, "#6fb6ff")
+			R(x - 1, y, 1, 2, "#ffffff")
 		elif b.k == "c":
 			R(x - 2, y - 3, 5, 2, "#ffd92e")
 			R(x - 1, y - 1, 3, 2, "#ff8a1f")

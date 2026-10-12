@@ -43,12 +43,30 @@ WAVES AND ENEMIES
   except that PUNCH THROUGH carries on through a web tile it breaks, halving like it does through an enemy.
   With its webs up a spider spits venom instead.
 - Every enemy has its own chance to attack, about one attack per row of a kind at a time, with a cap.
+- Attack cadence: a shared volley window, then a rest. The rests are the gaps. Nothing attacks until the
+  formation has settled.
+- Difficulty is one number, the wave's LEVEL, that drives every attack rate and shot speed. No caps anywhere:
+  caps are never the right way, diminishing returns with a floor is (it stays getting harder).
+  Within a stage the level follows the cadence: set 1 relaxed, set 2 medium, set 3 hard, set 4 harder, set 5
+  find the gaps or get hit. The wave right after a boss is a breather (lower level, one row fewer). Each stage
+  beaten adds a step: 0.5 * (1 - e^(-stages/2.5)) + 0.06 * stages. Sets 1-2 (into 3) must stay survivable
+  enough that a team thinned by the last boss can build back up through surviving, not through handouts.
+- Every attack has a tell in proportion to its punishment (see Game-Design-Document.md).
 - Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the
   waves just before it, as a warning, and only then (spiders replaced up to 6 only before the BLACK WIDOW,
   the extra vampire row only before the VAMPIRE LORD, the extra witch row only before the WITCH QUEEN).
-  After the PUMPKIN KING comes STAGE 1 COMPLETE, then Sammie's HAUNTED MANSION (25 waves, bosses SPIDER BEAST,
-  THE TWINS, BAT CAT, PUPPET DOLL, GRIM REAPER). After the GRIM REAPER comes STAGE 2 COMPLETE, and it starts
-  over in the graveyard at wave 1's lineup with every enemy tougher (+1 HP per stage beaten).
+  After the PUMPKIN KING comes STAGE 1 COMPLETE, then Sammie's HAUNTED MANSION (25 waves, bosses in order
+  SPIDER BEAST < BAT CAT < PUPPET DOLL < THE TWINS < GRIM REAPER). After the GRIM REAPER comes STAGE 2 COMPLETE,
+  and it starts over in the graveyard at wave 1's lineup with every enemy tougher (+1 HP per stage beaten).
+- Mansion waves 1-4 ease in with a slight slow mix, not one kind per wave. Before a boss, half the enemies in
+  each wave are its kind, as in the graveyard: spiders before the SPIDER BEAST, bats before BAT CAT (her bats
+  recoloured as small PRIMAL BATs, not new art), dolls before the PUPPET DOLL, ghosts before the GRIM REAPER.
+  THE TWINS' kind is Sammie's to say; until then those waves are the plain full room. The mummy and
+  Frankenstein sprites stay unused: don't add them just because the art exists.
+- Mansion HP: dolls and ghosts 4, spiders 3 (the grunts: a dropping spider can be shot out of your lane),
+  bats 2, +1 per stage beaten.
+- The GRIM REAPER's job is to test the whole stage: he borrows the other bosses' attacks and calls the room's
+  kinds. A second form is a Sammie discussion.
 - The wave counter counts 1-25 in each stage, starting again at WAVE 1 in the mansion and back in the graveyard.
   The real wave count keeps going underneath for difficulty.
 - Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players

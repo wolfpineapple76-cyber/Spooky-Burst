@@ -58,7 +58,12 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   venom that falls faster and faster. A web tile soaks up 4 damage of your shots, piercing ones too,
   and sways with the rows. Enemies and their shots pass straight through webs.
 - Every enemy has its own chance to attack, so more of a kind means more attacks, about one per row of
-  them at a time. A wave calms down as you clear it.
+  them at a time. A wave calms down as you clear it. Attacks come in volleys with rests between them, and
+  nothing attacks until the formation has settled.
+- How hard a wave hits follows a cadence within each stage: the first set of waves (1-4) is relaxed, the
+  second medium, the third hard, the fourth harder, and by the fifth you find the gaps or get hit. The wave
+  right after a boss is a breather with one row fewer. Every stage beaten adds a step on top, smaller each
+  time but never below a floor, so it never stops getting harder and never jumps.
 - Everything is on a doubled scale: orbs do 2 damage before boosts. SPECTRAL SHOT and PUNCH THROUGH halve
   each time they go through an enemy and stop once under 1 damage.
 - Every 5th wave is a boss, in this order: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN,
@@ -82,13 +87,19 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   The PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders,
   and they act just like the ones in a normal wave.
 - THE HAUNTED MANSION (Sammie's level 2), stage 2, waves 1-25: a room inside the mansion, where spiders, possessed dolls
-  and ghosts take the place of the bats, witches and vampires (4 to a row in a checkerboard). Spiders drop
-  straight down on their threads, dolls shoot buttons and swoop down in a U, ghosts cry three tears at a time.
+  and ghosts take the place of the bats, witches and vampires (4 to a row in a checkerboard). Waves 1-4 ease
+  in: mostly spiders with a couple of dolls, then more dolls, then ghosts, then the full room.
+  Every mansion attack has a tell: a spider wiggles and lets out a bit of thread, then drops straight down on
+  it and hangs at your height for a moment. A doll lifts and pauses, then swoops down in a U that bottoms out
+  above where you were when it started and comes back up on the far side; dolls also shoot buttons at you.
+  A ghost's eyes glow, then it cries three tears that fall straight down its column.
   The pick-ups are candles: a candelabra for the power-up pumpkin and a brass candle for the treat bucket.
-  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a moment, THE TWINS (10) shoot
-  mirror-image bows, BAT CAT (15) swoops at you and scratches along the floor, PUPPET DOLL (20) shoots big
-  buttons and sewing needles, and the GRIM REAPER (25) warns on half the floor, then slashes across it.
-  After the GRIM REAPER it's back to the graveyard.
+  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a moment, BAT CAT (10) swoops
+  at you, scratches along the floor and calls bats (the mansion's bats, in the PRIMAL BAT's colours), PUPPET
+  DOLL (15) shoots big buttons and sewing needles, THE TWINS (20) shoot mirror-image bows, and the GRIM
+  REAPER (25) warns on half the floor, then slashes across it, borrows the others' webs, needles and bows,
+  and calls spiders, dolls and ghosts into the room. In the waves before BAT CAT, the PUPPET DOLL and the GRIM
+  REAPER, half the enemies are their kind. After the GRIM REAPER it's back to the graveyard.
 
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and
