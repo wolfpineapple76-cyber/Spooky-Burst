@@ -23,3 +23,21 @@ Bullets must be visible. Enemy shots drawn on top of explosions, pickups and ene
 Dives follow the same rules. A Galaga dive is just a slow, big, aimed bullet. It's fair because the enemy loops first (the tell), comes down a smooth arc (readable), and is aimed at where you were when it started (streamable). The Goei's weave is the "hard" version, and it's still a shape. An enemy that just turns and homes in on you is the dive equivalent of a random bullet.
 
 Pacing and rhythm. Fire comes in cadences with rests. The guides describe a wave as a positional puzzle: where do I stand and what do I kill first. Waves that never stop firing stop being fun. A common trick is enemies firing more as their numbers drop (the Space Invaders speed-up), which makes the end of a wave the climax instead of a mop-up. Some games use a hidden "rank" that rises as you do well and falls when you die, so a struggling player gets a quieter game.
+
+THE FLOW OF A STAGE
+
+My general Idea of the flow of the game would be
+
+Although each "Stage" would be harder than the last, the waves and bosses should have a difficulty cadence.
+
+The first waves coming up to the first boss should be easy, a little relaxed, showcasing some enemies and a bit of a breather. The first Boss of each stage is kind of easy maybe showing off some new effects or attacks not seen in the previous stage.
+
+The second set of waves would be getting a little harder so at this point medium difficulty, you have to dodge but it doesn't feel like hell and the second boss is a bit more challenging than the first. With approx. half the enemies leading up to him matching his theme a bit.
+
+Then after the second boss it starts getting hard, dodging each wave is starting to become necessary and you start feeling the pressure, the boss is a bit of challenge laying some pressure on you. At this point if you're not paying attention you will probably die.
+
+The fourth set of waves and fourth boss continues this pattern but by the fifth set of waves if you have not gotten good and find the gaps or kill the enemies then you're getting hit.
+
+The final boss's job is to test your skills with all of the enemies and new attack types of this stage it can fairly put into the fight and its second form is to check if you have mastered this stage and are ready to move on.
+
+Keep in mind also the first sets of waves will likely be dealt with by less players who have less power ups due to death. So, hopefully by the 3rd to 4th boss it has let you breathe enough to build back up some.
