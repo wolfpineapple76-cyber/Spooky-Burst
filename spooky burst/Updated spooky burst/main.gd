@@ -658,7 +658,7 @@ func draw_graveyard(boss_here: bool) -> void:
 		R(0, 0, 320, 240, "#ff1133", 0.07)
 		ellipse(56, 46, 21, 21, "#d1122e", 0.6)
 
-# level 2 (from wave 20): the haunted mansion room (mansion.png, 320x240)
+# level 2: the haunted mansion room (mansion.png, 320x240)
 func draw_mansion(boss_here: bool) -> void:
 	if mansion_tex == null:
 		mansion_tex = load("res://mansion.png")
@@ -1579,7 +1579,7 @@ func draw_game() -> void:
 	for e in G.en:
 		if e.ty == "B":
 			B = e
-	var indoors: bool = G.wave >= 20
+	var indoors: bool = G.wave > 15
 	if indoors:
 		draw_mansion(B != null)
 	else:
