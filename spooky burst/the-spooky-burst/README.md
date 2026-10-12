@@ -110,10 +110,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - The Black Cat is black for every player; players 2-4 have a coloured tummy matching their orbs.
 - NINE LIVES shows as the cat's tail curled up over his head while the shield is ready.
 - LUCKY COIN shoots big gold coins that flip as they fly. Half the time a hit knocks the enemy away from you
-  (8 px per point of damage). Knocks add up and it drifts back slowly, so keeping at one enemy drives it up or
+  (4 px per point of damage). Knocks add up and it drifts back slowly, so keeping at one enemy drives it up or
   off to the side, never off the screen. It keeps moving and attacking. Bosses can be knocked too.
 - WIGGLE TAIL collects candy, power-ups, buckets and apples up to one cat width beyond him, as high as his head.
-  His tail flicks up over his back toward it, or with NINE LIVES the curled tail leans over and back.
+  His tail swipes the full reach up over his back on that side, or with NINE LIVES the curled tail leans over and back.
 - HEAVY FIST makes the Zombie's shots little fists. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
   and through a web tile they break (halving the same way).
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.

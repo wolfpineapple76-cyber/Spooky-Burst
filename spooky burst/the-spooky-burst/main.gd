@@ -1803,14 +1803,15 @@ func got_candy(k: Dictionary, p: Dictionary) -> void:
 	sfx("candy")
 
 # WIGGLE TAIL: falling candy or a drop that comes within one character width (24 px) beyond the Cat's body,
-# as high as his head, is collected straight away, and his tail swipes all the way out to where it was (0.25 s)
+# as high as his head, is collected straight away, and his tail swipes the full reach out on that side (0.25 s)
 # and back (0.25 s). The swipe is only for show: a cat's tail can't hold things.
 const TAIL_OUT := 0.25
 const TAIL_BACK := 0.25
 func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
 		if p.eq.has("tail") and absf(o.x - p.x) < 36 and o.y > 188 and o.y < 224:
-			p.tl = {"t": 0.0, "tx": o.x, "ty": o.y}
+			# the swipe always goes the full reach on that side, at its height
+			p.tl = {"t": 0.0, "rx": 36.0 if o.x >= p.x else -36.0, "ty": o.y}
 			if o.has("k"):
 				catch_drop(o, p)
 			else:
@@ -1878,16 +1879,34 @@ func enemy_attacks(dt: float, w: int) -> void:
 			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 			G.gap.v = 0.12
 
-# LUCKY COIN's knock back: anything held to a spot (formation, a hanging spider, a boss) gets an offset from it
-# that adds up with every shove and drifts back at KICK_BACK px a second, slower than steady hits push it, so
-# keeping at one enemy drives it away. Anything flying about is just moved and carries on. Never off screen.
-const KICK_BACK := 15.0
+# LUCKY COIN's knock back: each shove slides the enemy over at SHOVE_SPEED px a second rather than jumping.
+# Anything held to a spot (formation, a hanging spider, a boss) gets an offset from it that adds up with every
+# shove and drifts back at KICK_BACK px a second, slower than steady hits push it, so keeping at one enemy drives
+# it away. Anything flying about is just moved and carries on. Never off screen. A boss ignores shoves while he's
+# flying in, laughing or strafing and for half a second after, so they can't pile up and jump him when he settles.
+const KICK_BACK := 6.0
+const SHOVE_SPEED := 55.0
 func shove(e: Dictionary, d: Vector2) -> void:
+	if e.ty == "B" and e.get("calm", 0.5) > 0:
+		return
+	e.kq = e.get("kq", Vector2.ZERO) + d
+
+# each frame: slide on with any shove still to come, and drift back
+func shoving(e: Dictionary, dt: float) -> void:
+	if e.ty == "B":
+		var busy: bool = e.st != "form" or e.laugh > 0 or e.get("sf", 0) > 0
+		e.calm = 0.5 if busy else e.get("calm", 0.5) - dt
+		if busy:
+			e.kq = Vector2.ZERO
+			e.kick = Vector2.ZERO
+	var q: Vector2 = e.get("kq", Vector2.ZERO)
+	var go := q.limit_length(SHOVE_SPEED * dt)
+	e.kq = q - go
 	if e.ty == "B" or e.st == "form":
-		e.kick = e.get("kick", Vector2.ZERO) + d
-	else:
-		e.x += d.x
-		e.y += d.y
+		e.kick = e.get("kick", Vector2.ZERO).move_toward(Vector2.ZERO, KICK_BACK * dt) + go
+	elif go != Vector2.ZERO:
+		e.x += go.x
+		e.y += go.y
 		on_screen(e)
 
 # where a shoved enemy held to a spot actually is: its spot plus its knock back, kept on screen
@@ -2144,7 +2163,7 @@ func update(dt: float) -> void:
 			continue
 		e.t += dt
 		e.flash -= dt
-		e.kick = e.get("kick", Vector2.ZERO).move_toward(Vector2.ZERO, KICK_BACK * dt)
+		shoving(e, dt)
 		if e.ty == "B":
 			boss(e, dt)
 			continue
@@ -2265,9 +2284,9 @@ func update(dt: float) -> void:
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and absf(s.y - e.y) < hh:
 				e.hp -= s.dmg
-				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 8 px per point of damage
+				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 4 px per point of damage
 				if s.coin and randf() < 0.5:
-					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 8.0 * s.dmg)
+					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
 				s.hit.append(e)
 				# SPECTRAL SHOT and PUNCH THROUGH: each enemy it goes through halves it, and it stops under 1 damage
 				s.dmg *= 0.5
@@ -2588,7 +2607,7 @@ func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
 	# WIGGLE TAIL with NINE LIVES: the curl leans all the way over to what he collected, keeping its shape, and back
 	if tl != null:
 		var k := tail_reach(tl)
-		var dx: float = clampf(tl.tx - px, -36.0, 36.0)
+		var dx: float = tl.rx
 		for j in range(1, pts.size()):
 			pts[j].x += dx * k * clampf((pts[0].y - pts[j].y) / 30.0, 0.0, 1.0)
 			pts[j].y += sin(gt * 20 + j) * k
@@ -2618,7 +2637,7 @@ func tail_reach(tl: Dictionary) -> float:
 func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> void:
 	var k := tail_reach(tl)
 	var base := Vector2(px, by + 19)
-	var tip := base.lerp(Vector2(tl.tx, tl.ty), k)
+	var tip := base.lerp(Vector2(px + tl.rx, tl.ty), k)
 	var c1 := Vector2(base.x, by - 4 * k)
 	var c2 := Vector2(tip.x, tip.y - 12 * k)
 	var pts := []
