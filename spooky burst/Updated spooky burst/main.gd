@@ -1106,7 +1106,7 @@ func give_boost(p: Dictionary) -> void:
 	sfx("unlock")
 
 # Pumpkin King, the first time his health runs out: no death yet. He laughs, heals all the way up
-# and comes back moldy and angrier (phase 2). His shots are cleared so it stays fair.
+# and comes back moldy and angrier (phase 2). His shots and bats are cleared so it stays fair.
 func pk_laugh(e: Dictionary) -> void:
 	e.hp = 1
 	e.laugh = 2.0
@@ -1114,6 +1114,11 @@ func pk_laugh(e: Dictionary) -> void:
 	e.sp = 0.0
 	for b in G.eb:
 		b.dead = true
+	# his bats go too, so nothing can hit you while he laughs
+	for o in G.en:
+		if o.ty != "B" and not o.dead:
+			o.dead = true
+			burst(o.x, o.y, "#8a66e0", 8)
 	say("HA HA HA!", 1.8)
 	sfx("cackle")
 	G.shake = 0.6
