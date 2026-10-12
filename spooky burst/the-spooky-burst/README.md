@@ -101,6 +101,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   Each one stacks up to 10 times and stays below the character upgrade it matches, stacking on top of it
   (so the Black Cat with LUCKY COIN has the biggest shots):
   DM damage +5% each, FR fire rate +5%, SS shot speed +4%, MS move speed +4%, OS orb size, LS longer safe time +6%.
+  ORB SIZE shows every 5: first a bigger look, then the normal look a size up, then the bigger one a size up.
   Your boosts show in blue above your upgrades. When all six are maxed, pumpkins give 300 points.
 - This version saves to a new file (spooky_burst_v2.cfg), so everyone starts fresh. Reset Save erases one player
   (their candy, characters, upgrades and prestige) or everything.

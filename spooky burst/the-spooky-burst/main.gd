@@ -69,11 +69,23 @@ const COIN := [
 	[".d.", "dgd", "dcd", "dgd", ".d."],
 	[".ddd.", "dgTgd", "dgTgd", "dgTgd", ".ddd."],
 	[".d.", "dgd", "dcd", "dgd", ".d."]]
+const COIN_B := [
+	[".dddd.", "dgHHgd", "dHggHd", "dHggHd", "dgHHgd", ".dddd."],
+	[".d.", "dgd", "dcd", "dcd", "dgd", ".d."],
+	[".dddd.", "dgTTgd", "dgTTgd", "dgTTgd", "dgTTgd", ".dddd."],
+	[".d.", "dgd", "dcd", "dcd", "dgd", ".d."]]
 # HEAVY FIST: a little four-fingered fist in fleshy green, fading row by row (0-6) into the player's colour
 const FIST := [".0.0.0.0.", "111111111", "222222222", "333333333", ".4444444.", "..55555..", "..66666.."]
+const FIST_B := ["..0.0.0.0..", ".111111111.", "22222222222", "33333333333", "44444444444", ".555555555.", "..6666666..",
+	"...77777...", "...88888..."]
 # BONE THROW: the left and right ends of the bone, two knobs each (a 2 px shaft joins them)
 const BONE_L := ["ww.", "www", ".ww", ".ww", "www", "ww."]
 const BONE_R := [".ww", "www", "ww.", "ww.", "www", ".ww"]
+const BONE_LB := ["ww..", "www.", "wwww", ".www", ".www", "wwww", "www.", "ww.."]
+const BONE_RB := ["..ww", ".www", "wwww", "www.", "www.", "wwww", ".www", "..ww"]
+# a plain orb, and the bigger one
+const ORB := [".ccc.", "ccccc", "ccccc", "ccccc", ".ccc."]
+const ORB_B := ["..ccc..", "..ccc..", "ccccccc", "ccccccc", "ccccccc", "..ccc..", "..ccc.."]
 # the PRIMAL BAT's other shots: dark orbs the colour of his skin
 const DORB := [".aaa.", "abbba", "abhba", "abbba", ".aaa."]
 const DORBPAL := {"a": "#6b4a8a", "b": "#3a2252", "h": "#9d7ac4"}
@@ -93,6 +105,7 @@ const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", "
 const GPAL := {"X": "#f6f1ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}
 # GHOST SHOT orbs are little ghosts in the shot colour (c)
 const GSHOT := [".ccc.", "ckckc", "ccccc", "cckcc", "ccccc", "c.c.c"]
+const GSHOT_B := [".ccccc.", "cckckcc", "ccccccc", "ccckccc", "ccccccc", "ccccccc", "c.c.c.c"]
 # SOUL MATE's bow and GHOSTRESS's black rose clip, drawn on top of a small ghost at (x + 3, y - 2) and (x + 6, y - 2)
 const BOW := ["BB.BB", "BBdBB", ".B.B."]
 const ROSE := ["gg...", "gRRR.", ".RrR.", ".RRRg", "...gg"]
@@ -521,6 +534,14 @@ func tex(rows: Array, pal: Dictionary) -> ImageTexture:
 	var tx := ImageTexture.create_from_image(img)
 	tcache[key] = tx
 	return tx
+
+# a sprite at scale s centred on x, y
+func spr_mid(rows: Array, pal: Dictionary, x: int, y: int, s: int) -> void:
+	spr(rows, pal, x - (rows[0].length() * s) / 2, y - (rows.size() * s) / 2, s)
+
+# which rung of the ORB SIZE ladder a shot is on: one every 5 boosts
+func shot_rung(s: Dictionary) -> int:
+	return int(round(s.grow / 0.4)) / 5
 
 func spr(rows: Array, pal: Dictionary, x, y, s, white := false) -> void:
 	var tx := tex(rows, pal)
@@ -2457,38 +2478,43 @@ func draw_game() -> void:
 		var x := int(round(s.x))
 		var y := int(round(s.y))
 		var col: String = s.col
+		# ORB SIZE climbs a ladder every 5 boosts: the bigger image, then the normal one a size up, then the bigger
+		# one a size up, and so on
+		var r := shot_rung(s)
+		var bg := r % 2 == 1
+		var sc := 1 + r / 2
 		# GHOST SHOT has no glow trail, which made it look like a sign on a post
 		if s.gs:
-			spr(GSHOT, {"c": col, "k": "#1b0f33"}, x - 2, y - 3, 1)
+			spr_mid(GSHOT_B if bg else GSHOT, {"c": col, "k": "#1b0f33"}, x, y, sc)
 			continue
 		if s.coin:
-			var fr: Array = COIN[int(floor(gt * 12 + s.x * 0.1)) % 4]
+			var fr: Array = (COIN_B if bg else COIN)[int(floor(gt * 12 + s.x * 0.1)) % 4]
 			var cp := {"g": "#ffd92e", "d": "#c9a24a", "H": "#fff3a8", "T": "#b88a1e",
 				"c": "#" + Color("#ffd92e").lerp(Color(col), 0.45).to_html(false)}
-			spr(fr, cp, x - (fr[0].length() / 2) * 2, y - 5, 2)
+			spr_mid(fr, cp, x, y, sc + 1)
 			continue
 		if s.fist:
+			var fi: Array = FIST_B if bg else FIST
 			var fp := {}
-			for i in 7:
-				fp[str(i)] = "#" + Color("#a8d088").lerp(Color(col), i / 6.0).to_html(false)
-			spr(FIST, fp, x - 4, y - 3, 1)
+			for i in fi.size():
+				fp[str(i)] = "#" + Color("#a8d088").lerp(Color(col), i / float(fi.size() - 1)).to_html(false)
+			spr_mid(fi, fp, x, y, sc)
 			continue
 		if s.bone:
 			var bp := {"w": "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false)}
 			var m = s.get("mate")
 			if m != null and not m.dead and s.x < m.x:
-				R(x + 2, y - 1, int(round(m.x)) - x - 3, 2, bp.w)
-			spr(BONE_L if m == null or s.x < m.x else BONE_R, bp, x - 1, y - 3, 1)
+				R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
+			# each end grows outward from the shaft, so the bone stays joined
+			var left: bool = m == null or s.x < m.x
+			var be: Array = (BONE_LB if bg else BONE_L) if left else (BONE_RB if bg else BONE_R)
+			var bw: int = be[0].length() * sc
+			spr(be, bp, x + 2 - bw if left else x - 1, y - (be.size() * sc) / 2, sc)
 			continue
-		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
-		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
-		R(x - 2, y - 1, 5, 3, col)
-		R(x - 1, y - 2, 3, 5, col)
-		# ORB SIZE boosts show a little at 5+, always smaller than LUCKY COIN
-		var g := 1 if s.grow >= 2.0 else 0
-		if g > 0:
-			R(x - 3, y - 1, 7, 3, col)
-			R(x - 1, y - 3, 3, 7, col)
+		var gw := (9 if bg else 7) * sc
+		R(x - gw / 2, y - gw / 2, gw, gw, "#cfe0ff", 0.25)
+		R(x - (3 * sc) / 2, y + gw / 2 + 1, 3 * sc, 6 * sc, "#cfe0ff", 0.25)
+		spr_mid(ORB_B if bg else ORB, {"c": col}, x, y, sc)
 	for i in G.players.size():
 		var p: Dictionary = G.players[i]
 		if p.out or mode == "over":
