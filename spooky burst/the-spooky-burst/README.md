@@ -104,6 +104,13 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and
   SOUL MATE help you get more of it.
+- The treat bucket gives 5 candy (45%), 300 points (20%), an extra life (15%), a TRICK of three bats (15%)
+  or a POWER TREAT (5%): one of the pumpkin's small boosts, never a character ability.
+- Each character has a SPECIAL, its own boost worth 2 steps: the Ghost's fire rate, the Cat's move speed, the
+  Zombie's damage, the Skeleton's shot speed, the Jester's safe time after a hit. Its CHARACTERS page names it.
+- SUGAR RUSH: when a boss dies it tosses a cotton candy high into the air (two if 3 or 4 players are alive at
+  that moment). Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
+  SUG 1 to SUG 10 by your power-up codes. It's lost with your power-ups and boosts when you're out of lives.
 - An enemy drops candy a quarter of the time. GRAVE ROBBER (for everyone's kills while anyone has it) or a
   HEAVY FIST killing blow raises that to a third, and both together to half. A third of all candy, boss candy
   too, is a gumball worth 2.
@@ -149,16 +156,21 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.
 - The Jester is black and white; players 2-4 have their colour on his left bell, his diamonds and his right leg.
-  The glint in his eyes looks the way he's moving. He shoots jingle bells, angled 30 degrees the way he's moving.
+  The glint in his eyes looks the way he's moving. He shoots jingle bells, angled 30 degrees the way he's moving,
+  45 degrees once he's kept going that way for half a second.
 - TRICK SHOT turns his shots into balls that do 1 damage and can hit any number of times. They bounce off
   enemies and webs (damaging the webs too), leaning a little toward the next enemy, but not off the sides or
   the floor. Each time one goes off the top it falls back down, speeding up as it falls and drifting
-  1-2 character widths left or right at random.
+  1-2 character widths left or right at random. A ball that comes down onto the Jester who threw it bounces
+  back up off him (not off other players), so he can keep one in the air by staying under it.
 - WICKED CLOWN gives him a life back the moment he's down to 1 (even if he catches it while already on 1),
-  then it's used up until a pumpkin gives it again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
+  then it's used up until a pumpkin gives it again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to
+  him while he's on 1 life; with more lives it only pulls what's within half a character width, fading out by a
+  full one.
 - JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
   one, kicking it 1-2 rows up toward another player, then the Jester, then a random spot, in turn. They block
-  enemy shots, do 2 damage to enemies they touch and never leave the play area.
+  enemy shots, do 2 damage to enemies they touch and never leave the play area. A ball that has come to a stop
+  rolls back to the Jester and stops a step short of him, ready to kick again.
 - I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 pieces of candy, some of them gumballs.
   It costs him half of what it's worth (rounded up). It bursts about 3 rows up, the pieces hit enemies on the way
   out (1 damage, gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can

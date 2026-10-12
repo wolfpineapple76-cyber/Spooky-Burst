@@ -104,7 +104,7 @@ const JBELL_B := ["...ccc...", "..cWccc..", ".cWccccc.", ".cWccccc.", "ccccccccc
 const TBALL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "cccccwc", ".cccww.", "..cww.."]
 const TBALL_B := ["...ccc...", "..cWccc..", ".cWccccc.", "cWccccccc", "ccccccccc", "cccccccwc", ".ccccccw.", "..cccww..", "...cww..."]
 # JUGGLING BALLS: a shiny ball, always one green, one blue and one orange
-const JUGBALL := ["..ccc..", ".cWlcc.", "cWlcccc", "clccccc", "cccccdc", ".ccccd.", "..ddd.."]
+const JUGBALL := ["...ccc...", "..cWlcc..", ".cWllccc.", "cWlcccccc", "ccccccccc", "cccccccdc", ".cccccdd.", "..ccddd..", "...ddd..."]
 const JUG_COLS := ["#228b22", "#4169e1", "#ff7518"]
 # I'M NOT A PINATA's gift box: white with a ribbon (red for P1, the player's colour for P2-4)
 const GIFT := [".rr...rr.", "..rrRrr..", "WWWWrWWWW", "WWWWrWWWW", "rrrrrrrrr", "WWWWrWWWW", "WWWWrWWWW", "ggggrgggg"]
@@ -245,6 +245,10 @@ const SLASH := ["..............................b.............................", 
 	".bba.....................................................abb", ".bba.....................................................abb"]
 const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
 # a gumball: the double candy
+# SUGAR RUSH: cotton candy a boss tosses up when it dies; each one caught adds +1 to the catcher's SPECIAL
+const SUGAR := ["..PPPP..", ".PPpPPP.", "PPPPPPpP", "PpPPpPPP", "PPPPPPPP", ".PPpPPP.", "..PPPP..", "...s....", "...s....", "...s...."]
+const SUGARPAL := {"P": "#ff9ec2", "p": "#ffd0e4", "s": "#f3e2c0"}
+const SUGAR_MAX := 10
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
 const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
@@ -556,7 +560,7 @@ func _build_chars() -> void:
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#228b22", "o": "#228b22"},
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#4169e1", "o": "#4169e1"},
 				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#ff7518", "o": "#ff7518"}],
-			"tr": {"shot": 2}, "desc": "IT'S JUST A JOKE.",
+			"tr": {"safe": 2}, "desc": "IT'S JUST A JOKE.",
 			"pow": [["trick", "TRICK SHOT", "BOUNCY BALLS, MANY HITS", "TRK"], ["wicked", "WICKED CLOWN", "AT 1 LIFE, GET ONE BACK", "WKD"],
 				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
 				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]}]
@@ -1082,15 +1086,26 @@ func say(s: String, dur: float) -> void:
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
-		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0}
+		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
 
 # how many boosts' worth of k a player has: this run's boosts (up to 10), their character's trait,
 # and +1 for each time they've prestiged that character (up to 10 more)
+# a stat's level: boosts caught this run, the character's SPECIAL (its own boost, plus every SUGAR RUSH caught
+# this run), and prestige
 func lvl(p: Dictionary, k: String) -> int:
-	return bo(p, k) + int(chars[p.ch].tr.get(k, 0)) + prestige(p.n, p.ch)
+	var tr: Dictionary = chars[p.ch].tr
+	return bo(p, k) + (int(tr[k]) + int(p.get("sugar", 0)) if tr.has(k) else 0) + prestige(p.n, p.ch)
+
+# the key and name of a character's SPECIAL, its own boost
+func special_of(ch: int) -> Array:
+	var k: String = chars[ch].tr.keys()[0]
+	for b in BOOSTS:
+		if b[0] == k:
+			return [k, b[1].trim_suffix(" UP")]
+	return [k, k.to_upper()]
 
 func add_player(x: float, pad: int, kb: String, ch: int, slot: int) -> Dictionary:
 	var np := mk_player(x, slot, kb, pad, ch)
@@ -1478,6 +1493,7 @@ func pick_ok(k: Dictionary) -> void:
 			np.ch = ch
 			np.own = owns(np.n, np.ch)
 			np.eq = {}
+			np.sugar = 0
 		np.x = open_x()
 		np.out = false
 	else:
@@ -1641,6 +1657,10 @@ func kill(e: Dictionary, fist := false) -> void:
 			burst(e.x + (randf() - 0.5) * 50, e.y + (randf() - 0.5) * 36, "#b3122e" if i % 2 == 1 else "#ffd92e", 14)
 		for i in 6:
 			drop_candy(e.x + (i - 2.5) * 16, e.y)
+		# SUGAR RUSH: it tosses one high into the air, two if 3 or 4 players are alive right now
+		var n_sr := 2 if live().size() >= 3 else 1
+		for i in n_sr:
+			G.drops.append({"x": clampf(e.x + (i * 2 - (n_sr - 1)) * 60, 40.0, 280.0), "y": -12.0, "k": "r", "dead": false})
 		for o in G.en:
 			if not o.dead:
 				o.dead = true
@@ -1707,6 +1727,7 @@ func hurt(p: Dictionary) -> void:
 			# SECOND WIND: wiped just like dying (power-ups and boosts gone), then back with 2 lives
 			p.eq = {}
 			p.bo = {}
+			p.sugar = 0
 			p.sh = 0.0
 			p.revived = true
 			p.lives = 2
@@ -1717,6 +1738,7 @@ func hurt(p: Dictionary) -> void:
 			p.out = true
 			p.eq = {}
 			p.bo = {}
+			p.sugar = 0
 			p.sh = 0.0
 			p.revived = false
 	if live().is_empty():
@@ -1795,27 +1817,39 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		say("CANDIED APPLE: +1 LIFE", 1.4)
 		sfx("life")
 		return
+	if d.k == "r":
+		# SUGAR RUSH: +1 to the catcher's SPECIAL, up to SUGAR_MAX, lost with the power-ups and boosts
+		p.sugar = mini(SUGAR_MAX, int(p.get("sugar", 0)) + 1)
+		say("SUGAR RUSH!", 1.4)
+		sfx("treat")
+		return
+	# the treat bucket: 5 candy 45%, 300 points 20%, an extra life 15%, a TRICK 15%, a POWER TREAT 5%
 	var r := randf()
-	if r < 0.5:
+	if r < 0.45:
 		add_candy(p.n, 5)
 		p.got += 5
 		pts(100)
 		say("TREAT: 5 CANDY", 1.4)
 		sfx("treat")
-	elif r < 0.7:
+	elif r < 0.65:
 		pts(300)
 		say("TREAT: 300 POINTS", 1.4)
 		sfx("treat")
-	elif r < 0.85:
+	elif r < 0.8:
 		if p.lives < 5:
 			p.lives += 1
 		say("TREAT: EXTRA LIFE", 1.4)
 		sfx("life")
-	else:
+	elif r < 0.95:
 		for i in 3:
 			G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 44, d.x + (i - 1) * 16, d.y - 24, 1, "return"))
 		say("TRICK!", 1.2)
 		sfx("trick")
+	else:
+		# POWER TREAT: one of the pumpkin's small boosts (never a character ability)
+		say("POWER TREAT", 1.4)
+		sfx("treat")
+		give_boost(p)
 
 func boss(e: Dictionary, dt: float) -> void:
 	if e.st == "enter":
@@ -2228,6 +2262,8 @@ func vxs_of(p: Dictionary) -> Array:
 	return vxs
 
 const JEST_ANGLE := 30.0
+const JEST_ANGLE_RUN := 45.0
+const JEST_RUN_TIME := 0.5
 func orb_dmg(p: Dictionary) -> float:
 	return (4.0 if p.eq.has("fist") else 2.0) * (1.0 + 0.05 * lvl(p, "dmg"))
 
@@ -2244,10 +2280,12 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 	var col: String = shot_col(p.n, p.ch)
 	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
-	# THE JESTER always shoots 30 degrees the way he's moving (straight up when still)
+	# THE JESTER shoots 30 degrees the way he's moving (straight up when still), 45 once he's kept going that
+	# way for half a second
 	var jest: bool = chars[p.ch].id == "jester"
 	if jest:
-		lv = sp * tan(deg_to_rad(JEST_ANGLE)) * p.md
+		var ang := JEST_ANGLE_RUN if p.mv >= JEST_RUN_TIME else JEST_ANGLE
+		lv = sp * tan(deg_to_rad(ang)) * p.md
 	var trick: bool = p.eq.has("trick")
 	var made := []
 	for ox in xs:
@@ -2384,24 +2422,33 @@ func wiggle_reach(o: Dictionary) -> bool:
 
 # NEEDS FOOD BADLY: while he's on 1 life, candied apples and power-up pumpkins within FOOD_REACH px drift to him
 const FOOD_REACH := 48.0
+# NEEDS FOOD BADLY: on his last life he pulls in food from FOOD_REACH away. With more lives he's only a little
+# hungry: full pull within half a character width, fading to nothing by a full one, so he isn't stealing apples.
 func food_pull(d: Dictionary, dt: float) -> void:
 	if d.k != "h" and d.k != "p":
 		return
 	for p in live():
-		if p.eq.has("food") and p.lives == 1:
+		if p.eq.has("food"):
 			# a little secret: the blue player (P3) reaches half a character width further and pulls a bit harder
 			var blue: bool = col_blue(p.n)
+			var hungry: bool = p.lives == 1
 			var to := Vector2(p.x - d.x, 209.0 - d.y)
-			if to.length() < FOOD_REACH + (12.0 if blue else 0.0):
-				var step := to.limit_length((161.0 if blue else 140.0) * dt)
+			var dist := to.length()
+			var reach := (FOOD_REACH + (12.0 if blue else 0.0)) if hungry else 24.0
+			if dist < reach:
+				var pull := 161.0 if blue else 140.0
+				if not hungry:
+					pull *= clampf((24.0 - dist) / 12.0, 0.0, 1.0)
+				var step := to.limit_length(pull * dt)
 				d.x += step.x
 				d.y += step.y
 				return
 
 # JUGGLING BALLS: three balls (green, blue, orange) that stay with the Jester as long as he's in the game. They sit
-# on the ground, bouncing a little until they settle. Any player who walks into one kicks it 1-2 rows up, aimed in
-# turn at another player (if there is one), at the Jester, and at a random spot. They block enemy shots and do 2
-# damage to enemies they touch, and never leave the play area.
+# on the ground, bouncing a little until they settle, then roll back to the Jester and stop just short of him, so
+# a step kicks them again. Any player who walks into one kicks it 1-2 rows up, aimed in turn at another player (if
+# there is one), at the Jester, and at a random spot. They block enemy shots and do 2 damage to enemies they
+# touch, and never leave the play area.
 const JUG_GROUND := 218.0
 const JUG_GRAV := 420.0
 func juggle(p: Dictionary, dt: float) -> void:
@@ -2428,15 +2475,18 @@ func juggle(p: Dictionary, dt: float) -> void:
 			b.x = clampf(b.x, 6.0, 314.0)
 			b.vx = -b.vx
 		b.y = maxf(b.y, 10.0)
+		# settled: it rolls back toward the Jester, stopping a step short of him
+		if b.vy == 0.0 and b.vx == 0.0 and b.y >= JUG_GROUND and absf(b.x - p.x) > 18.0 and not p.out:
+			b.x = move_toward(b.x, p.x - signf(p.x - b.x) * 18.0, 40.0 * dt)
 		# kicked by a player walking into it
 		if b.cd <= 0.0:
 			for q in live():
-				if absf(b.x - q.x) < 12.0 and b.y > 196.0:
+				if absf(b.x - q.x) < 13.0 and b.y > 196.0:
 					jug_kick(p, b, q)
 					break
 		# blocks enemy shots
 		for s in G.eb:
-			if not s.dead and absf(s.x - b.x) < 6.0 and absf(s.y - b.y) < 6.0:
+			if not s.dead and absf(s.x - b.x) < 7.0 and absf(s.y - b.y) < 7.0:
 				s.dead = true
 		# 2 damage to an enemy it touches (once every half second per enemy)
 		for e in G.en:
@@ -2444,7 +2494,7 @@ func juggle(p: Dictionary, dt: float) -> void:
 				continue
 			var hw: float = 27.0 if e.ty == "B" else 11.0
 			var hh: float = 20.0 if e.ty == "B" else 9.0
-			if absf(b.x - e.x) < hw + 3.0 and absf(b.y - e.y) < hh + 3.0:
+			if absf(b.x - e.x) < hw + 4.0 and absf(b.y - e.y) < hh + 4.0:
 				e.jbt = G.t + 0.5
 				e.hp -= 2
 				e.flash = 0.1
@@ -2698,6 +2748,14 @@ func trick_move(s: Dictionary, dt: float) -> void:
 		s.vx += (24.0 + randf() * 24.0) * (1.0 if randf() < 0.5 else -1.0) / off
 	if s.y > -6:
 		s.up = false
+	# coming down onto the Jester who threw it, it bounces back up off him (not off the floor, not off anyone else)
+	if s.vy > 0 and s.y > 194:
+		for p in live():
+			if p.n == s.o and chars[p.ch].id == "jester" and absf(s.x - p.x) < 12 and absf(s.y - 209) < 12:
+				trick_bounce(s, p.x, 209.0, 12.0, 12.0, null)
+				s.y = minf(s.y, 196.0)
+				sfx("trick")
+				break
 	if s.x < -6 or s.x > 326 or s.y > 246:
 		s.dead = true
 
@@ -3286,7 +3344,7 @@ func update(dt: float) -> void:
 		p.y += p.vy * dt
 		p.life -= dt
 	for d in G.drops:
-		d.y += (45 if d.k == "p" else 80) * dt
+		d.y += (45 if d.k == "p" or d.k == "r" else 80) * dt
 		food_pull(d, dt)
 		var got = null
 		for p in live():
@@ -3460,6 +3518,8 @@ func draw_game() -> void:
 			spr(CANDELABRA, CANDLEPAL, x - 10, y - 11, 2)
 		elif d.k == "b":
 			spr(BUCKET, BUCKETPAL, x - 10, y - 9, 2)
+		elif d.k == "r":
+			spr(SUGAR, SUGARPAL, x - 8, y - 10, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
 			pumpkin(x, y, 6, 5, true, gt * 2, 4)
@@ -3610,7 +3670,7 @@ func draw_game() -> void:
 		for b in p.get("jb", []):
 			var bc: String = b.col
 			spr(JUGBALL, {"c": bc, "W": "#ffffff", "l": "#" + Color(bc).lerp(Color("#ffffff"), 0.45).to_html(false),
-				"d": "#" + Color(bc).darkened(0.35).to_html(false)}, int(round(b.x)) - 3, int(round(b.y)) - 3, 1)
+				"d": "#" + Color(bc).darkened(0.35).to_html(false)}, int(round(b.x)) - 4, int(round(b.y)) - 4, 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
 		var px := int(round(p.x))
@@ -3744,6 +3804,8 @@ func draw_hud() -> void:
 		for w in chars[p.ch].pow:
 			if p.eq.has(w[0]):
 				codes += w[3] + " "
+		if int(p.get("sugar", 0)) > 0:
+			codes += "SUG %d " % p.sugar
 		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
 		# their prestige level for this character, which counts for every stat
 		var pr := prestige(p.n, p.ch)
@@ -3880,6 +3942,8 @@ func draw_shop() -> void:
 	if sch >= 0:
 		T(chars[sch].name, 80, y + 52, 2, "#f6f1ff")
 		T(chars[sch].desc, 80, y + 72, 1, "#9d8cc4")
+		var sp := special_of(sch)
+		T("SPECIAL: %s +%d" % [sp[1], chars[sch].tr[sp[0]]], 560, y + 72, 1, "#9d8cc4", 2)
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
 	var ry := y + 84 + dy
 	for i in rows.size():
