@@ -46,9 +46,9 @@ const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", "
 	"W.WWWWWWWW.W", "W..kWWWWk..W", "W.WWWWWWWW.W", "...WW..WW...", "...WW..WW..."]
 const GPAL := {"X": "#f6f1ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}
 # GHOST SHOT orbs are little ghosts in the shot colour (c)
-const GSHOT := [".ccc.", "ccccc", "ckckc", "ccccc", "ccccc", "c.c.c"]
-# SOUL MATE's bow and GHOSTRESS's black rose clip, drawn on top of a small ghost at (x + 7, y - 2) and (x + 7, y)
-const BOW := ["B...B", "BBdBB", "B...B"]
+const GSHOT := [".ccc.", "ckckc", "ccccc", "cckcc", "ccccc", "c.c.c"]
+# SOUL MATE's bow and GHOSTRESS's black rose clip, drawn on top of a small ghost at (x + 3, y - 2) and (x + 7, y)
+const BOW := ["BB.BB", "BBdBB", ".B.B."]
 const ROSE := [".RR.", "RrRR", "RRrR", ".RRg"]
 const ACCPAL := {"B": "#ff4f9a", "d": "#b02670", "R": "#140a1a", "r": "#7a5a8e", "g": "#3d8b3a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
@@ -1736,12 +1736,12 @@ func draw_game() -> void:
 			continue
 		var C: Dictionary = chars[p.ch]
 		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you
-		for h in [["gr", "grp", ROSE, 0], ["sm", "smp", BOW, -2]]:
+		for h in [["gr", "grp", ROSE, 7, 0], ["sm", "smp", BOW, 3, -2]]:
 			if p.has(h[0]):
 				var hx := int(round(p[h[0]].x)) - 6
 				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
 				spr(C.spr, C[h[1]][p.n], hx, hb, 1)
-				spr(h[2], ACCPAL, hx + 7, hb + h[3], 1)
+				spr(h[2], ACCPAL, hx + h[3], hb + h[4], 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
 		var px := int(round(p.x))
