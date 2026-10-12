@@ -1069,7 +1069,8 @@ func draw_jack(cx: int, cy: int, ry: int) -> void:
 	R(x0 + 18, cut - 2, 4, 1, "#ffd27a")
 	R(x0 + 2, cut - 1, 7, 1, "#ffe9b0")
 	R(x0 + 16, cut - 1, 7, 1, "#ffe9b0")
-	spr(JESTER.slice(0, 9), chars[4].pals[0], cx - 12, gy, 2)
+	# enough rows that he never hovers: at the top of the bob a row of his diamonds shows over the rim
+	spr(JESTER.slice(0, 11), chars[4].pals[0], cx - 12, gy, 2)
 	spr(PK_BOTTOM, PKCUTPAL, x0, cut, 1)
 	R(x0 + 2, cut, 21, 1, "#ffe9b0")
 	R(x0 + 2, cut + 1, 21, 1, "#ffd27a")
@@ -1300,6 +1301,14 @@ func next_wave() -> void:
 # the wave number the player sees: 1-25 in each stage (the graveyard, then the mansion)
 func shown_wave(w: int) -> int:
 	return (stage_wave(w) - 1) % YARD_WAVES + 1
+
+# which stage wave w is in, counting on past the mansion (3 is the graveyard again)
+func stage_of(w: int) -> int:
+	return (w - 1) / YARD_WAVES + 1
+
+# how a wave reads on the game over and high score screens
+func wave_text(w: int) -> String:
+	return "STAGE %d WAVE %d" % [stage_of(w), shown_wave(w)]
 
 # ---------------------------------------------------------------- difficulty
 # One number, the wave's LEVEL, drives every attack rate and shot speed. Within a stage it follows the cadence
@@ -1720,7 +1729,7 @@ func kill(e: Dictionary, fist := false) -> void:
 		# enemy after it 1 HP tougher, and its STAGE COMPLETE banner follows the DEFEATED one
 		if e.bk == 2 or e.bk == 9:
 			G.hpup += 1
-			G.after = "STAGE %d COMPLETE" % (1 if e.bk == 2 else 2)
+			G.after = "STAGE %d COMPLETE" % stage_of(G.wave)
 			G.clearing = 4.4
 		sfx("roar")
 		G.shake = 1.2
@@ -4156,7 +4165,7 @@ func draw_ui() -> void:
 						draw_texture_rect(tex(chars[cur].spr, chars[cur].pals[0]), Rect2(238, y - 4 + bob, 24, 26), false)
 			T("ARROWS OR D-PAD: MOVE   SPACE OR A: SELECT   ESC OR START: QUIT   M: MUSIC", 320, 466, 1, "#9d8cc4", 1)
 		elif panel == "score":
-			draw_panel("HIGH SCORE", [["HIGH SCORE", "%06d" % int(sv("high", 0))], ["BEST WAVE", str(int(sv("wave", 0)))],
+			draw_panel("HIGH SCORE", [["HIGH SCORE", "%06d" % int(sv("high", 0))], ["BEST WAVE", wave_text(int(sv("wave", 0))) if int(sv("wave", 0)) > 0 else "-"],
 				], "PRESS SPACE TO GO BACK")
 		elif panel == "shop":
 			draw_shop()
@@ -4198,7 +4207,7 @@ func draw_ui() -> void:
 		else:
 			draw_pause()
 	elif mode == "over":
-		var rows := [["SCORE", "%06d" % G.score], ["HIGH SCORE", "%06d" % maxi(G.high, G.score)], ["WAVE REACHED", str(G.wave)]]
+		var rows := [["SCORE", "%06d" % G.score], ["HIGH SCORE", "%06d" % maxi(G.high, G.score)], ["WAVE REACHED", wave_text(G.wave)]]
 		var ps: Array = G.players.duplicate()
 		ps.sort_custom(func(a, b): return a.n < b.n)
 		for p in ps:
@@ -4750,9 +4759,11 @@ const PAD_OFF := {"up": false, "down": false, "left": false, "right": false, "ok
 const STICK_DEAD := 0.2
 const STICK_FULL := 0.9
 
+# extra_pads: a headless test can plug in a pretend controller here (headless Godot has none of its own)
+var extra_pads: Array = []
 func poll_pads() -> void:
 	pads = {}
-	for d in Input.get_connected_joypads():
+	for d in Input.get_connected_joypads() + extra_pads:
 		var ax := Input.get_joy_axis(d, JOY_AXIS_LEFT_X)
 		var ay := Input.get_joy_axis(d, JOY_AXIS_LEFT_Y)
 		var a := Input.is_joy_button_pressed(d, JOY_BUTTON_A)

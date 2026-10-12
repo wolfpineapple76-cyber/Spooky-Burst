@@ -76,7 +76,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   - Beating the PUMPKIN KING shows STAGE 1 COMPLETE, then comes the HAUNTED MANSION (below). Beating the
     GRIM REAPER there shows STAGE 2 COMPLETE, and it starts over in the graveyard from wave 1's lineup.
     Every stage beaten makes every enemy after it +1 HP.
-- The wave counter counts 1-25 in each stage: the graveyard, then the mansion starts again at WAVE 1.
+- The wave counter counts 1-25 in each stage: the graveyard, then the mansion starts again at WAVE 1. The game
+  over screen and BEST WAVE say which stage too (STAGE 2 WAVE 7), and the stages keep counting round the loop.
 - The PRIMAL BAT swoops down at you, flies off one side and comes back in from the other to strafe across
   the whole screen dropping slow sound waves at you, fires spreads and 3-shots of dark orbs, and calls
   swarms of bats into formation. The BLACK WIDOW hangs on her thread, spits venom, dangles spiders down
