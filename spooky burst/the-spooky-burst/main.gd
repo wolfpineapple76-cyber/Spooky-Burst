@@ -1157,7 +1157,7 @@ func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st
 
 func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
-		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
+		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "after": "", "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
 		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
@@ -1206,7 +1206,7 @@ func next_wave() -> void:
 		return
 	if c > YARD_WAVES:
 		mansion_wave()
-		say("WAVE %d" % w, 1.4)
+		say("WAVE %d" % shown_wave(w), 1.4)
 		return
 	var rows := wave_rows(c)
 	for r in rows.size():
@@ -1220,7 +1220,11 @@ func next_wave() -> void:
 			G.en.append(new_spider(spot))
 		if ((c - 1) % YARD_WAVES) / 5 == 1:
 			G.sp_more = 3
-	say("WAVE %d" % w, 1.4)
+	say("WAVE %d" % shown_wave(w), 1.4)
+
+# the wave number the player sees: 1-25 in each stage (the graveyard, then the mansion)
+func shown_wave(w: int) -> int:
+	return (stage_wave(w) - 1) % YARD_WAVES + 1
 
 # where wave w is in the 50-wave loop (1-50)
 func stage_wave(w: int) -> int:
@@ -1588,11 +1592,14 @@ func kill(e: Dictionary, fist := false) -> void:
 		G.webs = []
 		G.sp_q = []
 		G.sp_more = 0
-		# every PUMPKIN KING beaten makes every enemy after him 1 HP tougher
-		if e.bk == 2:
-			G.hpup += 1
 		G.clearing = 2.4
 		say(BOSS_NAMES[e.bk] + " DEFEATED", 2.0)
+		# every stage beaten (the PUMPKIN KING ends the graveyard, the GRIM REAPER the mansion) makes every
+		# enemy after it 1 HP tougher, and its STAGE COMPLETE banner follows the DEFEATED one
+		if e.bk == 2 or e.bk == 9:
+			G.hpup += 1
+			G.after = "STAGE %d COMPLETE" % (1 if e.bk == 2 else 2)
+			G.clearing = 4.4
 		sfx("roar")
 		G.shake = 1.2
 		if e.bk == 2:
@@ -2799,6 +2806,9 @@ func update(dt: float) -> void:
 		G.bt -= dt
 		if G.bt <= 0:
 			banner = ""
+			if G.after != "":
+				say(G.after, 2.0)
+				G.after = ""
 	if G.toast != null:
 		G.toast.t -= dt
 		if G.toast.t <= 0:
@@ -3186,7 +3196,7 @@ func update(dt: float) -> void:
 	if mode == "game":
 		if G.en.is_empty() and G.sp_q.is_empty() and G.clearing <= 0:
 			G.clearing = 1.7
-			say("WAVE %d CLEARED" % w, 1.5)
+			say("WAVE %d CLEARED" % shown_wave(w), 1.5)
 			wave_drop()
 			sfx("clear")
 		if G.clearing > 0 and G.en.is_empty() and G.drops.is_empty():
@@ -3591,7 +3601,7 @@ func draw_hud() -> void:
 			T("P%d CANDY: %d" % [ps[i].n + 1, candy_of(ps[i].n)], 40, 30 + i * 11, 1, "#f6f1ff")
 	T("SCORE %06d" % G.score, 627, 12, 2, "#ffd92e", 2)
 	T("HIGH %06d" % maxi(G.high, G.score), 627, 30, 2, "#ffd92e", 2)
-	T("WAVE %d" % G.wave, 627, 48, 2, "#ffd92e", 2)
+	T("WAVE %d" % shown_wave(G.wave), 627, 48, 2, "#ffd92e", 2)
 	for p in G.players:
 		var codes := ""
 		for w in chars[p.ch].pow:

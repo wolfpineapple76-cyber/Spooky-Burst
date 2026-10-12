@@ -35,7 +35,7 @@ PROGRESSION
 
 WAVES AND ENEMIES
 - Everything is on a doubled scale (orbs do 2, bats and witches have 2 HP, vampires 12, spiders 6).
-  Each PUMPKIN KING beaten adds 1 HP to every enemy after him.
+  Each stage beaten (the PUMPKIN KING, then the GRIM REAPER) adds 1 HP to every enemy after it.
 - SPECTRAL SHOT and PUNCH THROUGH halve with each enemy they go through and stop under 1 damage, so they can't clear whole screens. There's no cap on how many they go through.
 - Each enemy enters its own way: bats swarm in from the corners, witches swoop in from the sides firing,
   vampires come as dark red-eyed bats and transform.
@@ -46,9 +46,11 @@ WAVES AND ENEMIES
 - Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the
   waves just before it, as a warning, and only then (spiders replaced up to 6 only before the BLACK WIDOW,
   the extra vampire row only before the VAMPIRE LORD, the extra witch row only before the WITCH QUEEN).
-  After the PUMPKIN KING comes Sammie's HAUNTED MANSION (waves 26-50, bosses SPIDER BEAST, THE TWINS,
-  BAT CAT, PUPPET DOLL, GRIM REAPER). After the last stage it starts over in the graveyard at wave 1's
-  lineup with every enemy tougher (+1 HP per PUMPKIN KING beaten).
+  After the PUMPKIN KING comes STAGE 1 COMPLETE, then Sammie's HAUNTED MANSION (25 waves, bosses SPIDER BEAST,
+  THE TWINS, BAT CAT, PUPPET DOLL, GRIM REAPER). After the GRIM REAPER comes STAGE 2 COMPLETE, and it starts
+  over in the graveyard at wave 1's lineup with every enemy tougher (+1 HP per stage beaten).
+- The wave counter counts 1-25 in each stage, starting again at WAVE 1 in the mansion and back in the graveyard.
+  The real wave count keeps going underneath for difficulty.
 - Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players
   (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
   Only the PUMPKIN KING gets a ring of shots. The VAMPIRE LORD stays distant and commanding, so he doesn't

@@ -68,8 +68,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
     BLACK WIDOW) a killed spider is replaced, up to 6.
   - Before the VAMPIRE LORD the top bat row is vampires instead, before the WITCH QUEEN it's witches
     instead, and before the PUMPKIN KING it's witches, vampires, witches, vampires and one row of bats.
-  - After the PUMPKIN KING comes the HAUNTED MANSION (below), and after that it starts over in the
-    graveyard from wave 1's lineup, with every enemy +1 HP for each PUMPKIN KING beaten.
+  - Beating the PUMPKIN KING shows STAGE 1 COMPLETE, then comes the HAUNTED MANSION (below). Beating the
+    GRIM REAPER there shows STAGE 2 COMPLETE, and it starts over in the graveyard from wave 1's lineup.
+    Every stage beaten makes every enemy after it +1 HP.
+- The wave counter counts 1-25 in each stage: the graveyard, then the mansion starts again at WAVE 1.
 - The PRIMAL BAT swoops down at you, flies off one side and comes back in from the other to strafe across
   the whole screen dropping slow sound waves at you, fires spreads and 3-shots of dark orbs, and calls
   swarms of bats into formation. The BLACK WIDOW hangs on her thread, spits venom, dangles spiders down
@@ -79,13 +81,13 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   random breather, and her candy corn rain always leaves a clear lane.
   The PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders,
   and they act just like the ones in a normal wave.
-- THE HAUNTED MANSION (Sammie's level 2), waves 26-50: a room inside the mansion, where spiders, possessed dolls
+- THE HAUNTED MANSION (Sammie's level 2), stage 2, waves 1-25: a room inside the mansion, where spiders, possessed dolls
   and ghosts take the place of the bats, witches and vampires (4 to a row in a checkerboard). Spiders drop
   straight down on their threads, dolls shoot buttons and swoop down in a U, ghosts cry three tears at a time.
   The pick-ups are candles: a candelabra for the power-up pumpkin and a brass candle for the treat bucket.
-  Its bosses: SPIDER BEAST (wave 30) throws sticky webs that slow you down for a moment, THE TWINS (35) shoot
-  mirror-image bows, BAT CAT (40) swoops at you and scratches along the floor, PUPPET DOLL (45) shoots big
-  buttons and sewing needles, and the GRIM REAPER (50) warns on half the floor, then slashes across it.
+  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a moment, THE TWINS (10) shoot
+  mirror-image bows, BAT CAT (15) swoops at you and scratches along the floor, PUPPET DOLL (20) shoots big
+  buttons and sewing needles, and the GRIM REAPER (25) warns on half the floor, then slashes across it.
   After the GRIM REAPER it's back to the graveyard.
 
 ## Candy and upgrades
