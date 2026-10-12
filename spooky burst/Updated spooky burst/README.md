@@ -65,4 +65,5 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.
 - Each character's power-ups are listed in `_build_chars()`.
 - `audio/` holds the music and sound effects as .wav files. Replace a file with your own of the same name to change a sound.
+  `audio/laugh.wav` (the Pumpkin King's laugh) is "Evil Laugh 2" by AntumDeluge from OpenGameArt.org, CC0 (free to use).
 - Your save is stored by Godot in its user data folder, and Reset Save on the menu erases it.

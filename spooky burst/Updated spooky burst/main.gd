@@ -355,7 +355,7 @@ func _build_audio() -> void:
 			st.loop_end = int(st.get_length() * st.mix_rate)
 		tracks.append(st)
 	for n in ["move", "select", "back", "deny", "shoot0", "shoot1", "pop", "bosshit", "hurt", "shield", "roar", "clear", "unlock",
-			"life", "treat", "candy", "gameover", "cackle", "squeak", "trick", "join", "boom", "spread", "dash", "ring"]:
+			"life", "treat", "candy", "gameover", "cackle", "squeak", "trick", "join", "boom", "spread", "dash", "ring", "laugh"]:
 		var p := AudioStreamPlayer.new()
 		p.stream = load("res://audio/%s.wav" % n)
 		p.max_polyphony = 4
@@ -1120,7 +1120,7 @@ func pk_laugh(e: Dictionary) -> void:
 			o.dead = true
 			burst(o.x, o.y, "#8a66e0", 8)
 	say("HA HA HA!", 1.8)
-	sfx("cackle")
+	sfx("laugh")
 	G.shake = 0.6
 
 func kill(e: Dictionary) -> void:
