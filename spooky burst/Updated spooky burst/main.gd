@@ -802,7 +802,7 @@ func next_wave() -> void:
 					continue
 			elif ty == "v" and (q < 2 or q > 5):
 				continue
-			G.en.append(new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 3 if ty == "v" else 1, "enter"))
+			G.en.append(new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 2 if in_mansion() else (3 if ty == "v" else 1), "enter"))
 	say("WAVE %d" % w, 1.4)
 
 # ---------------------------------------------------------------- co-op
@@ -1111,6 +1111,18 @@ func game_over() -> void:
 	sfx("gameover")
 	sv_set("high", maxi(G.high, G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
+
+# mansion doll: a button shot at one of the players
+func button(e: Dictionary) -> void:
+	var alive_p := live()
+	if alive_p.is_empty():
+		return
+	var tg: Dictionary = pick(alive_p)
+	var dx: float = tg.x - e.x
+	var dy: float = 209 - e.y
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	var sp: float = 85.0 + G.wave * 3
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "btn", "ph": 0.0, "dead": false})
 
 func corn(e: Dictionary) -> void:
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
@@ -1424,6 +1436,30 @@ func update(dt: float) -> void:
 				e.pass += 1
 				if e.pass >= 2:
 					e.st = "return"
+		elif e.st == "drop":
+			# mansion spider: straight down on its thread, a short hang at the players' height, then back up
+			if e.n == 0:
+				e.y += (120 + w * 4) * dt
+				if e.y >= 200:
+					e.y = 200
+					e.n = 1
+					e.spt = 0.5
+			elif e.n == 1:
+				e.spt -= dt
+				if e.spt <= 0:
+					e.n = 2
+			else:
+				e.y -= 80 * dt
+				if e.y <= ty + 4:
+					e.st = "return"
+		elif e.st == "swoop":
+			# mansion doll: a U-shaped swoop down towards the players and back up on the other side
+			e.spt += dt
+			var k := minf(1.0, e.spt / 1.6)
+			e.x = e.spa + e.dir * e.dz * k
+			e.y = e.fy + (196 - e.fy) * sin(PI * k)
+			if k >= 1.0:
+				e.st = "return"
 		elif e.st == "dive":
 			var tg := nearest(e.x)
 			e.vx = clampf(e.vx + signf(tg.x - e.x) * 220 * dt, -95, 95)
@@ -1447,7 +1483,16 @@ func update(dt: float) -> void:
 	G.dive -= dt
 	if G.dive <= 0:
 		var bats := formed("b")
-		if not bats.is_empty():
+		if not bats.is_empty() and in_mansion() and not live().is_empty():
+			var tx0: float = pick(live()).x
+			var e: Dictionary = bats[0]
+			for sp in bats:
+				if absf(sp.x - tx0) < absf(e.x - tx0):
+					e = sp
+			e.st = "drop"
+			e.n = 0
+			sfx("squeak")
+		elif not bats.is_empty():
 			var e: Dictionary = pick(bats)
 			e.st = "dive"
 			e.vx = 0.0
@@ -1456,7 +1501,9 @@ func update(dt: float) -> void:
 	G.wt -= dt
 	if G.wt <= 0:
 		var ws := formed("w")
-		if not ws.is_empty():
+		if not ws.is_empty() and in_mansion():
+			button(pick(ws))
+		elif not ws.is_empty():
 			corn(pick(ws))
 		G.wt = maxf(0.45, 1.25 - w * 0.07)
 	G.wf -= dt
@@ -1464,11 +1511,19 @@ func update(dt: float) -> void:
 		var ws := formed("w")
 		if not ws.is_empty():
 			var e: Dictionary = pick(ws)
-			e.st = "fly"
-			e.dir = 1 if e.x < 160 else -1
-			e.fy = 118 + randf() * 30
-			e.pass = 0
-			e.drop = 0.3
+			if in_mansion():
+				e.st = "swoop"
+				e.dir = 1 if e.x < 160 else -1
+				e.spa = e.x
+				e.fy = e.y
+				e.dz = (292.0 - e.x) if e.dir > 0 else (e.x - 28.0)
+				e.spt = 0.0
+			else:
+				e.st = "fly"
+				e.dir = 1 if e.x < 160 else -1
+				e.fy = 118 + randf() * 30
+				e.pass = 0
+				e.drop = 0.3
 			sfx("cackle")
 		G.wf = maxf(1.6, 3.6 - w * 0.2)
 	G.vt -= dt
@@ -1481,7 +1536,13 @@ func update(dt: float) -> void:
 			var dx: float = tg.x - e.x
 			var dy: float = 209 - e.y
 			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
+			if in_mansion():
+				# mansion ghost: three spectral tears in a small spread
+				var a := atan2(dy, dx)
+				for da in [-0.25, 0.0, 0.25]:
+					G.eb.append({"x": e.x, "y": e.y + 8, "vx": cos(a + da) * 62, "vy": sin(a + da) * 62, "k": "t", "ph": 0.0, "dead": false})
+			else:
+				G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
 		G.vt = maxf(1.2, 2.8 - w * 0.1)
 
 	for b in G.eb:
@@ -1530,7 +1591,7 @@ func update(dt: float) -> void:
 		for e in G.en:
 			if e.dead:
 				continue
-			if e.ty != "B" and e.st == "dive" and absf(e.x - p.x) < 14 and absf(e.y - 209) < 13:
+			if e.ty != "B" and (e.st == "dive" or e.st == "drop" or e.st == "swoop") and absf(e.x - p.x) < 14 and absf(e.y - 209) < 13:
 				kill(e)
 				hurt(p)
 				break
@@ -1640,7 +1701,7 @@ func draw_game() -> void:
 			var ex := int(round(e.x))
 			var ey := int(round(e.y))
 			if e.ty == "b":
-				if e.st == "dive":
+				if e.st == "dive" or e.st == "drop":
 					R(ex, 0, 1, maxi(0, ey - 10), "#c9b8ee", 0.6)   # dropping down on its thread
 				spr(SPIDER2, L2PAL, ex - 13, ey - 11, 2, fl)
 			elif e.ty == "w":
@@ -1678,7 +1739,17 @@ func draw_game() -> void:
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "c":
+		if b.k == "btn":
+			R(x - 1, y - 2, 3, 5, "#ffd92e")
+			R(x - 2, y - 1, 5, 3, "#ffd92e")
+			R(x - 1, y, 1, 1, "#8a5a10")
+			R(x + 1, y, 1, 1, "#8a5a10")
+		elif b.k == "t":
+			R(x - 2, y - 2, 5, 5, "#7df2ff", 0.25)
+			R(x - 1, y - 1, 3, 3, "#7df2ff")
+			R(x, y - 3, 1, 2, "#7df2ff")
+			R(x, y, 1, 1, "#ffffff")
+		elif b.k == "c":
 			R(x - 2, y - 3, 5, 2, "#ffd92e")
 			R(x - 1, y - 1, 3, 2, "#ff8a1f")
 			R(x, y + 1, 1, 2, "#fffaf0")
