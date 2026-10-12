@@ -154,6 +154,7 @@ var chars: Array = []
 var tcache := {}
 var gcache := {}
 var stars: Array = []
+var mansion_tex: Texture2D
 var things: Array = []
 var t := 0.0
 var mode := "menu"      # menu, game, pause, over
@@ -656,6 +657,14 @@ func draw_graveyard(boss_here: bool) -> void:
 	if boss_here:
 		R(0, 0, 320, 240, "#ff1133", 0.07)
 		ellipse(56, 46, 21, 21, "#d1122e", 0.6)
+
+# level 2: the haunted mansion room (mansion.png, 320x240)
+func draw_mansion(boss_here: bool) -> void:
+	if mansion_tex == null:
+		mansion_tex = load("res://mansion.png")
+	draw_texture(mansion_tex, Vector2.ZERO)
+	if boss_here:
+		R(0, 0, 320, 240, "#ff1133", 0.07)
 
 # ---------------------------------------------------------------- game helpers
 func say(s: String, dur: float) -> void:
@@ -1570,9 +1579,13 @@ func draw_game() -> void:
 	for e in G.en:
 		if e.ty == "B":
 			B = e
-	draw_graveyard(B != null)
+	var indoors: bool = G.wave > 15
+	if indoors:
+		draw_mansion(B != null)
+	else:
+		draw_graveyard(B != null)
 	for i in stars.size():
-		if i % 3 == 0:
+		if i % 3 == 0 and not indoors:
 			var s: Array = stars[i]
 			R(s[0], s[1], 1, 1, "#ffffff", 0.5 + 0.5 * sin(gt * 2 + s[2]))
 	for k in G.candy:
