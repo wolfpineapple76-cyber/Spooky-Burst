@@ -1714,12 +1714,13 @@ func draw_game() -> void:
 	for s in G.shots:
 		var x := int(round(s.x))
 		var y := int(round(s.y))
-		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
-		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
 		var col: String = s.col
+		# GHOST SHOT has no glow trail, which made it look like a sign on a post
 		if s.gs:
 			spr(GSHOT, {"c": col, "k": "#1b0f33"}, x - 2, y - 3, 1)
 			continue
+		R(x - 3, y - 3, 7, 7, "#cfe0ff", 0.25)
+		R(x - 1, y + 4, 3, 6, "#cfe0ff", 0.25)
 		R(x - 2, y - 1, 5, 3, col)
 		R(x - 1, y - 2, 3, 5, col)
 		# ORB SIZE boosts show a little at 5+, always smaller than BIG ORB, and grow BIG ORB further
