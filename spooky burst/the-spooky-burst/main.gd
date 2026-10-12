@@ -1709,10 +1709,13 @@ func kill(e: Dictionary, fist := false) -> void:
 			burst(e.x + (randf() - 0.5) * 50, e.y + (randf() - 0.5) * 36, "#b3122e" if i % 2 == 1 else "#ffd92e", 14)
 		for i in 6:
 			drop_candy(e.x + (i - 2.5) * 16, e.y)
-		# SUGAR RUSH: it tosses one high into the air, two if 3 or 4 players are alive right now
+		# SUGAR RUSH: it tosses one high into the air, two if 3 or 4 players are alive right now. They fall beside
+		# the candy (which spreads 40 px either side of the boss), never through it: one on the side with more
+		# room, two one each side
 		var n_sr := 2 if live().size() >= 3 else 1
 		for i in n_sr:
-			G.drops.append({"x": clampf(e.x + (i * 2 - (n_sr - 1)) * 60, 40.0, 280.0), "y": -12.0, "k": "r", "dead": false})
+			var side := (1.0 if e.x < 160 else -1.0) if n_sr == 1 else (i * 2.0 - 1.0)
+			G.drops.append({"x": clampf(e.x + side * 72, 30.0, 290.0), "y": -12.0, "k": "r", "dead": false})
 		for o in G.en:
 			if not o.dead:
 				o.dead = true

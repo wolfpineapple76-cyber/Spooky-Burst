@@ -110,7 +110,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - Each character has a SPECIAL, its own boost worth 2 steps: the Ghost's fire rate, the Cat's move speed, the
   Zombie's damage, the Skeleton's shot speed, the Jester's safe time after a hit. Its CHARACTERS page names it.
 - SUGAR RUSH: when a boss dies it tosses a cotton candy high into the air (two if 3 or 4 players are alive at
-  that moment). Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
+  that moment). It falls beside the boss's candy, never through it, so you choose which to go for. Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
   SUG 1 to SUG 10 on the prestige line under your power-up codes. It's lost with your power-ups and boosts when
   you're out of lives.
 - Once the Jester is bought he pops out of the pumpkin on the right of the title screen, bobbing like a

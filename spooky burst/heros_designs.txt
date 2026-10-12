@@ -26,7 +26,7 @@ PROGRESSION
   Zombie damage, Skeleton shot speed, Jester longer safety (he's built around taking a hit and bouncing back).
   Its page in CHARACTERS names it (SPECIAL: ... +2); the join picker never does.
 - SUGAR RUSH (cotton candy): a boss tosses one high into the air when it dies, two if 3-4 players are alive at
-  that moment. Each one caught adds +1 to the catcher's SPECIAL, up to 10 (so +12 in all), and it's lost with
+  that moment. It falls beside the candy stream, not through it: you choose which to go for. Each one caught adds +1 to the catcher's SPECIAL, up to 10 (so +12 in all), and it's lost with
   the power-ups and boosts on death. The HUD shows SUG 1 to SUG 10 on the prestige line, in its style, since
   it's more special than the power-ups. Build back up by surviving, not handouts.
 - The treat bucket's POWER TREAT (5%) is one of the pumpkin's small boosts, never a character ability.
