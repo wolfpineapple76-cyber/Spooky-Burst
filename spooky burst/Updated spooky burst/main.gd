@@ -796,9 +796,11 @@ func next_wave() -> void:
 	for r in rows.size():
 		var ty: String = rows[r]
 		for q in 8:
-			if ty == "v" and (q < 2 or q > 5):
-				continue
-			if ty == "b" and in_mansion() and (q + r) % 2 == 1:
+			# in the mansion every row has 4, in a checkerboard so they are spread across the room
+			if in_mansion():
+				if (q + r) % 2 == 1:
+					continue
+			elif ty == "v" and (q < 2 or q > 5):
 				continue
 			G.en.append(new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 3 if ty == "v" else 1, "enter"))
 	say("WAVE %d" % w, 1.4)
