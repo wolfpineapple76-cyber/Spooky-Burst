@@ -456,6 +456,11 @@ var cfg := ConfigFile.new()
 var pads := {}
 var prev_pads := {}
 var banner := ""
+# the debug console: "/" opens it, Enter runs a command, Esc closes it
+var con_open := false
+var con_text := ""
+var con_msg := ""
+var con_mt := 0.0
 var muted := false
 var music: AudioStreamPlayer
 var tracks: Array = []
@@ -1306,6 +1311,7 @@ func share_lives(np: Dictionary) -> void:
 		var rich := live().filter(func(p): return not is_same(p, np) and p.lives == top)
 		var d: Dictionary = pick(rich)
 		d.lives -= 1
+		wicked(d)
 		np.lives += 1
 
 # a player leaving hands their lives to whoever has the fewest, up to 5 each
@@ -1529,6 +1535,7 @@ func award(p: Dictionary) -> void:
 	p.eq[pw[0]] = true
 	G.toast = {"key": pw[0], "title": pw[1], "desc": pw[2], "n": p.n, "t": 2.6}
 	sfx("unlock")
+	wicked(p)
 
 # a random boost that isn't maxed yet; once every boost is maxed, points instead
 func give_boost(p: Dictionary) -> void:
@@ -1619,6 +1626,15 @@ func kill(e: Dictionary, fist := false) -> void:
 		drop_candy(e.x, e.y)
 	sfx("pop")
 
+# WICKED CLOWN: the moment he's at 1 life (hit, a joining player taking a life, or catching it while already
+# at 1) he gets one straight back, and it's used up (a pumpkin can give it to him again)
+func wicked(p: Dictionary) -> void:
+	if p.lives == 1 and p.eq.has("wicked"):
+		p.eq.erase("wicked")
+		p.lives += 1
+		say("WICKED CLOWN!", 1.4)
+		sfx("life")
+
 func hurt(p: Dictionary) -> void:
 	if p.eq.has("shield") and p.sh <= 0:
 		p.sh = 15.0
@@ -1629,13 +1645,7 @@ func hurt(p: Dictionary) -> void:
 	p.lives -= 1
 	if p.eq.has("pinata"):
 		pinata(p)
-	# WICKED CLOWN: the first time he's down to 1 life he gets one straight back, and it's used up (a pumpkin can
-	# give it to him again)
-	if p.lives == 1 and p.eq.has("wicked"):
-		p.eq.erase("wicked")
-		p.lives += 1
-		say("WICKED CLOWN!", 1.4)
-		sfx("life")
+	wicked(p)
 	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe"))
 	burst(p.x, 209, "#ffffff", 16)
 	sfx("hurt")
@@ -4022,6 +4032,7 @@ func _draw() -> void:
 		draw_game()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	draw_ui()
+	draw_console()
 
 # ---------------------------------------------------------------- menu logic
 # Display settings: full screen or windowed, the window size (whole multiples of the 640x480 game so the
@@ -4344,9 +4355,84 @@ func draw_swatch() -> void:
 				R(x - 3, y - 3, 28, 28, "#f6f1ff")
 			R(x, y, 22, 22, SWATCH[r][c + 1])
 
+# ---------------------------------------------------------------- debug console
+# For testing. "/" opens a command line along the bottom; the game pauses and every key goes to it.
+#   /debug stage 1 or 2   start that stage at wave 1, with the HP boost it would have
+#   /debug gc p1-p4 N     give that player slot N candy
+func con_key(event: InputEventKey) -> void:
+	var k := event.keycode
+	if k == KEY_ESCAPE:
+		con_open = false
+	elif k == KEY_ENTER or k == KEY_KP_ENTER:
+		con_run(con_text)
+	elif k == KEY_BACKSPACE:
+		con_text = con_text.left(-1)
+		if con_text == "":
+			con_open = false
+	elif event.unicode >= 32 and event.unicode < 127 and con_text.length() < 40:
+		con_text += char(event.unicode)
+
+func con_run(cmd: String) -> void:
+	var w := cmd.to_lower().strip_edges().trim_prefix("/").split(" ", false)
+	var msg := ""
+	if w.size() == 3 and w[0] == "debug" and w[1] == "stage" and (w[2] == "1" or w[2] == "2"):
+		msg = debug_stage(int(w[2]))
+	elif w.size() == 4 and w[0] == "debug" and w[1] == "gc" and w[2] in ["p1", "p2", "p3", "p4"] and w[3].is_valid_int():
+		var n := int(w[2].substr(1)) - 1
+		add_candy(n, maxi(int(w[3]), -candy_of(n)))
+		msg = "P%d CANDY: %d" % [n + 1, candy_of(n)]
+	if msg == "":
+		con_msg = "UNKNOWN COMMAND"
+	else:
+		con_msg = msg
+		con_open = msg == "START A GAME FIRST"
+	con_mt = 2.5
+
+# clears the screen like a boss kill and starts the stage at its wave 1
+func debug_stage(st: int) -> String:
+	if mode != "game" and mode != "pause":
+		return "START A GAME FIRST"
+	for o in G.en:
+		o.dead = true
+	G.en = []
+	G.eb = []
+	G.shots = []
+	G.webs = []
+	G.sp_q = []
+	G.sp_more = 0
+	G.slash = null
+	G.boom = null
+	G.rot = null
+	G.clearing = 0.0
+	G.after = ""
+	G.hpup = st - 1
+	G.wave = (st - 1) * YARD_WAVES
+	next_wave()
+	return "STAGE %d" % st
+
+func draw_console() -> void:
+	if con_mt > 0 and con_msg != "":
+		R(0, 432, text_w(con_msg, 2) + 16, 24, "#000000", 0.85)
+		T(con_msg, 8, 438, 2, "#ffd92e")
+	if not con_open:
+		return
+	R(0, 456, 640, 24, "#000000")
+	T(con_text, 8, 462, 2, "#f6f1ff")
+	if fmod(t, 0.8) < 0.4:
+		R(8 + text_w(con_text, 2), 462, 10, 14, "#f6f1ff")
+
 # ---------------------------------------------------------------- input
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	if event is InputEventKey and event.pressed:
+		if con_open:
+			con_key(event)
+			return
+		if event.echo:
+			return
+		if event.unicode == 47 or event.keycode == KEY_SLASH:
+			con_open = true
+			con_text = "/"
+			return
 		on_key(event.keycode)
 
 func on_key(k: int) -> void:
@@ -4506,9 +4592,12 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 func _process(delta: float) -> void:
 	var dt := minf(0.05, delta)
 	t += delta
-	poll_pads()
-	if mode == "game":
-		update(dt)
+	con_mt = maxf(0.0, con_mt - delta)
+	# while the debug console is open it has the keys and the game waits
+	if not con_open:
+		poll_pads()
+		if mode == "game":
+			update(dt)
 	if mode == "menu" and t - open_cache_t > 0.8:
 		open_cache_t = t
 		open_cache = []

@@ -65,6 +65,10 @@ MENUS AND CONTROLS
   and the player number is played down.
 - Settings: full screen and windowed are separate from window size. Window sizes are clean multiples
   of the game size, and real 16:9 can come later.
+- Debug console for testing: "/" opens a command line along the bottom, Enter runs it, Esc closes it.
+  The game pauses while it's open and every key goes to it.
+    /debug stage 1 or /debug stage 2   start that stage at wave 1, with the HP boost it would have
+    /debug gc p3 500                   give that player slot (p1-p4) that much candy
 
 CHARACTER LOOKS
 - A character's name sets its look: the Black Cat is always black. Players tell cats apart by a coloured tummy.

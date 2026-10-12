@@ -143,8 +143,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   enemies and webs (damaging the webs too), leaning a little toward the next enemy, but not off the sides or
   the floor. Each time one goes off the top it falls back down, speeding up as it falls and drifting
   1-2 character widths left or right at random.
-- WICKED CLOWN gives him a life back the first time he's down to 1, then it's used up until a pumpkin gives it
-  again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
+- WICKED CLOWN gives him a life back the moment he's down to 1 (even if he catches it while already on 1),
+  then it's used up until a pumpkin gives it again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
 - JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
   one, kicking it 1-2 rows up toward another player, then the Jester, then a random spot, in turn. They block
   enemy shots, do 2 damage to enemies they touch and never leave the play area.
