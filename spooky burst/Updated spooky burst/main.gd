@@ -99,6 +99,18 @@ const PKING := ["..............................", "...........Y......Y..........
 	".....oooooMMMooooMMMooooo.....", "........DDDMMMMMMMMDDD........", "...........DDDDDDDD...........", ".............................."]
 const PKPAL := {"D": "#7a3006", "J": "#c9a24a", "M": "#c2520c", "Y": "#ffd92e", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "r": "#ff3355",
 	"y": "#ffe45c"}
+# level 2 enemies (the mansion, from wave 16)
+# black widow spider, hanging head-down (moves like the bats)
+const SPIDER2 := ["....kkkkk....", "...kkrrrkk...", "l..kkkrkkk..l", ".l.kkrrrkk.l.", "..lkKkkkKkl..", "l..lkkkkkl..l", ".l..lkkkl..l.",
+	"..llkekekll..", "l...lkkkl...l", ".l..l...l..l.", "..l.......l.."]
+# possessed doll: red pigtails, pink bows, stitched smile (moves like the witches)
+const DOLL2 := ["....HHHHH....", "...HHHHHHH...", "pp.HHHHHHH.pp", "HHHHSSSSSHHHH", "II.SkSSSkS.II", "I..SaSSSaS..I", "...SSrrrSS...",
+	"...uduuudu...", "..SuydddyuS..", "...ddddddd...", "...ddUdUdd...", "...dd...dd...", "...kk...kk..."]
+# poltergeist: tattered sheet with red eyes (moves like the vampires)
+const GHOST2 := ["...zzzzzz...", "..zzzzzzzz..", ".zzrzzzzrzz.", ".zzrzzzzrzz.", "zzzzzzzzzzzz", "zzzzzmmzzzzz", "zzzzzmmzzzzz", "zzzzzzzzzzzz",
+	"zZzzZzzZzzZz", "z.zZ.zZ.zZ.z", "...z..z..z.."]
+const L2PAL := {"H": "#e0482a", "I": "#a8301c", "K": "#5a4a8a", "S": "#f3e2d4", "U": "#33519c", "Z": "#a8c8e8dd", "a": "#ffb3c9", "d": "#4a6fc4",
+	"e": "#ff5c5c", "k": "#14101f", "l": "#7a6aa8", "m": "#b8a890", "p": "#ff7fb5", "r": "#ff3355", "u": "#f0f0f0", "y": "#ffd92e", "z": "#e8f6ffdd"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1615,6 +1627,18 @@ func draw_game() -> void:
 				spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
 					spr(CROWN, EPAL, bx + 20, by - 8, 4, fl)
+		elif indoors:
+			# in the mansion the bats, witches and vampires are replaced by spiders, dolls and ghosts
+			var ex := int(round(e.x))
+			var ey := int(round(e.y))
+			if e.ty == "b":
+				if e.st == "dive":
+					R(ex, 0, 1, maxi(0, ey - 10), "#c9b8ee", 0.6)   # dropping down on its thread
+				spr(SPIDER2, L2PAL, ex - 13, ey - 11, 2, fl)
+			elif e.ty == "w":
+				spr(DOLL2, L2PAL, ex - 13, ey - 13, 2, fl)
+			else:
+				spr(GHOST2, L2PAL, ex - 12, ey - 11, 2, fl)
 		elif e.ty == "b":
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
