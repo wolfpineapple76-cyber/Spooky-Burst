@@ -1774,9 +1774,8 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 				"sp": sp, "hit": [], "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y,
 				"bell": jest and not trick, "tb": trick}
 			if trick:
-				# TRICK SHOT: a ball doing 1 damage (boosted as usual) that has one hit per third of that damage
+				# TRICK SHOT: a ball doing 1 damage (boosted as usual) with no limit on hits
 				s.dmg = 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
-				s.hl = int(floor(s.dmg * 3.0 + 0.0001))
 				s.vy = -sp
 				s.grav = false
 				s.inside = null
@@ -2151,10 +2150,9 @@ func swept(s: Dictionary, y: float, h: float) -> bool:
 	var py: float = s.get("py", s.y)
 	return y > minf(s.y, py) - h and y < maxf(s.y, py) + h
 
-# TRICK SHOT's balls fly straight until they've gone off the top once; from then on gravity pulls them back down,
-# speeding up as they fall. Every time one goes off the top it comes back with one more hit, pushed 1-2 character
-# widths left or right. They don't bounce off
-# the sides: off the left, the right or the bottom they're gone.
+# TRICK SHOT's balls have no limit on hits. They fly straight until they've gone off the top once; from then on
+# gravity pulls them back down, speeding up as they fall. Every time one goes off the top it comes back pushed 1-2
+# character widths left or right. They don't bounce off the sides: off the left, the right or the bottom they're gone.
 const TRICK_GRAV := 520.0
 func trick_move(s: Dictionary, dt: float) -> void:
 	s.pxl = s.x
@@ -2164,7 +2162,6 @@ func trick_move(s: Dictionary, dt: float) -> void:
 	s.y += s.vy * dt
 	if s.y < -6 and s.vy < 0 and not s.get("up", false):
 		s.up = true
-		s.hl += 1
 		s.grav = true
 		# a slight wind push: it comes back down 1-2 character widths (24-48 px) to the left or right of where it
 		# would have, at random, so shots straight up come down on both sides
@@ -2175,7 +2172,7 @@ func trick_move(s: Dictionary, dt: float) -> void:
 	if s.x < -6 or s.x > 326 or s.y > 246:
 		s.dead = true
 
-# a TRICK SHOT ball against the enemies: any enemy, the same one again included, as long as the ball has hits left.
+# a TRICK SHOT ball against the enemies: any enemy, the same one again included, any number of times.
 # (inside is the one it's touching right now, so one touch is one hit)
 func trick_hits(s: Dictionary) -> void:
 	if s.inside != null and (s.inside.dead or not trick_touch(s, s.inside)):
@@ -2185,11 +2182,8 @@ func trick_hits(s: Dictionary) -> void:
 			continue
 		e.hp -= s.dmg
 		e.flash = 0.1
-		s.hl -= 1
 		s.inside = e
-		trick_bounce(s, e)
-		if s.hl <= 0:
-			s.dead = true
+		trick_bounce(s, e.x, e.y, (27 if e.ty == "B" else 11) + s.grow, (20 if e.ty == "B" else 9) + s.grow / 2.0, e)
 		if e.hp <= 0:
 			down(e)
 		else:
@@ -2201,14 +2195,13 @@ func trick_touch(s: Dictionary, e: Dictionary) -> bool:
 	var hh: float = (20 if e.ty == "B" else 9) + s.grow / 2.0
 	return absf(s.x - e.x) < hw and swept(s, e.y, hh)
 
-# a TRICK SHOT ball bounces off enemy e like a ball off a box (its hit area): off a side it turns back sideways
-# and keeps going up or down, off the bottom or the top it turns back up or down. Which side it hit is the one
-# it crossed last on its way in. It leans a little toward the nearest other enemy and keeps its speed.
-func trick_bounce(s: Dictionary, e: Dictionary) -> void:
-	var hw: float = (27 if e.ty == "B" else 11) + s.grow
-	var hh: float = (20 if e.ty == "B" else 9) + s.grow / 2.0
-	var px: float = s.get("pxl", s.x) - e.x
-	var py: float = s.get("py", s.y) - e.y
+# a TRICK SHOT ball bounces off a box (an enemy's hit area or a web tile) centred on cx, cy, hw by hh either side:
+# off a side it turns back sideways and keeps going up or down, off the bottom or the top it turns back up or down.
+# Which side it hit is the one it crossed last on its way in. It leans a little toward the nearest enemy (other
+# than e, the one it just hit, if any) and keeps its speed.
+func trick_bounce(s: Dictionary, cx: float, cy: float, hw: float, hh: float, e) -> void:
+	var px: float = s.get("pxl", s.x) - cx
+	var py: float = s.get("py", s.y) - cy
 	var side: bool
 	if absf(px) < hw:
 		side = false
@@ -2577,6 +2570,21 @@ func update(dt: float) -> void:
 		wb.flash = wb.get("flash", 0.0) - dt
 	for s in G.shots:
 		if s.dead:
+			continue
+		# TRICK SHOT balls bounce off webs, damaging them like a hit (one touch is one hit)
+		if s.get("tb", false):
+			var iw = s.get("inweb")
+			if iw != null and (iw.hp <= 0 or not (absf(s.x - web_x(iw, sway)) < 9 and swept(s, iw.y, 5.0))):
+				s.inweb = null
+			for wb in G.webs:
+				if wb.hp > 0 and not is_same(wb, s.get("inweb")) and absf(s.x - web_x(wb, sway)) < 9 and swept(s, wb.y, 5.0):
+					wb.hp -= s.dmg
+					wb.flash = 0.1
+					if wb.hp <= 0:
+						burst(web_x(wb, sway), wb.y, "#d8d2e8", 8)
+					s.inweb = wb
+					trick_bounce(s, web_x(wb, sway), wb.y, 9.0, 5.0, null)
+					break
 			continue
 		for wb in G.webs:
 			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and swept(s, wb.y, 5.0):
