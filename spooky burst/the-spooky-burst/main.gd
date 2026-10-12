@@ -27,7 +27,9 @@ const HATPAL := {"P": "#7a35d6", "O": "#ff8a1f", "K": "#5a5285", "R": "#e0364f",
 const HANGBAT := ["...X.X...", "...XXX...", "..XXXXX..", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", "..XXXXX..", "..XlXrX..", "..XXXXX..", "..X...X.."]
 const BATA := ["X...X.X...X", "XX.XXXXX.XX", "XXXXXXXXXXX", ".XXXeXeXXX.", "..X.XXX.X.."]
 const BATB := ["....X.X....", "...XXXXX...", ".XXXeXeXXX.", "XXXXXXXXXXX", "XX..XXX..XX", "X.........X"]
-const WITCH := [".....P.....", "....PPP....", "...POOOP...", "..PPPPPPP..", "...GGGGG...", "...GkGkG...", "...PPPPP...", "BBBBBBBBBYY"]
+# the witch enemy: a small witch riding a broomstick, facing right (WITCH) or left (WITCH_L)
+const WITCH := ["P...........", ".PP.........", "..PPP.......", "..OOOO......", "PPPPPPPP....", "...GkGGG....", "..PPPPP.....", "YYYBBBBBBBBB", "YY..PPk....."]
+const WITCH_L := ["...........P", ".........PP.", ".......PPP..", "......OOOO..", "....PPPPPPPP", "....GGGkG...", ".....PPPPP..", "BBBBBBBBBYYY", ".....kPP..YY"]
 const VAMP := ["...KKKKK...", "...SSSSS...", "...SrSrS...", "...SWSWS...", ".RRKKKKKRR.", "RRRKKRKKRRR", "RRRKKKKKRRR", "R.R.K.K.R.R"]
 const VLORD := ["....KKKKKKK....", "...KKKKKKKKK...", "...KSSSSSSSK...", "...SrrSSSrrS...", "...SSSSSSSSS...", "...SWSmmmSWS...", "R...SSSSSSS...R",
 	"RR.KKKRRRKKK.RR", "RRRKKKKRKKKKRRR", "RRRKKKKYKKKKRRR", "RRRRKKKKKKKRRRR", "RR.RKKKKKKKR.RR", "R...KK...KK...R"]
@@ -1482,6 +1484,8 @@ func update(dt: float) -> void:
 				e.x += sin(e.t * 1.7) * 10
 				e.y += sin(e.t * 3.4) * 5
 		elif e.st == "fly":
+			# witches face the way they're flying, and keep that facing in formation
+			e.face = e.dir
 			e.x += e.dir * 105 * dt
 			e.y += ((e.fy + sin(e.t * 5) * 14) - e.y) * minf(1.0, 4 * dt)
 			e.drop -= dt
@@ -1506,6 +1510,8 @@ func update(dt: float) -> void:
 			var dx: float = tx - e.x
 			var dy: float = ty - e.y
 			var d := sqrt(dx * dx + dy * dy)
+			if absf(dx) > 2:
+				e.face = int(signf(dx))
 			if d < 4:
 				e.st = "form"
 			else:
@@ -1712,7 +1718,10 @@ func draw_game() -> void:
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
 		else:
-			spr(WITCH if e.ty == "w" else VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+			if e.ty == "w":
+				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, EPAL, x - 1, int(round(e.y)) - 9, 2, fl)
+			else:
+				spr(VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
