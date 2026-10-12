@@ -2017,7 +2017,7 @@ func shop_note() -> String:
 		return chars[sch].pow[scur - 1][2] + "."
 	if sch >= 0 and scur == chars[sch].pow.size() + 1 and pre_shown(stab, sch):
 		var why := pre_why(stab, sch)
-		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, FOR GOOD." % chars[sch].name
+		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch < 0 and scur == chars.size() and owned_chars(stab).size() >= 2:
 		return "PLAY A RANDOM ONE OF YOUR CHARACTERS EACH GAME."
 	if sch >= 0 and not has_char(stab, sch):
