@@ -170,27 +170,26 @@ const PKROT3 := ["..............................", "............................
 	"..n.nG..nn.nn.GGnn.nn.G.Gnn...", "....nnG...Gn..nnnn.G.G.Gn.....", ".....nn.GnnG.Gnn.nGnnGGnn.....", ".....nnnn.n..GG..GGnnn.nn....."]
 const PK2PAL := {"D": "#7a3006", "E": "#3ad65a", "G": "#4f6a2a", "J": "#c9a24a", "M": "#c2520c", "Y": "#ffd92e", "b": "#4a2a10", "e": "#9dff6a",
 	"g": "#8aa04a", "n": "#24140a", "r": "#ff3355", "z": "#0c0806"}
-# mansion bosses: the bat-winged cat portrait (wave 30) and the giant puppet doll (wave 35)
-const CATBOSS := ["......LLLLLjjjjjjjjjjLLLLjjjjjjjjjjLLLLL......", "......LLLLLJJJJJJJJJJvvvbbJJJJJJJJJLLLLL......",
-	".......LLLjjjjjjjjjjjvvvbbjjjjjjjjjjLLL.......", "........jJjjjjjjjjjvvvvvvvvjjjjjjjjjJj........",
-	"........jJjjBBBBBBBvvvvvvvvBBBBBBBjjJj........", ".Q......jJjjBBBBKkKvvvvvvvvKkKBBBBjjJj......Q.",
-	".qQq....jJjjBBBBKkkvvvvvvvvkkKBBBBjjJj....qQq.", ".qqQQqq.jJjjbbbKkkkOOOOOOOOkkkKbbbjjJj.qqQQqq.",
-	".qqqqQqqqJjjbbbvvvvvvvvvvvvvvvvbbbjjJqqqQqqqq.", ".qqqqqQqqqjjbbKvvvvvvvvvvvvvvvvKbbjjqqqQqqqqq.",
-	".qqqqqqQqqqjbbKkkkkkkkkkkkkkkkkKbbjqqqQqqqqqq.", ".qqqqqqqQqQqbbbbKKkkkkkkkkkkKKbbbbqQqQqqqqqqq.",
-	"qqqqqqqqqqqQqbbbKkkkkkkkkkkkkKbbbqQqqqqqqqqqqq", "qqqqqqqqqqqqQqbKkkkkkkkkkkkkkkKbqQqqqqqqqqqqqq",
+# mansion bosses: the bat cat in a witch hat (wave 30) and the giant puppet doll (wave 35)
+const CATBOSS := ["..............................................", ".....................vvv......................",
+	".....................vvv......................", "...................vvvvvvvv...................",
+	"...................vvvvvvvv...................", ".Q..............KkKvvvvvvvvKkK..............Q.",
+	".qQq............KkkvvvvvvvvkkK............qQq.", ".qqQQqq........KkkkOOOOOOOOkkkK........qqQQqq.",
+	".qqqqQqqq......vvvvvvvvvvvvvvvv......qqqQqqqq.", ".qqqqqQqqq....KvvvvvvvvvvvvvvvvK....qqqQqqqqq.",
+	".qqqqqqQqqq...KkkkkkkkkkkkkkkkkK...qqqQqqqqqq.", ".qqqqqqqQqQq....KKkkkkkkkkkkKK....qQqQqqqqqqq.",
+	"qqqqqqqqqqqQq...KkkkkkkkkkkkkK...qQqqqqqqqqqqq", "qqqqqqqqqqqqQq.KkkkkkkkkkkkkkkK.qQqqqqqqqqqqqq",
 	"qqqqqqqqqqqqqQqKkkkYXkkkkXYkkkKqQqqqqqqqqqqqqq", "qqqqqqqqqqqqqqQKkkkYYkkkkYYkkkKQqqqqqqqqqqqqqq",
 	"qqq.QQQQQQQqqqqKkkkkkkkkkkkkkkKqqqqQQQQQQQ.qqq", "qq..qqqqqqqQQQQKkkkkkkkkkkkkkkKQQQQqqqqqqq..qq",
-	"q...qqqqqqqqQQQQKkkkkkKKkkkkkKQQQQqqqqqqqq...q", "....qqqqqJQQqqqqKKkkkkkkkkkkKKqqqqQQJqqqqq....",
-	".....qqqjJqqqqqqqKKkkkkkkkkKKqqqqqqqJjqqq.....", ".....qq.jJjqqqqqqbKKkkkkkkKKbqqqqqqjJj.qq.....",
-	".....q..jJjqqqqqKKkkkkkkkkkkKKqqqqqjJj..q.....", "........jJjqqqqKKkkkkkkkkkkkkKKqqqqjJj........",
-	"........jJjjqqqKkkkkkkkkkkkkkkKqqqjjJj........", "........jJjjqqKkkkkkkkkkkkkkkkkKqqjjJj........",
-	"........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........", "........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........",
-	"........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........", "........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........",
-	"........jJjjbbbKkkkkkkkkkkkkkkKbbbjjJj........", "........jJjjbbbKKkkkkkkkkkkkkKKbbbjjJj........",
-	"........jJjjjjjjKKkkkkkkkkkkKKjjjjjjJj........", ".......LLLjjjjjjjjKKkkkkkkKKjjjjjjjjLLL.......",
-	"......LLLLLJJJJJJJJJKKKKKKJJJJJJJJJLLLLL......", "......LLLLLjjjjjjjjjjLLLLjjjjjjjjjjLLLLL......"]
-const CATPAL := {"B": "#3a2258", "J": "#8a6a2a", "K": "#4a4170", "L": "#ffe9a8", "O": "#ff8a1f", "Q": "#3a1a6a", "X": "#000000", "Y": "#ffd92e",
-	"b": "#2a1840", "j": "#c9a24a", "k": "#14101f", "q": "#5a2a9a", "v": "#7a35d6"}
+	"q...qqqqqqqqQQQQKkkkkkKKkkkkkKQQQQqqqqqqqq...q", "....qqqqq.QQqqqqKKkkkkkkkkkkKKqqqqQQ.qqqqq....",
+	".....qqq..qqqqqqqKKkkkkkkkkKKqqqqqqq..qqq.....", ".....qq....qqqqqq.KKkkkkkkKK.qqqqqq....qq.....",
+	".....q.....qqqqqKKkkkkkkkkkkKKqqqqq.....q.....", "...........qqqqKKkkkkkkkkkkkkKKqqqq...........",
+	"............qqqKkkkkkkkkkkkkkkKqqq............", "............qqKkkkkkkkkkkkkkkkkKqq............",
+	"..............KkkkkkkkkkkkkkkkkK..............", "..............KkkkkkkkkkkkkkkkkK..............",
+	"..............KkkkkkkkkkkkkkkkkK..............", "..............KkkkkkkkkkkkkkkkkK..............",
+	"...............KkkkkkkkkkkkkkKK...............", "...............KKkkkkkkkkkkkkKK.......K.......",
+	"................KKkkkkkkkkkkKK.K.....KK.......", "..................KKkkkkkkKK...K.K.K.K........",
+	"....................KKKKKK.......K.K..........", ".............................................."]
+const CATPAL := {"K": "#4a4170", "O": "#ff8a1f", "Q": "#3a1a6a", "X": "#000000", "Y": "#ffd92e", "k": "#14101f", "q": "#5a2a9a", "v": "#7a35d6"}
 const DOLLBOSS := ["......nnnnnnnnnnnnnnnnnnnn......", "......nnnnnnnnnnnnnnnnnnnn......", ".......t.......tt.......t.......",
 	".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......",
 	".......t.......tt.......t.......", ".......t....HHHHHHHH....t.......", ".......t.HHHHHHHHHHHHHH.t.......", ".......tHHHHHHHHHHHHHHHHt.......",
@@ -207,7 +206,7 @@ const DOLLPAL := {"H": "#e0482a", "I": "#a8301c", "P": "#c94f8a", "S": "#f3e2d4"
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT PORTRAIT", "PUPPET DOLL"]
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL"]
 # which level-1 boss each boss moves and attacks like (the mansion bosses borrow these for now)
 const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1]
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
@@ -872,7 +871,7 @@ func next_wave() -> void:
 		G.bm = boss_mult()
 		var hp := int(round((36 + w * 4) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, cat portrait, puppet doll
+		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, bat cat, puppet doll
 		b.bk = 3 + (w / 5 - 4) % 4 if in_mansion() else (w / 5 - 1) % 3
 		b.t = 0.0
 		G.en.append(b)
