@@ -104,7 +104,24 @@ const JBELL_B := ["...ccc...", "..cWccc..", ".cWccccc.", ".cWccccc.", "ccccccccc
 const TBALL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "cccccwc", ".cccww.", "..cww.."]
 const TBALL_B := ["...ccc...", "..cWccc..", ".cWccccc.", "cWccccccc", "ccccccccc", "cccccccwc", ".ccccccw.", "..cccww..", "...cww..."]
 # JUGGLING BALLS: a shiny ball, always one green, one blue and one orange
-const JUGBALL := ["...ccc...", "..cWlcc..", ".cWllccc.", "cWlcccccc", "ccccccccc", "cccccccdc", ".cccccdd.", "..ccddd..", "...ddd..."]
+const JUGBALL := ["..ccccc..", ".ccWlccc.", "cWllccccc", "cWlcccccc", "ccccccccc", "ccccccccc", "cccccccdc", ".cccccdd.", "..ddddd.."]
+# the ball turned by quarter turns, so it rolls
+var jug_rot := {}
+func jug_frame(k: int) -> Array:
+	k = posmod(k, 4)
+	if not jug_rot.has(k):
+		var r: Array = JUGBALL
+		for i in k:
+			var n := r.size()
+			var out := []
+			for y in n:
+				var row := ""
+				for x in n:
+					row += r[n - 1 - x][y]
+				out.append(row)
+			r = out
+		jug_rot[k] = r
+	return jug_rot[k]
 const JUG_COLS := ["#228b22", "#4169e1", "#ff7518"]
 # I'M NOT A PINATA's gift box: white with a ribbon (red for P1, the player's colour for P2-4)
 const GIFT := [".rr...rr.", "..rrRrr..", "WWWWrWWWW", "WWWWrWWWW", "rrrrrrrrr", "WWWWrWWWW", "WWWWrWWWW", "ggggrgggg"]
@@ -249,6 +266,12 @@ const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
 const SUGAR := ["..PPPP..", ".PPpPPP.", "PPPPPPpP", "PpPPpPPP", "PPPPPPPP", ".PPpPPP.", "..PPPP..", "...s....", "...s....", "...s...."]
 const SUGARPAL := {"P": "#ff9ec2", "p": "#ffd0e4", "s": "#f3e2c0"}
 const SUGAR_MAX := 10
+# The title screen's right-hand pumpkin, lifted pixel for pixel and cut at its 5th body row, so once the Jester is
+# bought he can pop out of it with the pumpkin's own top on his head as the lid. PK_LID is the top with the stem,
+# PK_BOTTOM the rest; the pale rows are the cut's flesh.
+const PK_LID := ["...........GGGG..........", "...........GG............", "...........GG............", "............O............", ".......OOOOOOOOOOO.......", "....KODOOOOOOOOOOODOK....", "...OOODOLOOOOOOOOODOOO...", "..OOOLDLLLLLOOOOOODOOOO..", ".KOOLLDLLLLLLOOOOODOOOOK."]
+const PK_BOTTOM := [".OOOLLDLLLLLLOOOOODOOOOO.", "KOOOLLDLLLLLLOOOOODOOOOOK", "KOOOOLDLLLLLOOOOOODOOOOOK", "KOOOOODOLOOOOOOOOODOOOOOK", "KOOOOODOOOOOOOOOOODOOOOOK", "KKOOOODOOOOOOOOOOODOOOOKK", ".KOOOODOOOOOOOOOOODOOOOK.", ".KKOOODOOOOOOOOOOODOOOKK.", "..KKKODOOOOOOOOOOODOKKK..", "...KKKDOOOOOOOOOOODKKK...", "....KKKKKKKKOKKKKKKKK....", ".......KKKKKKKKKKK.......", "............K............"]
+const PKCUTPAL := {"K": "#c2520c", "O": "#ee7a14", "L": "#ff9a33", "D": "#b4480a", "G": "#3d6b2a"}
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
 const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
@@ -586,7 +609,7 @@ func _build_things() -> void:
 		{"k": "p", "x": 104, "y": 182, "rx": 7, "ry": 5, "cv": false}, {"k": "p", "x": 140, "y": 178, "rx": 5, "ry": 4, "cv": true},
 		{"k": "p", "x": 186, "y": 180, "rx": 6, "ry": 5, "cv": false}, {"k": "p", "x": 226, "y": 177, "rx": 5, "ry": 4, "cv": true},
 		{"k": "p", "x": 300, "y": 181, "rx": 7, "ry": 5, "cv": false}, {"k": "p", "x": 160, "y": 200, "rx": 10, "ry": 8, "cv": true},
-		{"k": "p", "x": 66, "y": 214, "rx": 11, "ry": 9, "cv": true}, {"k": "p", "x": 232, "y": 222, "rx": 12, "ry": 9, "cv": false},
+		{"k": "p", "x": 66, "y": 214, "rx": 11, "ry": 9, "cv": true}, {"k": "p", "x": 232, "y": 222, "rx": 12, "ry": 9, "cv": false, "jack": true},
 		{"k": "p", "x": 120, "y": 230, "rx": 9, "ry": 7, "cv": false}, {"k": "p", "x": 296, "y": 232, "rx": 10, "ry": 8, "cv": true},
 		{"k": "p", "x": 16, "y": 232, "rx": 9, "ry": 7, "cv": false}, {"k": "p", "x": 196, "y": 234, "rx": 7, "ry": 6, "cv": true},
 		{"k": "g", "x": 268, "y": 196, "s": 2, "tint": "#f6f1ff", "cv": true, "ph": 0.0, "face": 0, "hat": "witch", "ch": 0},
@@ -1029,8 +1052,28 @@ func draw_menu_scene() -> void:
 		var o: Dictionary = things[i]
 		if o.k == "p":
 			pumpkin(o.x, o.y - o.ry, o.rx, o.ry, o.cv, t, i)
+			if o.get("jack", false) and open_cache.size() > 4 and open_cache[4]:
+				draw_jack(o.x, o.y - o.ry, o.ry)
 		else:
 			draw_patch_figure(o)
+
+# THE JESTER, once bought, bobbing out of the cut pumpkin like a jack-in-the-box with its top on his head.
+# Behind him the back of the cut curves up in pale flesh; in front, the pumpkin's body over his waist and the
+# cut's pale edge right under his chin, with the top of his collar just peeking over it.
+func draw_jack(cx: int, cy: int, ry: int) -> void:
+	var x0 := cx - 12
+	var cut := cy - ry + 5
+	var bob := int(round(sin(t * 2.6) * 2.5))
+	var gy := cut - 17 + bob
+	R(x0 + 3, cut - 2, 4, 1, "#ffd27a")
+	R(x0 + 18, cut - 2, 4, 1, "#ffd27a")
+	R(x0 + 2, cut - 1, 7, 1, "#ffe9b0")
+	R(x0 + 16, cut - 1, 7, 1, "#ffe9b0")
+	spr(JESTER.slice(0, 9), chars[4].pals[0], cx - 12, gy, 2)
+	spr(PK_BOTTOM, PKCUTPAL, x0, cut, 1)
+	R(x0 + 2, cut, 21, 1, "#ffe9b0")
+	R(x0 + 2, cut + 1, 21, 1, "#ffd27a")
+	spr(PK_LID, PKCUTPAL, x0, gy - 7, 1)
 
 # ---------------------------------------------------------------- graveyard
 # level 2: the haunted mansion room (Sammie's mansion.png, 320x240)
@@ -2458,12 +2501,16 @@ func juggle(p: Dictionary, dt: float) -> void:
 	if not p.has("jb"):
 		p.jb = []
 		for i in 3:
-			p.jb.append({"x": p.x + (i - 1) * 16.0, "y": 190.0, "vx": (i - 1) * 30.0, "vy": -60.0, "col": JUG_COLS[i], "k": i, "cd": 0.0})
+			p.jb.append({"x": p.x + (i - 1) * 16.0, "y": 190.0, "vx": (i - 1) * 30.0, "vy": -60.0, "col": JUG_COLS[i], "k": i, "cd": 0.0, "ang": 0.0})
 	for b in p.jb:
 		b.cd -= dt
 		b.vy += JUG_GRAV * dt
 		b.x += b.vx * dt
 		b.y += b.vy * dt
+		# it rolls with the ground it covers (radius 4.5), and spins a bit faster in the air
+		b.ang += b.vx / 4.5 * dt
+		if b.y < JUG_GROUND - 1.0:
+			b.ang += 6.0 * (signf(b.vx) if b.vx != 0.0 else 1.0) * dt
 		# bounce on the ground, a little less each time, until it settles
 		if b.y >= JUG_GROUND:
 			b.y = JUG_GROUND
@@ -2477,7 +2524,9 @@ func juggle(p: Dictionary, dt: float) -> void:
 		b.y = maxf(b.y, 10.0)
 		# settled: it rolls back toward the Jester, stopping a step short of him
 		if b.vy == 0.0 and b.vx == 0.0 and b.y >= JUG_GROUND and absf(b.x - p.x) > 18.0 and not p.out:
-			b.x = move_toward(b.x, p.x - signf(p.x - b.x) * 18.0, 40.0 * dt)
+			var nx := move_toward(b.x, p.x - signf(p.x - b.x) * 18.0, 40.0 * dt)
+			b.ang += (nx - b.x) / 4.5
+			b.x = nx
 		# kicked by a player walking into it
 		if b.cd <= 0.0:
 			for q in live():
@@ -3669,7 +3718,7 @@ func draw_game() -> void:
 		# JUGGLING BALLS don't blink when he does
 		for b in p.get("jb", []):
 			var bc: String = b.col
-			spr(JUGBALL, {"c": bc, "W": "#ffffff", "l": "#" + Color(bc).lerp(Color("#ffffff"), 0.45).to_html(false),
+			spr(jug_frame(int(floor(b.get("ang", 0.0) / (PI / 2)))), {"c": bc, "W": "#ffffff", "l": "#" + Color(bc).lerp(Color("#ffffff"), 0.45).to_html(false),
 				"d": "#" + Color(bc).darkened(0.35).to_html(false)}, int(round(b.x)) - 4, int(round(b.y)) - 4, 1)
 		if p.inv > 0 and int(floor(gt * 12)) % 2 == 0:
 			continue
@@ -3804,13 +3853,17 @@ func draw_hud() -> void:
 		for w in chars[p.ch].pow:
 			if p.eq.has(w[0]):
 				codes += w[3] + " "
-		if int(p.get("sugar", 0)) > 0:
-			codes += "SUG %d " % p.sugar
 		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
-		# their prestige level for this character, which counts for every stat
+		# their prestige level for this character, which counts for every stat, and their SUGAR RUSH count, on
+		# their own line: both are more special than the power-ups
 		var pr := prestige(p.n, p.ch)
+		var sp := ""
 		if pr > 0:
-			T("PRE %d" % pr, CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
+			sp += "PRE %d " % pr
+		if int(p.get("sugar", 0)) > 0:
+			sp += "SUG %d" % p.sugar
+		if sp != "":
+			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
 		var boosts := ""
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:

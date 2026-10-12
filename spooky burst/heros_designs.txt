@@ -27,7 +27,8 @@ PROGRESSION
   Its page in CHARACTERS names it (SPECIAL: ... +2); the join picker never does.
 - SUGAR RUSH (cotton candy): a boss tosses one high into the air when it dies, two if 3-4 players are alive at
   that moment. Each one caught adds +1 to the catcher's SPECIAL, up to 10 (so +12 in all), and it's lost with
-  the power-ups and boosts on death. The HUD shows SUG 1 to SUG 10. Build back up by surviving, not handouts.
+  the power-ups and boosts on death. The HUD shows SUG 1 to SUG 10 on the prestige line, in its style, since
+  it's more special than the power-ups. Build back up by surviving, not handouts.
 - The treat bucket's POWER TREAT (5%) is one of the pumpkin's small boosts, never a character ability.
   The character's own boost is its "Special", so a bucket never says special.
 - PRESTIGE: once a character and all its upgrades are bought, it can be relocked for +1 of every boost
@@ -87,6 +88,9 @@ MENUS AND CONTROLS
   It only pauses if you're already playing. The picker has a "?" for random.
 - In the upgrade pop-up, the name is biggest, the description goes right under it,
   and the player number is played down.
+- The Jester isn't a grey silhouette on the title screen while locked; once bought he pops out of the right-hand
+  pumpkin as a jack-in-the-box. The lid is literally the pumpkin's own cut top (same pixels), so it's the right
+  size; the cut's back rim curves up behind him in pale flesh and the top of his collar just shows over the front.
 - Settings: full screen and windowed are separate from window size. Window sizes are clean multiples
   of the game size, and real 16:9 can come later.
 - Debug console for testing: ~ opens a command line along the bottom, Enter runs it, ~ or Esc closes it.
