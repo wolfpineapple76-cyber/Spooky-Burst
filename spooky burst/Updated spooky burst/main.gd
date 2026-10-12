@@ -111,6 +111,65 @@ const GHOST2 := ["...zzzzzz...", "..zzzzzzzz..", ".zzrzzzzrzz.", ".zzrzzzzrzz.",
 	"zZzzZzzZzzZz", "z.zZ.zZ.zZ.z", "...z..z..z.."]
 const L2PAL := {"H": "#e0482a", "I": "#a8301c", "K": "#5a4a8a", "S": "#f3e2d4", "U": "#33519c", "Z": "#a8c8e8dd", "a": "#ffb3c9", "d": "#4a6fc4",
 	"e": "#ff5c5c", "k": "#14101f", "l": "#7a6aa8", "m": "#b8a890", "p": "#ff7fb5", "r": "#ff3355", "u": "#f0f0f0", "y": "#ffd92e", "z": "#e8f6ffdd"}
+# Pumpkin King phase 2: moldy and angry with a cracked crown, his laugh, and rotting away when beaten
+const PKING2 := ["..............................", "...........Y......Y...........", "........Y..Y......Y..Y........",
+	"........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YYYYz....YYYYY........",
+	"........YrYYrz...rYYrY........", "........YYYYz....YYYYY........", "........JJJJJ....JJJJJ........", "....zz..DDDgggMMMMMDDD..zz....",
+	".....nzzMMgggggMMMMMMMzzn.....", "....MMMnzzMgggMMMMMMzznMMM....", "...MMeeeenzMMMMMMMMzneeeeMM...", "..MggeeEEenzMMMMMMzneEEeeMMM..",
+	"..ggggeEEeenzMMMMzneeEEeMMMM..", ".gggggggeeeeMMMMMMeeeeMMMMMMM.", ".gggggggMMMMMMeeMMMMMMMMMMMMM.", ".gggggggMMMMMeeeeMMMMMMMMMMMM.",
+	".MgggggMMMMMMMMMMMMMMMMgggggM.", ".MMMMMMMMMMMMMMMMMMMMMggggggg.", ".MMMeeMMMMMMMMMMMMMMMMggeeggg.", ".MMMMeeMMeeMMeeeeMMeeMgeegggg.",
+	"..MMMeeeeeeeeeeeeeeeeeeeeggg..", "..MMMeeeeMMeeMMMMeeMMeeeeMMM..", "...MMMeeeMMeeMMMMeeMMeeeMMM...", "....MMMMMMeMGGGGGMMeMMMMMM....",
+	".....MMMMMMGGGGGGGMMMMMMM.....", "........DDDGGGGGGGMDDD........", "...........GGGGGGGD...........", ".............................."]
+const PKLAUGH1 := ["..............................", "...........Y......Y...........", "........Y..Y......Y..Y........",
+	"........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YYYYz....YYYYY........",
+	"........YrYYrz...rYYrY........", "........YYYYz....YYYYY........", "........JJJJJ....JJJJJ........", "....zz..DDDgggMMMMMDDD..zz....",
+	".....nzzMMgggggMMMMMMMzzn.....", "....MMMnzzMgggMMMMMMzznMMM....", "...MMMMMMnzMMMMMMMMznMMMMMM...", "..MggeMMMMezMMMMMMzeMMMMeMMM..",
+	"..ggggeeeeMnzMMMMznMeeeeMMMM..", ".gggggggMMMMMMMMMMMMMMMMMMMMM.", ".gggggggMMMMMMeeMMMMMMMMMMMMM.", ".gggggggMMMMMeeeeMMMMMMMMMMMM.",
+	".MgggggMMMMMMMMMMMMMMMMgggggM.", ".MMMMMMMMMMMMMMMMMMMMMggggggg.", ".MMMezeezeezeezeezeezeezzeggg.", ".MMMMzzzzzzzzzzzzzzzzzzzzgggg.",
+	"..MMMzzzzzzzzzzzzzzzzzzzzggg..", "..MMMzzzzzzzzzzzzzzzzzzzzMMM..", "...MMMezzzzzzzzzzzzzzzzeMMM...", "....MMMMezzzezzzezzzeMMMMM....",
+	".....MMMMMMGGGGGGGMMMMMMM.....", "........DDDGGGGGGGMDDD........", "...........GGGGGGGD...........", ".............................."]
+const PKLAUGH2 := ["..............................", "...........Y......Y...........", "........Y..Y......Y..Y........",
+	"........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YY.YY....YY.YY........", "........YYYYz....YYYYY........",
+	"........YrYYrz...rYYrY........", "........YYYYz....YYYYY........", "........JJJJJ....JJJJJ........", "....zz..DDDgggMMMMMDDD..zz....",
+	".....nzzMMgggggMMMMMMMzzn.....", "....MMMnzzMgggMMMMMMzznMMM....", "...MMMMMMnzMMMMMMMMznMMMMMM...", "..MggeMMMMezMMMMMMzeMMMMeMMM..",
+	"..ggggeeeeMnzMMMMznMeeeeMMMM..", ".gggggggMMMMMMMMMMMMMMMMMMMMM.", ".gggggggMMMMMMeeMMMMMMMMMMMMM.", ".gggggggMMMMMeeeeMMMMMMMMMMMM.",
+	".MgggggMMMMMMMMMMMMMMMMgggggM.", ".MMMMzeezeezeezeezeezeezzgggg.", ".MMMezzzzzzzzzzzzzzzzzzzzeggg.", ".MMMMzzzzzzzzzzzzzzzzzzzzgggg.",
+	"..MMMzzzzzzzzzzzzzzzzzzzzggg..", "..MMMzzzzzzzzzzzzzzzzzzzzMMM..", "...MMzzzzzzzzzzzzzzzzzzzzMM...", "....MzzzzzzzzzzzzzzzzzzzzM....",
+	".....MMzzzzzzzzzzzzzzzzMM.....", "........eDDzezzzezzDeD........", "...........GGGGGGGD...........", ".............................."]
+const PKROT0 := ["..............................", "..............................", "............Y......Y..........",
+	".........Y..Y......Y..Y.......", ".........YY.YY....YY.YY.......", ".........YY.YY....YY.YY.......", ".........YY.YY....YY.YY.......",
+	".........YYYYz....YYYYY.......", ".........YrYYr....rYYrY.......", ".........YYYY.....YYYYY.......", "....zz..nJJJJJbbbbJJJJJ.zz....",
+	".....nzzbbGGGGGbbbbbbbzzn.....", "....bbbnzzbGGGbbbbbbzznbbb....", "...bbGGGGnzbbbbbbbbznGGGGbb...", "..bGGGGGGGnzbbbbbbznGGGGGbbb..",
+	"..GGGGGGGGGnzbbbbznGGGGGbbbb..", ".GGGGGGGGGGGbbbbbbGGGGbbbbbbb.", ".GGGGGGGbbbbbbGGbbbbbbbbbbbbb.", ".GGGGGGGbbbbbGGGGbbbbbbbbbbbb.",
+	".bGGGGGbbbbbbbbbbbbbbbbGGGGGb.", ".bbbbbbbbbbbbbbbbbbbbbGGGGGGG.", ".bbbGGbbbbbbbbbbbbbbbbGGGGGGG.", ".bbbbGGbbGGbbGGGGbbGGbGGGGGGG.",
+	"..bbbGGGGGGGGGGGGGGGGGGGGGGG..", "..bbbGGGGbbGGbbbbGGbbGGGGbbb..", "...bbbGGGbbGGbbbbGGbbGGGbbb...", "....bbbbbbGbGGGGGbbGbbbbbb....",
+	".....bbbbbbGGGGGGGbbbbbbb.....", "........nnnGGGGGGGbnnn........", "...........GGGGGGGn...........", ".............................."]
+const PKROT1 := ["..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "....................Y.........",
+	"..........Y..Y......Y..Y......", "..........YY.Y......Y.YY......", "..........YYzYY....YY.YY......", "..........YY.YY....YY.YY......",
+	"....zz....YYYYY....YYYYYzz....", ".....n..nnYrYY.....YYYrYn.....", "....bbzzbbYYYYr..bbrYYYYbb....", "..bbbGbnzzJJJYbbbbbYJJJJGbbb..",
+	"..GGGGGGGnbGGJJbbbbJnGGGGbbb..", ".GGGGGGGGGzbbGbbbbbzGGGGbbbbb.", ".GGGGGGGGGnzbbbbbbznGGGGbbbbb.", ".GGGGGGGGGGnzbbbbznGGGbbbbbbb.",
+	".bGGGGGGbbGGbbbbbbGGbbbbbbbGb.", ".bbGGGGGbbbbbbbbbbbbbbbbGGGGG.", ".bbbbbGbbbbbbbGGbbbbbbbGGGGGG.", ".bbbGGbbbbbbbGGGGbbbbbGGGGGGG.",
+	"..bbbGbbbbbbbbbbbbbbbbGGGGGG..", "..bbbGGbbGbbbbbbbbbbGbGGGGGb..", "...bbGGGGGGbbbbbbbbGGGGGGbb...", "...bbbGGGbGGGGGGGGGGbGGGbbb...",
+	"....bbGGGbbGGGGGGGGbbGGGbb....", ".....bbbbbbGGbbbbGGbbbbbb.....", "......bbbbGbGbbbbbbGbbbb......", "........nnbGGGGGGGbbnn........"]
+const PKROT2 := ["..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"..............................", "..............................", ".....................Y........", "...........Y.........Y..Y.....",
+	"...........YY.Y.....YY.YY.....", "....zz.....Y.zY.....Y..YYz....", ".....nz.n..YY.Y.....YYYYY.....", "..bGbGGnzbG.rY.YbbbbrYYYYbbb..",
+	".GGGGGGGGzbJYYYbbbbbYJ.JJbb.b.", ".GGGGGGGGnzbJYYrbbbzJ.GGbbbbb.", ".bGGGGGGGGGnb.JJbbnGGG.bbbbbb.", ".bGGGGGGbGGGzb.bbzGG.bbbbbGGG.",
+	".bbbGGGGbbbbb.b.bbb.bbb.GGGGG.", ".b.bGGbbbbbbbGGGGbbbb.GGGGGG..", "..bbbGGbbbbb.bGGbbbbbbGGGGGG..", "..bbb.Gb.bbbbbbbbbbbbbGGGG.b..",
+	"...bbbGGGGGGbGbbGbGG.GGGbbb...", "....bbbGGb.GGGGGGGGbbGGbbb....", "......bbbbbGGbGGbGGbb.bbb.....", ".......bb.GbGbbbbGbGbbb......."]
+const PKROT3 := ["..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"..............................", "..............................", "..............................", "..............................",
+	"......................Y..Y....", "....z.......z........Y...Y....", "..n.nnn...n..Y.Y.....YYYYYnn..", ".G...GGGG.nGYY.Y.nnn.rYY.J.nn.",
+	".nG.GG.GG.n...YYrnnn.J.n.n.nn.", ".nGGGGGGGGGzY.YY.nzGGGn.nn.GG.", ".nnnn....nnGznJJnzG.n.n..GGGG.", "....n.nnn..nnn.nnn.n.nGGGGG...",
+	"..n.nG..nn.nn.GGnn.nn.G.Gnn...", "....nnG...Gn..nnnn.G.G.Gn.....", ".....nn.GnnG.Gnn.nGnnGGnn.....", ".....nnnn.n..GG..GGnnn.nn....."]
+const PK2PAL := {"D": "#7a3006", "E": "#3ad65a", "G": "#4f6a2a", "J": "#c9a24a", "M": "#c2520c", "Y": "#ffd92e", "b": "#4a2a10", "e": "#9dff6a",
+	"g": "#8aa04a", "n": "#24140a", "r": "#ff3355", "z": "#0c0806"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -752,13 +811,13 @@ func burst(x: float, y: float, col: String, n: int) -> void:
 func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st: String) -> Dictionary:
 	return {"ty": ty, "hx": hx, "hy": hy, "x": x, "y": y, "hp": hp, "max": hp, "st": st, "t": randf() * 6.0, "vx": 0.0, "flash": 0.0,
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
-		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false}
+		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "p2": false, "laugh": 0.0}
 
 func start_game(pad: int) -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pk": null, "pk_t": 5.0, "pk_done": false,
-		"shake": 0.0, "boom": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
+		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	add_player(160, pad, "" if pad >= 0 else "both", pick_char(0), 0)
 	mode = "game"
 	panel = ""
@@ -1046,6 +1105,19 @@ func give_boost(p: Dictionary) -> void:
 	G.toast = {"key": b[0], "title": b[1], "desc": "%s  (%d/%d)" % [b[2], p.bo[b[0]], BOOST_MAX], "n": p.n, "t": 2.6}
 	sfx("unlock")
 
+# Pumpkin King, the first time his health runs out: no death yet. He laughs, heals all the way up
+# and comes back moldy and angrier (phase 2). His shots are cleared so it stays fair.
+func pk_laugh(e: Dictionary) -> void:
+	e.hp = 1
+	e.laugh = 2.0
+	e.dz = 0.0
+	e.sp = 0.0
+	for b in G.eb:
+		b.dead = true
+	say("HA HA HA!", 1.8)
+	sfx("cackle")
+	G.shake = 0.6
+
 func kill(e: Dictionary) -> void:
 	e.dead = true
 	if e.ty == "B":
@@ -1064,7 +1136,10 @@ func kill(e: Dictionary) -> void:
 		say(BOSS_NAMES[e.bk] + " DEFEATED", 2.0)
 		sfx("roar")
 		G.shake = 1.2
-		G.boom = {"x": e.x, "y": e.y, "t": 1.2, "n": 0.0}
+		if e.bk == 2:
+			G.rot = {"x": e.x, "y": e.y, "t0": G.t}   # he rots away instead of exploding
+		else:
+			G.boom = {"x": e.x, "y": e.y, "t": 1.2, "n": 0.0}
 		return
 	var base: int = {"b": 50, "w": 80, "v": 150}[e.ty]
 	pts(base * (2 if e.st == "dive" else 1))
@@ -1128,6 +1203,8 @@ func corn(e: Dictionary) -> void:
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
 
 func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null) -> void:
+	if k == "s" and randf() < 0.5:
+		k = "sm"   # moldy seed
 	G.eb.append({"x": e.x if x == null else x, "y": e.y + 20 if y == null else y, "vx": vx, "vy": vy, "k": k, "ph": randf() * TAU, "dead": false})
 
 func wave_drop() -> void:
@@ -1188,14 +1265,28 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.st = "form"
 			e.at = 1.2
 		return
+	if e.laugh > 0:
+		# Pumpkin King: laughs while his health fills back up, then comes back for phase 2
+		e.laugh -= dt
+		e.hp = maxi(1, int(round(e.max * (1.0 - maxf(0.0, e.laugh) / 2.0))))
+		if e.laugh <= 0:
+			e.hp = e.max
+			e.p2 = true
+			e.raged = false
+			e.at = 1.0
+			e.n = 0
+			sfx("roar")
+			G.shake = 0.8
+		return
 	var rage: bool = e.hp < e.max / 2.0
-	var K := "r" if e.bk == 0 else "c"
+	var K := "r" if e.bk == 0 else ("s" if e.p2 else "c")
+	var fast := 1.15 if e.p2 else 1.0   # phase 2 is a little faster
 	if rage and not e.raged:
 		e.raged = true
 		say("ENRAGED!", 1.2)
 		sfx("roar")
 		G.shake = 0.6
-	e.ph += dt * (1.25 if rage else 1.0)
+	e.ph += dt * (1.25 if rage else 1.0) * fast
 	var bx := 0.0
 	var by := 0.0
 	if e.bk == 1:
@@ -1225,7 +1316,7 @@ func boss(e: Dictionary, dt: float) -> void:
 	e.at -= dt
 	if e.at > 0:
 		return
-	e.at = 0.95 if rage else 1.5
+	e.at = (0.95 if rage else 1.5) / fast
 	e.n += 1
 	var m: int = e.n % 5
 	if m == 1:
@@ -1266,7 +1357,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		else:
 			for i in 12:
 				var a := i / 12.0 * TAU
-				bshot(e, cos(a) * 80, sin(a) * 80, "c")
+				bshot(e, cos(a) * 80, sin(a) * 80, K)
 			sfx("ring")
 			G.shake = 0.3
 	else:
@@ -1546,7 +1637,7 @@ func update(dt: float) -> void:
 		G.vt = maxf(1.2, 2.8 - w * 0.1)
 
 	for b in G.eb:
-		if b.k == "c":
+		if b.k == "c" or b.k == "s" or b.k == "sm":
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
@@ -1558,7 +1649,7 @@ func update(dt: float) -> void:
 		if s.dead:
 			continue
 		for e in G.en:
-			if e.dead or is_same(e, s.last):
+			if e.dead or is_same(e, s.last) or e.laugh > 0:
 				continue
 			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
@@ -1569,7 +1660,9 @@ func update(dt: float) -> void:
 					s.dead = true
 				e.hp -= s.dmg
 				e.flash = 0.1
-				if e.hp <= 0:
+				if e.hp <= 0 and e.ty == "B" and e.bk == 2 and not e.p2:
+					pk_laugh(e)
+				elif e.hp <= 0:
 					kill(e)
 				else:
 					sfx("bosshit")
@@ -1595,7 +1688,7 @@ func update(dt: float) -> void:
 				kill(e)
 				hurt(p)
 				break
-			if e.ty == "B" and absf(e.x - p.x) < 30 and absf(e.y - 209) < 28:
+			if e.ty == "B" and e.laugh <= 0 and absf(e.x - p.x) < 30 and absf(e.y - 209) < 28:
 				hurt(p)
 				break
 
@@ -1689,9 +1782,16 @@ func draw_game() -> void:
 			if e.bk == 2:
 				# candle-light flicker behind the carved face
 				var fk := (sin(gt * 9 + 7) + sin(gt * 5.3 + 1)) * 0.5
-				ellipse(bx + 30, by + 28, 35, 27, "#ff9a2e", 0.10 + 0.04 * fk)
-				ellipse(bx + 30, by + 28, 31, 24, "#ffb84a", 0.14 + 0.05 * fk)
-				spr(PKING, PKPAL, bx, by - 11, 2, fl)
+				var moldy: bool = e.p2 or e.laugh > 0
+				ellipse(bx + 30, by + 28, 35, 27, "#9dff6a" if moldy else "#ff9a2e", 0.10 + 0.04 * fk)
+				ellipse(bx + 30, by + 28, 31, 24, "#3ad65a" if moldy else "#ffb84a", 0.14 + 0.05 * fk)
+				if e.laugh > 0:
+					var lf := int(floor(gt * 8)) % 2
+					spr(PKLAUGH1 if lf == 0 else PKLAUGH2, PK2PAL, bx, by - 11 + (2 if lf == 0 else -2), 2)
+				elif e.p2:
+					spr(PKING2, PK2PAL, bx, by - 11, 2, fl)
+				else:
+					spr(PKING, PKPAL, bx, by - 11, 2, fl)
 			else:
 				spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
@@ -1713,6 +1813,14 @@ func draw_game() -> void:
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
 		else:
 			spr(WITCH if e.ty == "w" else VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+	if G.rot != null:
+		# the Pumpkin King rotting away after his final defeat
+		var rk: float = G.t - G.rot.t0
+		if rk > 2.4:
+			G.rot = null
+		else:
+			var rf: Array = [PKROT0, PKROT1, PKROT2, PKROT3][mini(3, int(rk / 0.6))]
+			spr(rf, PK2PAL, int(round(G.rot.x)) - 30, int(round(G.rot.y)) - 37, 2)
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
@@ -1749,6 +1857,15 @@ func draw_game() -> void:
 			R(x - 1, y - 1, 3, 3, "#7df2ff")
 			R(x, y - 3, 1, 2, "#7df2ff")
 			R(x, y, 1, 1, "#ffffff")
+		elif b.k == "s" or b.k == "sm":
+			R(x - 1, y - 2, 3, 5, "#f3e2c0")
+			R(x, y - 3, 1, 1, "#c8b890")
+			R(x + 1, y - 1, 1, 3, "#c8b890")
+			R(x, y + 3, 1, 1, "#c8b890")
+			if b.k == "sm":
+				R(x - 1, y - 1, 1, 1, "#8aa04a")
+				R(x, y + 1, 1, 1, "#8aa04a")
+				R(x, y - 3, 1, 1, "#4f6a2a")
 		elif b.k == "c":
 			R(x - 2, y - 3, 5, 2, "#ffd92e")
 			R(x - 1, y - 1, 3, 2, "#ff8a1f")
