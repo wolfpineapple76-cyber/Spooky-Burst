@@ -23,7 +23,7 @@ PROGRESSION
 - Unlocks happen only in the menu between games, never during play.
 - Characters cost 500 candy and upgrades cost 100, with no free upgrades. Characters can be bought in any order.
 - Each character is a bit better at one thing, worth 2 boosts: Ghost fire rate, Cat move speed,
-  Zombie damage, Skeleton shot speed, Jester shot speed. Its page in UPGRADES hints at it in a line, never in the join picker.
+  Zombie damage, Skeleton shot speed, Jester shot speed. Its page in CHARACTERS hints at it in a line, never in the join picker.
 - PRESTIGE: once a character and all its upgrades are bought, it can be relocked for +1 of every boost
   for that character, up to 10 times. Prices for it go up 10% of the base each time. Not your only
   character unless you have the candy to buy one back. Shows as PRESTIGE 1/10 on its page, PRE 1 in game.

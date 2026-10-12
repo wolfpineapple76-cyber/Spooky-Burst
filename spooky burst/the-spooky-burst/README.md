@@ -82,7 +82,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - An enemy drops candy a quarter of the time. GRAVE ROBBER (for everyone's kills while anyone has it) or a
   HEAVY FIST killing blow raises that to a third, and both together to half. A third of all candy, boss candy
   too, is a gumball worth 2.
-- Spend it in UPGRADES on the title screen. There's a tab for each player: LB / RB on a controller,
+- Spend it in CHARACTERS on the title screen. There's a tab for each player: LB / RB on a controller,
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
   The Ghost starts free. Each character's page shows a line about what it's a bit better at:

@@ -5,7 +5,7 @@ extends Node2D
 
 # a new save file for the candy shop version, so everyone starts fresh (the old spooky_burst.cfg is left alone)
 const SAVE_PATH := "user://spooky_burst_v2.cfg"
-# what things cost in the UPGRADES menu, before PRESTIGE: each prestige level of a character
+# what things cost in the CHARACTERS menu, before PRESTIGE: each prestige level of a character
 # adds 10% of these to its price and its upgrades' prices
 const CHAR_COST := 500
 const POW_COST := 100
@@ -218,7 +218,7 @@ const SLOT_V5 := [48.0, 104.0, 160.0, 216.0, 272.0]
 const SPIDER_SPOTS := [[12.0, 112.0], [308.0, 112.0], [160.0, 22.0]]
 # a web tile soaks up this much damage from player shots, piercing ones too
 const WEB_HP := 4.0
-const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["PLAYER SETUP", "setup"], ["SETTINGS", "settings"],
+const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["CHARACTERS", "shop"], ["PLAYER SETUP", "setup"], ["SETTINGS", "settings"],
 	["RESET SAVE", "reset"], ["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
 const PICK_X := [80, 240, 400, 560]
@@ -287,11 +287,11 @@ var t := 0.0
 var mode := "menu"      # menu, game, pause, over
 var panel := ""         # menu panel: "", score, shop, settings, reset, quit
 var sel := 0
-var stab := 0           # UPGRADES menu: which player's tab
-var sch := -1           # UPGRADES menu: -1 on the character list, else the character whose upgrades are open
-var scur := 0           # UPGRADES menu: cursor
-var smsg := ""          # UPGRADES menu: a short message like NEED 500 CANDY
-var spre := -1          # UPGRADES menu: the PRESTIGE confirm, -1 closed, else its cursor (0 NO, 1 YES)
+var stab := 0           # CHARACTERS menu: which player's tab
+var sch := -1           # CHARACTERS menu: -1 on the character list, else the character whose upgrades are open
+var scur := 0           # CHARACTERS menu: cursor
+var smsg := ""          # CHARACTERS menu: a short message like NEED 500 CANDY
+var spre := -1          # CHARACTERS menu: the PRESTIGE confirm, -1 closed, else its cursor (0 NO, 1 YES)
 var rsel := 0
 var ssel := 0
 var qsel := 0
@@ -345,7 +345,7 @@ func _build_chars() -> void:
 			"spr2": _alt(GHOST, {11: "X.XXX.XXX.XX", 12: "..X...X...X."}),
 			"pals": [GPAL, {"X": "#a8e6a0", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"},
 				{"X": "#a8bcff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}, {"X": "#ffc08a", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}],
-			# tr: what each character is a bit better at, counted in boosts. desc shows in UPGRADES.
+			# tr: what each character is a bit better at, counted in boosts. desc shows in CHARACTERS.
 			"tr": {"rate": 2}, "desc": "FIRES QUICK AND HAS FRIENDS",
 			"pow": [["ghostshot", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["restless", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
 				["spectral", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["soulmate", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
@@ -937,7 +937,7 @@ func start_game(pad: int, side := "wasd") -> void:
 		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [],
 		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
-	# everyone they had is prestiged and not bought back yet: off to UPGRADES to buy one
+	# everyone they had is prestiged and not bought back yet: off to CHARACTERS to buy one
 	if owned_chars(slot).is_empty():
 		panel = "shop"
 		stab = slot
@@ -1262,7 +1262,7 @@ func to_menu() -> void:
 	banner = ""
 
 # Shooting the glowing pumpkin drops a power-up. Whoever catches it gets one they don't have yet
-# this run, picked from the upgrades they've bought and switched ON in the UPGRADES menu.
+# this run, picked from the upgrades they've bought and switched ON in the CHARACTERS menu.
 # Nothing is unlocked in game. No pop-up: the name shows for a moment instead.
 func award(p: Dictionary) -> void:
 	var left := []
@@ -3033,7 +3033,7 @@ func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> voi
 func draw_hud() -> void:
 	T("STATS", 13, 12, 2, "#ff8a1f")
 	draw_texture_rect(tex(BUCKET, BUCKETPAL), Rect2(13, 32, 20, 18), false)
-	# each player's own candy (what they have to spend in the UPGRADES menu)
+	# each player's own candy (what they have to spend in the CHARACTERS menu)
 	var ps: Array = G.players.duplicate()
 	ps.sort_custom(func(a, b): return a.n < b.n)
 	if ps.size() == 1:
@@ -3094,7 +3094,7 @@ func draw_panel(title: String, rows: Array, footer: String, cursor := -1, note :
 	if footer != "" and int(floor(t * 2)) % 2 == 0:
 		T(footer, 80, ry + 6, 1, "#9d8cc4")
 
-# ---------------------------------------------------------------- UPGRADES menu
+# ---------------------------------------------------------------- CHARACTERS menu
 # A tab for each player. The first page lists characters (buy for char_cost, or open one);
 # a character's page lets you play as it and buy upgrades (pow_cost) or switch them ON / OFF.
 # Once all its upgrades are bought, a PRESTIGE row shows at the bottom (and stays from then on):
@@ -3176,13 +3176,14 @@ func draw_shop() -> void:
 	# a character's page has its description line under the name, so its rows start a bit lower
 	var dy := 10 if sch >= 0 else 0
 	draw_box(y, 116 + dy + rows.size() * 26)
-	T("UPGRADES", 80, y + 18, 3, "#ff8a1f")
+	T("CHARACTERS", 80, y + 18, 3, "#ff8a1f")
 	T("LB", 318, y + 26, 1, "#9d8cc4", 1)
 	for i in MAX_PLAYERS:
 		T("P%d" % (i + 1), 356 + i * 46, y + 22, 2, "#ffd92e" if i == stab else "#5a4d80")
 	T("RB", 556, y + 26, 1, "#9d8cc4", 1)
-	T("CHARACTERS" if sch < 0 else chars[sch].name, 80, y + 52, 2, "#f6f1ff")
+	# a character's page shows its name under the title; the list doesn't repeat "CHARACTERS"
 	if sch >= 0:
+		T(chars[sch].name, 80, y + 52, 2, "#f6f1ff")
 		T(chars[sch].desc, 80, y + 72, 1, "#9d8cc4")
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
 	var ry := y + 84 + dy
@@ -3507,7 +3508,7 @@ func settings_change(d: int) -> void:
 		return
 	sfx("select")
 
-# left / right in the menus: settings rows, and the player tabs in UPGRADES
+# left / right in the menus: settings rows, and the player tabs in CHARACTERS
 func menu_side(d: int) -> void:
 	if mode == "menu" and panel == "settings":
 		settings_change(d)
@@ -3838,7 +3839,7 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 			menu_move(-1)
 		if hit.call("down"):
 			menu_move(1)
-		# on a controller the UPGRADES tabs use LB / RB, so left / right is left alone there
+		# on a controller the CHARACTERS tabs use LB / RB, so left / right is left alone there
 		var in_shop: bool = mode == "menu" and panel == "shop"
 		if hit.call("left") and not in_shop:
 			menu_side(-1)
