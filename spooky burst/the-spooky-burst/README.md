@@ -79,6 +79,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and
   SOUL MATE help you get more of it.
+- An enemy drops candy a quarter of the time. GRAVE ROBBER (for everyone's kills while anyone has it) or a
+  HEAVY FIST killing blow raises that to a third, and both together to half. A third of all candy, boss candy
+  too, is a gumball worth 2.
 - Spend it in UPGRADES on the title screen. There's a tab for each player: LB / RB on a controller,
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
@@ -115,7 +118,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   moving and attacking. Bosses can be knocked too.
 - WIGGLE TAIL collects candy, power-ups, buckets and apples up to one cat width beyond him, as high as his head.
   His tail swipes the full reach up over his back on that side, or with NINE LIVES the curled tail leans over and back.
-- HEAVY FIST makes the Zombie's shots little fists. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
+- HEAVY FIST makes the Zombie's shots little fists that do double damage, and enemies they finish off drop
+  candy more often. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
   and through a web tile they break (halving the same way).
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.

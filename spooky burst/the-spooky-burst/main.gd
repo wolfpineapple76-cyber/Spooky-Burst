@@ -92,6 +92,9 @@ const DORBPAL := {"a": "#6b4a8a", "b": "#3a2252", "h": "#9d7ac4"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 # the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
+# a gumball: the double candy
+const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
+const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
 const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
 	"CLCCCCCCCRr", ".CLCCCCCCD.", ".CLCCCCCCD.", "..CLCCCCD..", "...DDDDD...", "......D...."]
 const APPLEPAL := {"R": "#e0213f", "r": "#9c1030", "h": "#ffd0dc", "s": "#c8955a", "S": "#8a5a2e",
@@ -349,7 +352,7 @@ func _build_chars() -> void:
 				{"d": "#5a4a3a", "G": "#8fd6a8", "o": "#1b0f33", "m": "#3a1420", "S": "#4169e1", "P": "#6a5a8a"},
 				{"d": "#5a4a3a", "G": "#a8d66a", "o": "#1b0f33", "m": "#3a1420", "S": "#ff7518", "P": "#6a5a8a"}],
 			"tr": {"dmg": 2}, "desc": "POWERFUL AND NOT AFRAID OF DEATH",
-			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["fist", "HEAVY FIST", "FISTS DO DOUBLE DAMAGE", "FST"],
+			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["fist", "HEAVY FIST", "DOUBLE DAMAGE, MORE CANDY", "FST"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
 				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]]},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
@@ -357,7 +360,7 @@ func _build_chars() -> void:
 			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
 			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
 			"pow": [["ribs", "RIBBED SHOT", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
-				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ENEMIES DROP MORE CANDY", "ROB"],
+				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ALL ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
 	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
 	for tint in [["smp", "#ff9ec2"], ["grp", "#b07cff"]]:
@@ -1274,21 +1277,27 @@ func pk_laugh(e: Dictionary) -> void:
 	sfx("laugh")
 	G.shake = 0.6
 
-# an enemy's health has run out: the Pumpkin King's first time starts his second phase, anyone else dies
-func down(e: Dictionary) -> void:
+# an enemy's health has run out: the Pumpkin King's first time starts his second phase, anyone else dies.
+# fist is true when a HEAVY FIST shot landed the killing blow.
+func down(e: Dictionary, fist := false) -> void:
 	if e.ty == "B" and e.bk == 2 and not e.p2:
 		pk_laugh(e)
 	else:
-		kill(e)
+		kill(e, fist)
 
-func kill(e: Dictionary) -> void:
+const CANDY_ODDS := [0.25, 1.0 / 3.0, 0.5]
+# a piece of candy falls from x, y. A third of them are gumballs, worth 2.
+func drop_candy(x: float, y: float) -> void:
+	G.candy.append({"x": x, "y": y, "dead": false, "x2": randf() < 1.0 / 3.0})
+
+func kill(e: Dictionary, fist := false) -> void:
 	e.dead = true
 	if e.ty == "B":
 		pts(2000)
 		for i in 6:
 			burst(e.x + (randf() - 0.5) * 50, e.y + (randf() - 0.5) * 36, "#b3122e" if i % 2 == 1 else "#ffd92e", 14)
 		for i in 6:
-			G.candy.append({"x": e.x + (i - 2.5) * 16, "y": e.y, "dead": false})
+			drop_candy(e.x + (i - 2.5) * 16, e.y)
 		for o in G.en:
 			if not o.dead:
 				o.dead = true
@@ -1317,8 +1326,9 @@ func kill(e: Dictionary) -> void:
 	if e.ty == "s" and G.sp_more > 0:
 		G.sp_more -= 1
 		G.sp_q.append({"spot": e.spot, "t": 1.6})
-	if randf() < (0.56 if any_eq("cdrop") else 0.28):
-		G.candy.append({"x": e.x, "y": e.y, "dead": false})
+	# candy: a quarter of the time, a third with GRAVE ROBBER (anyone's) or a HEAVY FIST kill, half with both
+	if randf() < CANDY_ODDS[int(any_eq("cdrop")) + int(fist)]:
+		drop_candy(e.x, e.y)
 	sfx("pop")
 
 func hurt(p: Dictionary) -> void:
@@ -1797,9 +1807,10 @@ func helpers(p: Dictionary, dt: float) -> void:
 # p catches the candy k
 func got_candy(k: Dictionary, p: Dictionary) -> void:
 	k.dead = true
-	add_candy(p.n, 1)
-	p.got += 1
-	pts(10)
+	var n := 2 if k.get("x2", false) else 1
+	add_candy(p.n, n)
+	p.got += n
+	pts(10 * n)
 	sfx("candy")
 
 # WIGGLE TAIL: falling candy or a drop that comes within one character width (24 px) beyond the Cat's body,
@@ -2308,7 +2319,7 @@ func update(dt: float) -> void:
 					s.dead = true
 				e.flash = 0.1
 				if e.hp <= 0:
-					down(e)
+					down(e, s.fist)
 				else:
 					sfx("bosshit")
 				break
@@ -2407,6 +2418,9 @@ func draw_game() -> void:
 	for k in G.candy:
 		var x := int(round(k.x))
 		var y := int(round(k.y))
+		if k.get("x2", false):
+			spr(GUMBALL, GUMPAL, x - 3, y - 3, 1)
+			continue
 		R(x - 2, y - 2, 5, 4, "#ff7fb5")
 		R(x - 5, y - 2, 2, 4, "#7df2ff")
 		R(x + 4, y - 2, 2, 4, "#7df2ff")
