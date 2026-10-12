@@ -2713,7 +2713,7 @@ func draw_game() -> void:
 		var sc := 1 + r / 2
 		# THE JESTER's jingle bells and TRICK SHOT balls (P1's ball is dark grey)
 		if s.get("bell", false):
-			spr_mid(JBELL_B if bg else JBELL, {"c": col, "W": "#ffffff", "k": "#2c2638"}, x, y, sc)
+			spr_mid(JBELL_B if bg else JBELL, {"c": col, "W": "#ffffff", "k": "#000000"}, x, y, sc)
 			continue
 		if s.get("tb", false):
 			spr_mid(TBALL_B if bg else TBALL, {"c": "#5a5468" if s.o == 0 else col, "W": "#ffffff", "w": "#f3efe0"}, x, y, sc)
