@@ -223,12 +223,25 @@ const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
 const CANDELABRA := [".y..y..y..", "yoy.yoy.yo", ".w..w..w..", ".w..w..w..", ".g..g..g..", ".gg.g.gg..", "..ggggg...", "....g.....", "....g.....", "...ggg....", "..GGGGG..."]
 const CANDLE := ["....y.....", "...yoy....", "...yfy....", "....o.....", "...www....", "...wwW....", "...wwW....", "...wwW....", "..gggggg..", ".gGGGGGGg.", "..gggggg.."]
 const CANDLEPAL := {"G": "#8a6a2a", "W": "#c9c2b4", "f": "#fff6c8", "g": "#c9a24a", "o": "#ff9a2e", "w": "#f3efe6", "y": "#ffe45c"}
+# mansion boss 5 (wave 40): the Grim Reaper, a skeleton in a hood with a scythe
+const REAPER := ["............nnnnnnnn............", ".sssssssssnnnnnnnnnnnn..........", ".sssssssssnnnWWWWWWnnn..........",
+	".bSSSSS.nnnWWWWWWWWWWnnn........", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b....nnnWWWWWWWWWWWWWWnnn......",
+	".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWkgkWWWWkgkWWnnn......", ".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWWWWWWWWWWWWWnnn......",
+	".b....nnnnWWWWWkkWWWWWnnnn......", ".b....nnnnWWWWkWWkWWWWnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......",
+	".b....nnnnnkwwwnnwwwknnnnn......", ".b....nnnnnnwwwnnwwwnnnnnn......", ".b....nnnnnnnnwwwwnnnnnnnn......", ".b....WWnnnnnnwwwwnnnnnnWW......",
+	".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......",
+	".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......",
+	".b...WWWnnnnnnwwwwnnnnnnWWW.....", ".b...WWWnnWWWWWWWWWWWWnnWWW.....", ".b....nnnnWWWWWWWWWWWWnnnn......", ".b....nnnnWWWWWWWWWWWWnnnn......",
+	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......",
+	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnWWWWnnnnnnWWWWnnn......",
+	"................................"]
+const REAPERPAL := {"S": "#6a7088", "W": "#f0ead8", "b": "#6b3f2a", "g": "#7dff6a", "k": "#14101f", "n": "#1b1424", "s": "#a8b0c0", "w": "#c8c0a8"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL"]
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL", "GRIM REAPER"]
 # which level-1 boss each boss moves and attacks like (the mansion bosses borrow these for now)
-const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1]
+const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1, 0]
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
 	["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
@@ -891,8 +904,8 @@ func next_wave() -> void:
 		G.bm = boss_mult()
 		var hp := int(round((36 + w * 4) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, bat cat, puppet doll
-		b.bk = 3 + (w / 5 - 4) % 4 if in_mansion() else (w / 5 - 1) % 3
+		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, bat cat, puppet doll, grim reaper
+		b.bk = 3 + (w / 5 - 4) % 5 if in_mansion() else (w / 5 - 1) % 3
 		b.t = 0.0
 		G.en.append(b)
 		say(BOSS_NAMES[b.bk], 2.2)
@@ -1898,8 +1911,8 @@ func draw_game() -> void:
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
 			if e.bk >= 3:
-				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS][e.bk - 3]
-				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL][e.bk - 3]
+				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS, REAPER][e.bk - 3]
+				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL, REAPERPAL][e.bk - 3]
 				spr(brows, bpal, int(round(e.x)) - brows[0].length(), int(round(e.y)) - brows.size(), 2, fl)
 			elif e.bk == 2:
 				# candle-light flicker behind the carved face
