@@ -456,7 +456,7 @@ var cfg := ConfigFile.new()
 var pads := {}
 var prev_pads := {}
 var banner := ""
-# the debug console: "/" opens it, Enter runs a command, Esc closes it
+# the debug console: ~ opens it, Enter runs a command, ~ or Esc closes it
 var con_open := false
 var con_text := ""
 var con_msg := ""
@@ -4356,24 +4356,25 @@ func draw_swatch() -> void:
 			R(x, y, 22, 22, SWATCH[r][c + 1])
 
 # ---------------------------------------------------------------- debug console
-# For testing. "/" opens a command line along the bottom; the game pauses and every key goes to it.
+# For testing. ~ opens a command line along the bottom; the game pauses and every key goes to it.
+# Commands start with "/":
 #   /debug stage 1 or 2   start that stage at wave 1, with the HP boost it would have
 #   /debug gc p1-p4 N     give that player slot N candy
 func con_key(event: InputEventKey) -> void:
 	var k := event.keycode
-	if k == KEY_ESCAPE:
+	if k == KEY_ESCAPE or k == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
 		con_open = false
 	elif k == KEY_ENTER or k == KEY_KP_ENTER:
 		con_run(con_text)
 	elif k == KEY_BACKSPACE:
 		con_text = con_text.left(-1)
-		if con_text == "":
-			con_open = false
 	elif event.unicode >= 32 and event.unicode < 127 and con_text.length() < 40:
 		con_text += char(event.unicode)
 
 func con_run(cmd: String) -> void:
-	var w := cmd.to_lower().strip_edges().trim_prefix("/").split(" ", false)
+	var c := cmd.to_lower().strip_edges()
+	# without the "/" in front it's not a command
+	var w := c.trim_prefix("/").split(" ", false) if c.begins_with("/") else PackedStringArray()
 	var msg := ""
 	if w.size() == 3 and w[0] == "debug" and w[1] == "stage" and (w[2] == "1" or w[2] == "2"):
 		msg = debug_stage(int(w[2]))
@@ -4429,9 +4430,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.echo:
 			return
-		if event.unicode == 47 or event.keycode == KEY_SLASH:
+		if event.keycode == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
 			con_open = true
-			con_text = "/"
+			con_text = ""
 			return
 		on_key(event.keycode)
 
