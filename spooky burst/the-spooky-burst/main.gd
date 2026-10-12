@@ -1713,9 +1713,9 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 			# the two GHOST SHOTs weave as mirror images of each other
 			var sx: float = ox + ((GS_GAP if i == 1 else -GS_GAP) if gs else 0.0)
 			var s := {"x": sx, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col,
-				"pc": 3 if p.eq.has("spectral") or p.eq.has("punch") else 1, "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
+				"pierce": p.eq.has("spectral") or p.eq.has("punch"), "punch": p.eq.has("punch"), "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
 				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p),
-				"sp": sp, "last": null, "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y}
+				"sp": sp, "hit": [], "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y}
 			G.shots.append(s)
 			row.append(s)
 		made.append(row)
@@ -2232,7 +2232,8 @@ func update(dt: float) -> void:
 		if b.y > 246 or b.y < -60 or b.x < -6 or b.x > 326:
 			b.dead = true
 
-	# webs catch player orbs, piercing ones too (enemies and their shots go straight through)
+	# webs catch player orbs, piercing ones too, except that PUNCH THROUGH carries on through a web tile it breaks,
+	# halving like it does through an enemy (enemies and their shots go straight through webs)
 	for wb in G.webs:
 		wb.g += dt
 		wb.flash = wb.get("flash", 0.0) - dt
@@ -2246,6 +2247,9 @@ func update(dt: float) -> void:
 				s.dead = true
 				if wb.hp <= 0:
 					burst(web_x(wb, sway), wb.y, "#d8d2e8", 8)
+					if s.punch:
+						s.dmg *= 0.5
+						s.dead = s.dmg < 1.0
 				break
 	G.webs = G.webs.filter(func(o): return o.hp > 0)
 
@@ -2254,7 +2258,8 @@ func update(dt: float) -> void:
 		if s.dead:
 			continue
 		for e in G.en:
-			if e.dead or is_same(e, s.last) or e.laugh > 0:
+			# a piercing shot never hits the same enemy twice
+			if e.dead or e.laugh > 0 or s.hit.any(func(h): return is_same(h, e)):
 				continue
 			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
@@ -2263,11 +2268,10 @@ func update(dt: float) -> void:
 				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 8 px per point of damage
 				if s.coin and randf() < 0.5:
 					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 8.0 * s.dmg)
-				s.pc -= 1
-				s.last = e
-				# SPECTRAL SHOT: each enemy it goes through halves it, and it stops under 1 damage or after 3
+				s.hit.append(e)
+				# SPECTRAL SHOT and PUNCH THROUGH: each enemy it goes through halves it, and it stops under 1 damage
 				s.dmg *= 0.5
-				if s.pc <= 0 or s.dmg < 1.0:
+				if not s.pierce or s.dmg < 1.0:
 					s.dead = true
 				e.flash = 0.1
 				if e.hp <= 0:

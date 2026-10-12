@@ -36,10 +36,11 @@ PROGRESSION
 WAVES AND ENEMIES
 - Everything is on a doubled scale (orbs do 2, bats and witches have 2 HP, vampires 12, spiders 6).
   Each PUMPKIN KING beaten adds 1 HP to every enemy after him.
-- SPECTRAL SHOT and PUNCH THROUGH halve with each enemy they go through and stop under 1 damage, so they can't clear whole screens.
+- SPECTRAL SHOT and PUNCH THROUGH halve with each enemy they go through and stop under 1 damage, so they can't clear whole screens. There's no cap on how many they go through.
 - Each enemy enters its own way: bats swarm in from the corners, witches swoop in from the sides firing,
   vampires come as dark red-eyed bats and transform.
-- Spiders hang on threads and web the spot below a front enemy. Webs only stop player shots (piercing too).
+- Spiders hang on threads and web the spot below a front enemy. Webs only stop player shots (piercing too),
+  except that PUNCH THROUGH carries on through a web tile it breaks, halving like it does through an enemy.
   With its webs up a spider spits venom instead.
 - Every enemy has its own chance to attack, about one attack per row of a kind at a time, with a cap.
 - Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the

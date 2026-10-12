@@ -56,7 +56,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - Every enemy has its own chance to attack, so more of a kind means more attacks, about one per row of
   them at a time. A wave calms down as you clear it.
 - Everything is on a doubled scale: orbs do 2 damage before boosts. SPECTRAL SHOT and PUNCH THROUGH halve
-  each time they go through an enemy and stop once under 1 damage (or after 3 enemies).
+  each time they go through an enemy and stop once under 1 damage.
 - Every 5th wave is a boss, in this order: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN,
   PUMPKIN KING. Each boss's own kind fills the waves before the next one:
   - Waves 1-4 ease in (bats, then witches, then vampires; spiders from wave 3).
@@ -114,7 +114,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   off to the side, never off the screen. It keeps moving and attacking. Bosses can be knocked too.
 - WIGGLE TAIL collects candy, power-ups, buckets and apples up to one cat width beyond him, as high as his head.
   His tail flicks up over his back toward it, or with NINE LIVES the curled tail leans over and back.
-- HEAVY FIST makes the Zombie's shots little fists. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT.
+- HEAVY FIST makes the Zombie's shots little fists. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
+  and through a web tile they break (halving the same way).
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.
 
