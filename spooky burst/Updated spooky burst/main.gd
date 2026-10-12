@@ -214,6 +214,11 @@ const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
 const CLAW := ["P...P...P.", ".P...P...P", ".P...P...P", "..P...P...", "..P...P...", "...P...P.."]
 const CLAWL := [".P...P...P", "P...P...P.", "P...P...P.", "...P...P..", "...P...P..", "..P...P..."]
 const CLAWPAL := {"P": "#ff3355"}
+# Puppet Doll's shots: big pink buttons and silver sewing needles
+const BIGBUTTON := [".pppp.", "pPppPp", "ppwpwp", "pppppp", "ppwpwp", "pPppPp", ".pppp."]
+const BIGBUTTONPAL := {"p": "#ff7fb5", "P": "#c94f8a", "w": "#ffffff"}
+const NEEDLE := [".S.", "S.S", ".S.", ".s.", ".s.", ".s.", ".s.", ".s.", ".s.", ".S."]
+const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1332,7 +1337,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		return
 	var rage: bool = e.hp < e.max / 2.0
 	var sty: int = BOSS_STYLE[e.bk]
-	var K := "r" if sty == 0 else ("s" if e.p2 else "c")
+	var K := "pbtn" if e.bk == 6 else ("r" if sty == 0 else ("s" if e.p2 else "c"))
 	var fast := 1.15 if e.p2 else 1.0   # phase 2 is a little faster
 	if rage and not e.raged:
 		e.raged = true
@@ -1413,7 +1418,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		var alive_p := live()
 		if not alive_p.is_empty():
 			var tg: Dictionary = pick(alive_p)
-			var K2 := "web" if e.bk == 3 else K
+			var K2 := "web" if e.bk == 3 else ("ndl" if e.bk == 6 else K)
 			for i in 3:
 				var dx: float = tg.x - e.x + (i - 1) * 26
 				var dy: float = 209 - e.y
@@ -1444,7 +1449,7 @@ func boss(e: Dictionary, dt: float) -> void:
 			sfx("ring")
 		elif sty == 1:
 			for i in 9:
-				bshot(e, 0, 95 + randf() * 30, "c", 20 + randf() * 280, -8 - randf() * 40)
+				bshot(e, 0, 95 + randf() * 30, "ndl" if e.bk == 6 else "c", 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
 		elif e.bk == 5:
 			var alive_c := live()
@@ -1960,7 +1965,11 @@ func draw_game() -> void:
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "claw":
+		if b.k == "pbtn":
+			spr(BIGBUTTON, BIGBUTTONPAL, x - 7, y - 7, 2)
+		elif b.k == "ndl":
+			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
+		elif b.k == "claw":
 			spr(CLAW if b.vx > 0 else CLAWL, CLAWPAL, x - 10, y - 6, 2)
 		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
