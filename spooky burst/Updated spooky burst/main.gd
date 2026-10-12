@@ -250,6 +250,27 @@ const SLASH := ["..............................b.............................", 
 	".bbbaa.................................................aabbb", ".bbba...................................................abbb",
 	".bba.....................................................abb", ".bba.....................................................abb"]
 const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
+# new jack-o'-lantern designs: cute, spooky, cat, bat, ghost (the title screen mixes them; the power-up pumpkin is the spooky one)
+const JACK0 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
+	"..DollooooooooooD.", ".DoolyyooooyyooooD", ".DoooyyooooyyooooD", ".DoooooooooooooooD", ".DopoyooooooyopooD", ".DooooyyyyyyoooooD",
+	"..DoooooooooooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
+const JACK1 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
+	"..DollyooooyooooD.", ".DoolyoyooyoyooooD", ".DooyyyyooyyyyoooD", ".DoooooooooooooooD", ".DoooooooooooooooD", ".DooyykyykyykyoooD",
+	"..DooyyoyyoyyoooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
+const JACK2 := ["..................", "..................", "..................", "....D.DDsssDDD....", "...ooooSssooooo...", "...oooDossooDooo..",
+	"..DollooooooooooD.", ".DoolyooooooyooooD", ".DoooyyooooyyooooD", ".DoooooooooooooooD", ".DyyooooppooooyyoD", ".DoyooooyyooooyooD",
+	"..yooooyooyooooyD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
+const JACK3 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
+	"..DolloyoyoyooooD.", ".DooyyyyyyyyyyyooD", ".DoooyyyryryyyoooD", ".DooooyoyyoyoooooD", ".DoooooyooyooooooD", ".DoooooooooooooooD",
+	"..DoooyyyyyyooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
+const JACK4 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoyyooDooo..",
+	"..DolloyyyyoooooD.", ".DooloykyykyoooooD", ".DooooykyykyoooooD", ".DooooyyyyyyoooooD", ".DooooyykkyyoooooD", ".DooooyyyyyyoooooD",
+	"..DoooyoyyoyooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
+const JACKS := [JACK0, JACK1, JACK2, JACK3, JACK4]
+const JACKPAL := {"D": "#c2520c", "S": "#5a9a3a", "k": "#2a0c04", "l": "#ff9a33", "o": "#ee7a14", "p": "#ff7fb5", "r": "#ff3355", "s": "#3d6b2a",
+	"y": "#ffe45c"}
+const JACKPALB := {"D": "#c2520c", "S": "#5a9a3a", "k": "#2a0c04", "l": "#ff9a33", "o": "#ee7a14", "p": "#ff7fb5", "r": "#ff3355", "s": "#3d6b2a",
+	"y": "#ffc23a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -611,6 +632,27 @@ func pumpkin(cx: int, cy: int, rx: int, ry: int, carved: bool, tt: float, seed_v
 				R(x, my + e - 1, 1, 1, "#ee7a14")
 				x += 3
 
+# a carved jack-o'-lantern with one of the new designs: the same flickering glow as before, then the picture.
+# Small ones (rx 5 or less) are drawn smaller so the far-away pumpkins stay far away.
+func jack_tex(design: int, small: bool, bright: bool) -> ImageTexture:
+	var key := "jack_%d_%s_%s" % [design, small, bright]
+	if tcache.has(key):
+		return tcache[key]
+	var tx := tex(JACKS[design], JACKPAL if bright else JACKPALB)
+	if small:
+		var img := tx.get_image()
+		img.resize(12, 11, Image.INTERPOLATE_NEAREST)
+		tx = ImageTexture.create_from_image(img)
+	tcache[key] = tx
+	return tx
+
+func jack(cx: int, cy: int, rx: int, ry: int, tt: float, seed_v: float, design: int) -> void:
+	var fl := (sin(tt * 9 + seed_v * 7) + sin(tt * 5.3 + seed_v)) * 0.5
+	ellipse(cx, cy, rx + 7, ry + 6, "#ff9a2e", 0.10 + 0.04 * fl)
+	ellipse(cx, cy, rx + 3, ry + 3, "#ffb84a", 0.14 + 0.05 * fl)
+	var tx := jack_tex(design % JACKS.size(), rx <= 5, fl > 0)
+	draw_texture_rect(tx, Rect2(cx - tx.get_width() / 2, cy + ry - tx.get_height(), tx.get_width(), tx.get_height()), false)
+
 func draw_tree(flip: bool, oy: int) -> void:
 	for l in TREE:
 		var xa: float = 320 - l[0] if flip else l[0]
@@ -727,7 +769,10 @@ func draw_patch_figure(o: Dictionary) -> void:
 			spr(hat.r, HATPAL, gx, gy - (hat.r.size() - hat.ov) * s, s)
 	var pr := int(round(3.2 * s))
 	var py := gy + 9 * s
-	pumpkin(o.x, py, pr, pr - 1, o.cv, t, o.ph)
+	if o.cv:
+		jack(o.x, py, pr, pr - 1, t, o.ph, int(o.x))
+	else:
+		pumpkin(o.x, py, pr, pr - 1, o.cv, t, o.ph)
 	R(o.x - pr - s, py, s, s, hand)
 	R(o.x + pr + 1, py, s, s, hand)
 
@@ -771,7 +816,10 @@ func draw_menu_scene() -> void:
 	for i in things.size():
 		var o: Dictionary = things[i]
 		if o.k == "p":
-			pumpkin(o.x, o.y - o.ry, o.rx, o.ry, o.cv, t, i)
+			if o.cv:
+				jack(o.x, o.y - o.ry, o.rx, o.ry, t, i, i)
+			else:
+				pumpkin(o.x, o.y - o.ry, o.rx, o.ry, o.cv, t, i)
 		else:
 			draw_patch_figure(o)
 
@@ -2038,7 +2086,7 @@ func draw_game() -> void:
 			spr(BUCKET, BUCKETPAL, x - 10, y - 9, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
-			pumpkin(x, y, 6, 5, true, gt * 2, 4)
+			jack(x, y, 6, 5, gt * 2, 4, 1)
 		else:
 			R(x - 5, y - 4, 4, 3, "#ff4d7a")
 			R(x + 1, y - 4, 4, 3, "#ff4d7a")
@@ -2055,7 +2103,7 @@ func draw_game() -> void:
 			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
 			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
 		else:
-			pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
+			jack(int(round(k.x)), int(round(k.y)), 8, 6, gt * 2, 3, 1)
 		if k.flash > 0 and not in_mansion():
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
 	for b in G.eb:
