@@ -46,9 +46,10 @@ WAVES AND ENEMIES
   waves just before it, as a warning, and only then (spiders replaced up to 6 only before the BLACK WIDOW,
   the extra vampire row only before the VAMPIRE LORD, the extra witch row only before the WITCH QUEEN).
   After the PUMPKIN KING it loops back to the full lineup.
-- Every boss attack must leave a hole. A boss waits for its last attack's shots to pass the players (an aimed
-  shot excepted, as long as it doesn't home) plus a short random breather before the next one. Only the
-  PUMPKIN KING gets a ring of shots.
+- Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players
+  (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
+  Only the PUMPKIN KING gets a ring of shots. Only bats swoop at you: the VAMPIRE LORD stays distant and
+  commanding and sends bats instead.
 
 MENUS AND CONTROLS
 - The title screen has a proper QUIT, and Start/Esc gives you options.

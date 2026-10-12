@@ -66,13 +66,13 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
     instead, and before the PUMPKIN KING it's witches, vampires, witches, vampires and one row of bats.
   - After the PUMPKIN KING it loops back to the full lineup before the PRIMAL BAT, and every enemy
     has +1 HP for each PUMPKIN KING beaten.
-- A boss's next attack waits until its last one's shots are past you (except an aimed 3-shot, which you
-  just step away from), then for a short random breather, so there's always a way through.
-- The PRIMAL BAT swoops, strafes off one side and back across the whole screen dropping slow sound waves
-  at you, fires 3 sound waves straight down, and calls swarms of bats into formation. The BLACK
-  WIDOW hangs on her thread, spits venom, drops down at you, spins web walls and calls spiders. The
-  VAMPIRE LORD launches bats at you and sometimes calls vampires. The WITCH QUEEN calls witches,
-  and her candy corn rain always leaves a clear lane.
+- The PRIMAL BAT swoops down at you, flies off one side and comes back in from the other to strafe across
+  the whole screen dropping slow sound waves at you, fires spreads and 3-shots of dark orbs, and calls
+  swarms of bats into formation. The BLACK WIDOW hangs on her thread, spits venom, dangles spiders down
+  at you and leaves them hanging partway back up, spins web walls and calls spiders. The VAMPIRE LORD
+  launches bats at you and calls bats into formation and vampires. The WITCH QUEEN calls witches; her
+  next attack waits until her last one's shots are past you (except her aimed 3-shot), then for a short
+  random breather, and her candy corn rain always leaves a clear lane.
   The PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders,
   and they act just like the ones in a normal wave.
 

@@ -62,6 +62,9 @@ const WEBPAL := {"w": "#e6e0f5"}
 # the PRIMAL BAT's sound wave shot: three little arcs
 const SOUND := ["..b...b..", "...bbb...", ".a.....a.", "..aaaaa..", "c.......c", ".ccccccc."]
 const SOUNDPAL := {"a": "#c77dff", "b": "#e3b8ff", "c": "#8a4fd6"}
+# the PRIMAL BAT's other shots: dark orbs the colour of his skin
+const DORB := [".aaa.", "abbba", "abhba", "abbba", ".aaa."]
+const DORBPAL := {"a": "#6b4a8a", "b": "#3a2252", "h": "#9d7ac4"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 # the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
@@ -1436,7 +1439,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		return
 	var rage: bool = e.hp < e.max / 2.0
 	# what each boss shoots: blood, candy corn, sonic rings (PRIMAL BAT) or venom (BLACK WIDOW)
-	var K: String = "s" if e.p2 else {0: "r", 3: "p", 4: "g"}.get(e.bk, "c")
+	var K: String = "s" if e.p2 else {0: "r", 3: "o", 4: "g"}.get(e.bk, "c")
 	var fast := 1.15 if e.p2 else 1.0   # phase 2 is a little faster
 	if rage and not e.raged:
 		e.raged = true
@@ -1483,15 +1486,20 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.vol.append(G.eb[-1])
 	if e.dz > 0 or e.sp > 0 or e.get("sf", 0) > 0:
 		return
-	# The next attack waits until the last one's shots have got past the players (all but the aimed
-	# 3-shot, which you just step away from), then for a short random breather. So there's always a gap.
-	e.vol = e.get("vol", []).filter(func(b): return not b.dead and b.y < 222)
-	if not e.vol.is_empty():
-		return
+	# The WITCH QUEEN's next attack waits until her last one's shots have got past the players (all but
+	# her aimed 3-shot, which you just step away from), then for a short random breather, so there's
+	# always a gap through her candy corn. The other bosses attack on a steady beat.
+	if e.bk == 1:
+		e.vol = e.get("vol", []).filter(func(b): return not b.dead and b.y < 222)
+		if not e.vol.is_empty():
+			return
 	e.at -= dt
 	if e.at > 0:
 		return
-	e.at = (randf_range(0.4, 0.8) if rage else randf_range(0.6, 1.2)) / fast
+	if e.bk == 1:
+		e.at = randf_range(0.4, 0.8) if rage else randf_range(0.6, 1.2)
+	else:
+		e.at = (0.95 if rage else 1.5) / fast
 	e.n += 1
 	var m: int = e.n % 5
 	var before: int = G.eb.size()
@@ -1500,14 +1508,14 @@ func boss(e: Dictionary, dt: float) -> void:
 			for a in [-0.6, -0.3, 0.0, 0.3, 0.6]:
 				venom(e.x, e.y + 20, a)
 		else:
-			var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 or e.bk == 3 else [-0.6, -0.3, 0.0, 0.3, 0.6]
+			var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
 			for a in angs:
 				bshot(e, sin(a) * 85, cos(a) * 85, K)
 		sfx("spread")
 	elif m == 2 and e.bk == 3:
-		# the PRIMAL BAT's 3-shot isn't aimed: three sound waves straight down, lightly spread
+		# the PRIMAL BAT's 3-shot isn't aimed: three dark orbs straight down, lightly spread
 		for a in [-0.12, 0.0, 0.12]:
-			bshot(e, sin(a) * 105, cos(a) * 105, "p")
+			bshot(e, sin(a) * 105, cos(a) * 105, "o")
 		sfx("spread")
 	elif m == 2 and e.bk == 4:
 		for i in 3:
@@ -1558,10 +1566,17 @@ func boss(e: Dictionary, dt: float) -> void:
 					G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + G.hpup, "dive"))
 			sfx("squeak")
 	elif m == 4:
-		# the VAMPIRE LORD dashes down at you, the PRIMAL BAT swoops, the BLACK WIDOW drops on her thread
-		if e.bk == 0 or e.bk == 3 or e.bk == 4:
+		# the PRIMAL BAT swoops down at you, the VAMPIRE LORD calls bats into formation to swoop for him,
+		# and the BLACK WIDOW dangles spiders down at you that she leaves hanging partway back up
+		if e.bk == 3:
 			e.dz = 1.6
 			sfx("dash")
+		elif e.bk == 0:
+			summon(e, "b", 4 if rage else 3)
+			sfx("squeak")
+		elif e.bk == 4:
+			dangle_spiders(e, 3 if rage else 2)
+			sfx("squeak")
 		elif e.bk == 1:
 			# the WITCH QUEEN's candy corn rain always leaves one clear lane about 50 px wide somewhere
 			var lane := randf_range(40, 280)
@@ -1590,7 +1605,7 @@ func boss(e: Dictionary, dt: float) -> void:
 	else:
 		e.sp = 1.4
 		e.spt = 0.0
-	# every attack but the aimed 3-shot is waited out before the next one
+	# (the WITCH QUEEN waits out every attack but her aimed 3-shot before the next one)
 	e.vol = [] if m == 2 else G.eb.slice(before)
 
 # The PRIMAL BAT's strafe run: off the nearer side, across the whole screen from the other side at about his
@@ -1603,7 +1618,6 @@ func strafe(e: Dictionary, bx: float, by: float, dt: float) -> void:
 		if e.x < -50 or e.x > 370:
 			e.sf = 2
 			e.x = 370.0 if e.sd < 0 else -50.0
-			e.sd = -e.sd
 			e.sy = 58 + randf_range(-8, 8)
 			e.sft = 0.3
 	elif e.sf == 2:
@@ -1792,10 +1806,19 @@ func web_x(wb: Dictionary, sw: float) -> float:
 # A spider drops down on its thread, then every few seconds either webs the spot just below the front
 # enemy of a random column (while fewer than 2 of its own webs are up) or spits venom.
 func spider(e: Dictionary, dt: float) -> void:
-	var a: Array = SPIDER_SPOTS[e.spot]
+	# a spider the BLACK WIDOW dangled hangs where she left it (hx, hy)
+	var a: Array = SPIDER_SPOTS[e.spot] if e.spot >= 0 else [e.hx, e.hy]
 	if e.st == "enter":
 		e.y = minf(e.y + 70 * dt, a[1])
 		if e.y >= a[1]:
+			e.st = "form"
+	elif e.st == "drop":
+		e.y += 150 * dt
+		if e.y >= 172:
+			e.st = "pull"
+	elif e.st == "pull":
+		e.y = maxf(e.y - 90 * dt, a[1])
+		if e.y <= a[1]:
 			e.st = "form"
 	e.x = a[0] + sin(e.t * 1.3) * 3
 	e.silk -= dt
@@ -1856,6 +1879,19 @@ func summon_spiders(n: int) -> void:
 	free.shuffle()
 	for i in mini(n, free.size()):
 		G.en.append(new_spider(free[i]))
+
+# The BLACK WIDOW dangles n spiders down on threads toward the players, then pulls them partway back up
+# and leaves them hanging there, webbing and spitting venom like any other spider.
+func dangle_spiders(e: Dictionary, n: int) -> void:
+	var alive_p := live()
+	var tx: float = (pick(alive_p).x if not alive_p.is_empty() else 160.0)
+	for i in n:
+		var x := clampf(tx + (i - (n - 1) / 2.0) * 40, 20, 300)
+		var s := new_enemy("s", x, 120.0 + randf() * 12, x, e.y + 10, HP.s + G.hpup, "drop")
+		s.spot = -1
+		s.wt = 1.5 + randf() * 1.5
+		s.silk = 0.0
+		G.en.append(s)
 
 # the BLACK WIDOW spins three web tiles across, below her, that stay put
 func web_wall(x: float) -> void:
@@ -2327,6 +2363,8 @@ func draw_game() -> void:
 			R(x - 1, y - 1, 1, 1, "#c8ff9a")
 		elif b.k == "p":
 			spr(SOUND, SOUNDPAL, x - 4, y - 3, 1)
+		elif b.k == "o":
+			spr(DORB, DORBPAL, x - 2, y - 2, 1)
 		else:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")
