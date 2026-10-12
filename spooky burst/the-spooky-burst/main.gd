@@ -1811,7 +1811,10 @@ func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
 		if p.eq.has("tail") and absf(o.x - p.x) < 36 and o.y > 188 and o.y < 224:
 			# the swipe always goes the full reach on that side, at its height
-			p.tl = {"t": 0.0, "rx": 36.0 if o.x >= p.x else -36.0, "ty": o.y}
+			var rx := 36.0 if o.x >= p.x else -36.0
+			# with NINE LIVES the curl wags instead, and the wag to the left takes longer (see draw_tail)
+			var wag: bool = p.eq.has("shield") and p.sh <= 0
+			p.tl = {"t": 0.0, "rx": rx, "ty": o.y, "wag": wag, "end": WAG_LEFT[-1][0] if wag and rx < 0 else TAIL_OUT + TAIL_BACK}
 			if o.has("k"):
 				catch_drop(o, p)
 			else:
@@ -1823,7 +1826,7 @@ func wiggle(p: Dictionary, dt: float) -> void:
 	if p.get("tl") == null:
 		return
 	p.tl.t += dt
-	if p.tl.t >= TAIL_OUT + TAIL_BACK:
+	if p.tl.t >= p.tl.end:
 		p.tl = null
 
 # the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
@@ -1925,6 +1928,10 @@ func form_sway() -> float:
 	return sin(G.t * 0.8) * 22
 
 # where a web tile is now: formation webs sway with the rows, the BLACK WIDOW's stay put
+# did shot s pass within h of height y since last frame (anywhere between where it was and where it is)?
+func swept(s: Dictionary, y: float, h: float) -> bool:
+	return y > s.y - h and y < s.get("py", s.y) + h
+
 func web_x(wb: Dictionary, sw: float) -> float:
 	return wb.hx + (0.0 if wb.fixed else sw)
 
@@ -2117,6 +2124,8 @@ func update(dt: float) -> void:
 					best = e
 			if best != null:
 				s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
+		# where it was last frame, so a fast shot or a slow frame can't skip over a web or an enemy
+		s.py = s.y
 		s.y -= s.sp * dt
 		s.x += s.vx * dt
 		if s.gs:
@@ -2143,7 +2152,7 @@ func update(dt: float) -> void:
 			G.pks = G.pks.filter(func(o): return not is_same(o, k))
 			continue
 		for s in G.shots:
-			if not s.dead and absf(s.x - k.x) < 11 and absf(s.y - k.y) < 10:
+			if not s.dead and absf(s.x - k.x) < 11 and swept(s, k.y, 10.0):
 				s.dead = true
 				k.hp -= 1
 				k.flash = 0.1
@@ -2260,7 +2269,7 @@ func update(dt: float) -> void:
 		if s.dead:
 			continue
 		for wb in G.webs:
-			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and absf(s.y - wb.y) < 5:
+			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and swept(s, wb.y, 5.0):
 				wb.hp -= s.dmg
 				wb.flash = 0.1
 				s.dead = true
@@ -2282,7 +2291,7 @@ func update(dt: float) -> void:
 				continue
 			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
-			if absf(s.x - e.x) < hw and absf(s.y - e.y) < hh:
+			if absf(s.x - e.x) < hw and swept(s, e.y, hh):
 				e.hp -= s.dmg
 				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 4 px per point of damage
 				if s.coin and randf() < 0.5:
@@ -2599,19 +2608,46 @@ func draw_game() -> void:
 			tx += 12
 
 # NINE LIVES shield: the tail comes out from behind, up the side and curls over the head.
-# Drawn before the cat so it sits behind him. by is the top of the sprite.
+# Drawn before the cat so it sits behind him. by is the top of the sprite. Points are from (px, by).
+const TAIL_REST := [Vector2(8, 20), Vector2(14, 15), Vector2(16, 6), Vector2(14, -2), Vector2(8, -7), Vector2(0, -9),
+	Vector2(-6, -8), Vector2(-9, -4)]
+# the curl turned the other way, hooked out to his right
+const TAIL_FLIP := [Vector2(8, 20), Vector2(14, 15), Vector2(16, 6), Vector2(18, -2), Vector2(24, -7), Vector2(32, -9),
+	Vector2(38, -8), Vector2(41, -4)]
+# straight up behind him, the same length
+const TAIL_UP := [Vector2(0, 20), Vector2(0, 12.2), Vector2(0, 3), Vector2(0, -5.3), Vector2(0, -13.1), Vector2(0, -21.3),
+	Vector2(0, -27.4), Vector2(0, -32.4)]
+# WIGGLE TAIL with NINE LIVES wags: to the right the curl turns over to the other side and back. To the left it
+# goes straight up behind him, the whole cat flips (the tail is straight so it doesn't show), the same wag plays
+# mirrored, and it goes back up behind him and flips home. [time, pose, mirrored]
+const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.25, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
+const WAG_LEFT := [[0.0, TAIL_REST, false], [0.1, TAIL_UP, false], [0.2, TAIL_REST, true], [0.38, TAIL_FLIP, true],
+	[0.56, TAIL_REST, true], [0.66, TAIL_UP, false], [0.76, TAIL_REST, false]]
 func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
-	var sw := int(round(sin(gt * 3) * 1))
-	var pts := [Vector2(px + 8, by + 20), Vector2(px + 14, by + 15), Vector2(px + 16, by + 6), Vector2(px + 14, by - 2),
-		Vector2(px + 8 + sw, by - 7), Vector2(px + sw, by - 9), Vector2(px - 6 + sw, by - 8), Vector2(px - 9 + sw, by - 4)]
-	# WIGGLE TAIL with NINE LIVES: the curl leans all the way over to what he collected, keeping its shape, and back
-	if tl != null:
-		var k := tail_reach(tl)
-		var dx: float = tl.rx
-		for j in range(1, pts.size()):
-			pts[j].x += dx * k * clampf((pts[0].y - pts[j].y) / 30.0, 0.0, 1.0)
-			pts[j].y += sin(gt * 20 + j) * k
+	var pts := []
+	if tl != null and tl.get("wag", false):
+		pts = wag_pose(WAG_RIGHT if tl.rx > 0 else WAG_LEFT, tl.t)
+	else:
+		# resting, with a slow sway at the tip
+		var sw := int(round(sin(gt * 3) * 1))
+		for j in TAIL_REST.size():
+			pts.append(TAIL_REST[j] + Vector2(sw if j >= 4 else 0, 0))
+	for j in pts.size():
+		pts[j] += Vector2(px, by)
 	smooth_line(pts, col, 4)
+
+# the tail's pose at time t in a wag: an eased blend between the keyframes either side
+func wag_pose(keys: Array, t: float) -> Array:
+	for i in keys.size() - 1:
+		if t <= keys[i + 1][0] or i == keys.size() - 2:
+			var u := smoothstep(0.0, 1.0, clampf((t - keys[i][0]) / (keys[i + 1][0] - keys[i][0]), 0.0, 1.0))
+			var out := []
+			for j in TAIL_REST.size():
+				var a: Vector2 = keys[i][1][j] * (Vector2(-1, 1) if keys[i][2] else Vector2.ONE)
+				var b: Vector2 = keys[i + 1][1][j] * (Vector2(-1, 1) if keys[i + 1][2] else Vector2.ONE)
+				out.append(a.lerp(b, u))
+			return out
+	return TAIL_REST.duplicate()
 
 # a smooth curve through pts (Catmull-Rom), 3 px wide for the first thick segments and 2 px after
 func smooth_line(pts: Array, col: String, thick: int) -> void:
