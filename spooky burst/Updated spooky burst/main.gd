@@ -45,6 +45,49 @@ const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", "
 const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", ".WWWWkkWWWW.", "..WWWWWWWW..", "..WkWkWkWW..", "....WWWW....",
 	"W.WWWWWWWW.W", "W..kWWWWk..W", "W.WWWWWWWW.W", "...WW..WW...", "...WW..WW..."]
 const GPAL := {"X": "#f6f1ff", "o": "#1b0f33", "b": "#ff9ec2", "m": "#1b0f33"}
+# new monsters for the next level (top row of designs/monster_designs.png)
+# spider beast
+const SPIDER_A := ["..............kl...............", "..............kl...............", "..............kl...............",
+	"..............kl...............", "............gggggg.............", "..........gffffbbbgg...........", "....a....gffffffbbbbg..........",
+	"...ada..gffffffffbbbbg..ada....", "....ada.gfffffeefbbbbg.adaa....", "...aaadgbbfffeeeebbbbbgda.aa...", "...a..agbbbfffeebbbbbbga...a...",
+	"..adda.gbbbbbbeebbbbbbg..ddaa..", "..aaaddgbbbbbeeeebbbbbgddaaaa..", ".aaa...dgbbbbbeebbbbbgdaa..aaa.", "..aa....gbbbbhhhhbbbbga....aa..",
+	".aa......gbhhcccchhbg.......aa.", ".aaaaaaaaajccjccjccj........aa.", "aa.ddddddhcmeccccmechdddddda.aa", "aa.aa....hceecjjceechaaaaaaa.aa",
+	"..aa....ahceecccceech......aa..", "..aa.aaddhcccccccccchdd....aa..", "..aa.dd..hcccccccccch.adda.aa..", "..aa.aa...hcccccccch....aa.aa..",
+	".aa..aa....hiccccih.....aa..aa.", ".aa..aa.....iihhii......aa..aa.", "....aa......i....i.......aa....", "....aa...................aa....",
+	"....aa......e....e.......aa....", "....aa......e............aa....", ".................e.............", ".................e............."]
+const SPIDERPAL := {"a": "#4a3484", "b": "#3a2466", "c": "#2a1a4a", "d": "#8a66e0", "e": "#7dff5a", "f": "#4d3288", "g": "#241640", "h": "#170d2c",
+	"i": "#f6f1ff", "j": "#b6ff7a", "k": "#cfc6ea", "l": "#8f84b8", "m": "#eaffd8"}
+# twin ghosts
+const TWIN_A := ["....f...f..........g...g....", "....fffff..........ggggg....", "..bbfbbbfbb......bbgbbbgbb..", ".bbbbbbbbbbb....bbbbbbbbbbb.",
+	".bbbbbbbbbbb....bbbbbbbbbbb.", ".bbbbbbbbbbb....bbbbbbbbbbb.", ".bccbcbcbccb....bccbcbcbccb.", "bbcheccchecbb..bbcheccchecbb",
+	"bbceeccceecbb..bbceeccceecbb", "bbceeccceecbb..bbceeccceecbb", "bbcccececccbb..bbcccceccccbb", "bbbcccecccbbb..bbbccececcbbb",
+	"bbbdddddddbbb..bbbdddddddbbb", "bbbdddidddbbb..bbbdddidddbbb", "bbbaaaiaaabbb..bbbaaaiaaabbb", "bbcaaaaaaacbb..bbcaaaaaaacbb",
+	"bcaaaaaaaaacb..bcaaaaaaaaacb", "bcaaaaaaaaa.c..c.aaaaaaaaacb", "c.aaaaaaaaa..cc..aaaaaaaaa.c", "caaaaaaaaaaa....aaaaaaaaaaac",
+	".aaaaaaaaaaa....aaaaaaaaaaa.", ".aaaaaaaaaaa....aaaaaaaaaaa.", "ddddddddddddd..ddddddddddddd", "aaaaaaaaaaaaa..aaaaaaaaaaaaa",
+	"aaaaaaaaaaaaa..aaaaaaaaaaaaa", "aaaaaaaaaaaaa..aaaaaaaaaaaaa", "aa..aa..aa..a..aa..aa..aa..a", "a...a...a...a..a...a...a...a"]
+const TWINPAL := {"a": "#cfd6ff", "b": "#1b0f33", "c": "#eef0ff", "d": "#a9b2e8", "e": "#0b0616", "f": "#ff5c8a", "g": "#5cc8ff", "h": "#ff3b5c",
+	"i": "#ffffff"}
+# mummy
+const MUMMY_A := ["............aaaaaaaa............", "...........aaaaabbbbbbb.........", ".........bbbbbbbaabbb...........",
+	"...........aaabbbbaaa...........", "...........bcfccccfca...........", "...........acddccddca...........", "...........acccccccca...........",
+	"...........aaaaabbbbbbb.........", ".........bbbbbbbaaaaa...........", "...........aaaaaaaaaaa..........", "...........aaaaaaaaaa.aaa.......",
+	".........aaaaaaaaaaaaaa.a.......", ".......abbeaaaaabbbbbbbaaa......", ".....abbabbbbbbbaaaaaaabbaa.....", ".aaabbabbaaaaaaaaaaaabbbabbaaaa.",
+	".aababbaaaaaaaaabbbbbbbabbabbaa.", ".aabbaaa.bbbbbbbbbaaaaa.aabbaaa.", ".abaaa...aabbbaaaaaaaaa...aabba.", ".aaa.....bbaaaaabbbbbbb.....aaa.",
+	".a.......bbbbbbbaaaaaaa.......a.", "a........aaaaaaaaaaaaaa........a", "a........aaaaaaabbbbbeb........a", "a........bbbbbbbaaaaaaa.........",
+	".a........aaaaa..aaeaaa.........", ".a........aaabb.bbbbbbba........", "..a......bbbbbbb.abbaa..a.......", "..........baaaa.bbbbbbb.a.......",
+	".........bbbbbbb.aaaaa.a........", "..........aaaaa..aaaaa.a........", ".........aaaeaa..aaaaaa........."]
+const MUMMYPAL := {"a": "#e8dcb0", "b": "#b3a172", "c": "#1b0f33", "d": "#ffb52e", "e": "#7d6f4a", "f": "#ff6a1f"}
+# frankenstein
+const FRANK_A := [".......bbbbbbbbbbbb.......", ".......bbbbbbbbbbbb.......", ".......bbbbbbbfbbbb.......", ".......bbbbbbbbfffb.......",
+	".......bcbbcbbfbfcb.......", ".......ccbcccbcfbfc.......", ".......eeeeeeeeeeee.......", ".......cciicccciicc.......",
+	".......ccilceecilcc.......", "...j...cccccecccccc...j...", "..j....cccffffffccc....j..", "....khhhcccccccccchhhk....",
+	"....khhh..eeeeee..hhhk....", "...j......eeeeee......j...", "...aaaaaaaggggggaaaaaaa...", ".aaaadaaaaaggggaaaaadaaaa.",
+	".aaaadaaaaaggggaaaaadaaaa.", ".aaaadaaaaaaggaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.",
+	".aaaadaaaaahddaaaaaadaaaa.", ".aaaadaaaaaaddaaaaaadaaaa.", ".aaaadaaaaahddaaaaaadaaaa.", "cfffcaaaaaaaddaaaaaaacfffc",
+	"ccccc.dddddd..dddddd.ccccc", "ccccc.dddddd..dddddd.ccccc", "ecece.dddddd..dddddd.ecece", "......dddddd..dddddd......",
+	"....bbbbbbbb..bbbbbbbb....", "....bbbbbbbb..bbbbbbbb...."]
+const FRANKPAL := {"a": "#3b3350", "b": "#2a2238", "c": "#86c96a", "d": "#2a2440", "e": "#5e9a4c", "f": "#2c3a22", "g": "#5a5470", "h": "#b9c2cc",
+	"i": "#ffe45c", "j": "#7df2ff", "k": "#7d8791", "l": "#1b0f33"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
