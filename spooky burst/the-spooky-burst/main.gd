@@ -1339,8 +1339,9 @@ func soul_catch(o: Dictionary):
 			return p
 	return null
 
+# dir is -1 to 1: keys and the d-pad are always full speed, the left stick gives finer speeds
 func player_input(p: Dictionary) -> Dictionary:
-	var dir := 0
+	var dir := 0.0
 	var fire := false
 	if p.kb != "":
 		var w: bool = p.kb != "arrows"
@@ -1353,13 +1354,10 @@ func player_input(p: Dictionary) -> Dictionary:
 			fire = true
 	if p.pad >= 0 and pads.has(p.pad):
 		var g: Dictionary = pads[p.pad]
-		if g.left:
-			dir -= 1
-		if g.right:
-			dir += 1
+		dir += g.mx
 		if g.ok:
 			fire = true
-	return {"dir": clampi(dir, -1, 1), "fire": fire}
+	return {"dir": clampf(dir, -1, 1), "fire": fire}
 
 # ---------------------------------------------------------------- game update
 func update(dt: float) -> void:
@@ -1401,7 +1399,7 @@ func update(dt: float) -> void:
 		p.x = clampf(p.x, 14, 306)
 		track_lean(p, (p.x - ox) / dt if dt > 0 else 0.0, dt)
 		if I.dir != 0:
-			p.ld = I.dir
+			p.ld = int(signf(I.dir))
 		p.cd -= dt
 		p.inv -= dt
 		helpers(p, dt)
@@ -2101,7 +2099,7 @@ func draw_pause() -> void:
 		T(why, 300, y + 58 + m.sel * 26, 1, "#ff8a1f")
 	ry += 8
 	for line in ["KEYBOARD LEFT: A D MOVE, SPACE OR W SHOOT, ESC JOINS OR MENU", "KEYBOARD RIGHT: ARROWS MOVE, UP OR ENTER SHOOT, BACKSPACE JOINS OR MENU",
-			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y SHOOT, START JOINS OR MENU",
+			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y OR R2 SHOOT, START JOINS OR MENU",
 			"BOOSTS: DM DAMAGE  FR FIRE RATE  SS SHOT SPEED  MS MOVE  OS ORB SIZE  LS SAFETY"]:
 		T(line, 80, ry, 1, "#9d8cc4")
 		ry += 16
@@ -2339,9 +2337,13 @@ func on_key(k: int) -> void:
 	elif k == KEY_ESCAPE or k == KEY_BACKSPACE:
 		menu_back()
 
-# A, X and Y select in menus, B goes back. During play all four shoot ("ok").
+# A, X and Y select in menus, B goes back. During play all four and R2 shoot ("ok").
+# mx is how far to move in play: the d-pad is full speed, the left stick is finer the less it's pushed.
 const PAD_OFF := {"up": false, "down": false, "left": false, "right": false, "ok": false, "sel": false, "b": false,
-	"start": false, "back": false, "lb": false, "rb": false}
+	"start": false, "back": false, "lb": false, "rb": false, "mx": 0.0}
+# left stick in play: ignored inside STICK_DEAD (so a resting stick doesn't drift), full speed from STICK_FULL
+const STICK_DEAD := 0.2
+const STICK_FULL := 0.9
 
 func poll_pads() -> void:
 	pads = {}
@@ -2351,12 +2353,18 @@ func poll_pads() -> void:
 		var a := Input.is_joy_button_pressed(d, JOY_BUTTON_A)
 		var b := Input.is_joy_button_pressed(d, JOY_BUTTON_B)
 		var xy := Input.is_joy_button_pressed(d, JOY_BUTTON_X) or Input.is_joy_button_pressed(d, JOY_BUTTON_Y)
+		var rt := Input.get_joy_axis(d, JOY_AXIS_TRIGGER_RIGHT) > 0.5
+		var dl := Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_LEFT)
+		var dr := Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_RIGHT)
+		var mx := signf(ax) * clampf((absf(ax) - STICK_DEAD) / (STICK_FULL - STICK_DEAD), 0, 1)
+		if dl != dr:
+			mx = -1.0 if dl else 1.0
 		var now := {
 			"up": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_UP) or ay < -0.5,
 			"down": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_DOWN) or ay > 0.5,
-			"left": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_LEFT) or ax < -0.35,
-			"right": Input.is_joy_button_pressed(d, JOY_BUTTON_DPAD_RIGHT) or ax > 0.35,
-			"ok": a or b or xy, "sel": a or xy, "b": b,
+			"left": dl or ax < -0.35,
+			"right": dr or ax > 0.35,
+			"ok": a or b or xy or rt, "sel": a or xy, "b": b, "mx": mx,
 			"start": Input.is_joy_button_pressed(d, JOY_BUTTON_START),
 			"back": Input.is_joy_button_pressed(d, JOY_BUTTON_BACK),
 			"lb": Input.is_joy_button_pressed(d, JOY_BUTTON_LEFT_SHOULDER),

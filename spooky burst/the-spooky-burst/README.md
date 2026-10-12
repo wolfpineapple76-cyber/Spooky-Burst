@@ -14,7 +14,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - Keyboard left side: A and D to move, Space (or W) to shoot, Esc (or P) for the game menu.
 - Keyboard right side: left and right arrows to move, Enter (or up arrow) to shoot, Backspace for the game menu.
   One keyboard player can use both sides. A second keyboard player presses Backspace to join and gets the right side.
-- Xbox controller: D-pad or left stick to move, A/B/X/Y to shoot, Start for the game menu.
+- Xbox controller: D-pad or left stick to move (the stick moves slower when only pushed partway),
+  A/B/X/Y or the right trigger (R2) to shoot, Start for the game menu.
 - Start, Esc or Backspace opens the game menu if you're playing. If you aren't, a little character picker
   pops up at your spot while the game keeps going: left / right picks, A (or shoot on the keyboard) joins,
   B / Start / Back cancels. Once you own 2 or more characters there's a ? at the end that picks one at random.
