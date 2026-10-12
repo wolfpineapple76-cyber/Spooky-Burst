@@ -203,6 +203,9 @@ const DOLLBOSS := ["......nnnnnnnnnnnnnnnnnnnn......", "......nnnnnnnnnnnnnnnnnn
 	"...........UUUd..dUUU...........", "...........UUUd..dUUU...........", "..........kkkk....kkkk.........."]
 const DOLLPAL := {"H": "#e0482a", "I": "#a8301c", "P": "#c94f8a", "S": "#f3e2d4", "U": "#33519c", "a": "#ffb3c9", "d": "#4a6fc4", "k": "#14101f",
 	"n": "#6b3f2a", "p": "#ff7fb5", "r": "#ff3355", "t": "#c9b8ee", "u": "#f6f1ff", "y": "#ffd92e"}
+# Spider Beast's web shot: sticks to a player and slows them down for a moment
+const WEBSHOT := ["g...g...g", ".g..g..g.", "..ggGgg..", "gggG.Gggg", "..ggGgg..", ".g..g..g.", "g...g...g"]
+const WEBPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -785,7 +788,7 @@ func say(s: String, dur: float) -> void:
 # for their character. eq: upgrades they have this run. bo: how many of each boost this run. got: candy this run.
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
-		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false}
+		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false, "web": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -1370,11 +1373,12 @@ func boss(e: Dictionary, dt: float) -> void:
 		var alive_p := live()
 		if not alive_p.is_empty():
 			var tg: Dictionary = pick(alive_p)
+			var K2 := "web" if e.bk == 3 else K
 			for i in 3:
 				var dx: float = tg.x - e.x + (i - 1) * 26
 				var dy: float = 209 - e.y
 				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-				bshot(e, dx / d * 105, dy / d * 105, K)
+				bshot(e, dx / d * 105, dy / d * 105, K2)
 		sfx("spread")
 	elif m == 3:
 		if sty == 1:
@@ -1464,7 +1468,10 @@ func update(dt: float) -> void:
 		if p.out:
 			continue
 		var I := player_input(p)
-		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * bo(p, "move")) * dt
+		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a Spider Beast web
+		if p.web > 0:
+			p.web -= dt
+		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * bo(p, "move")) * stuck * dt
 		if p.sh > 0:
 			p.sh -= dt
 		p.x = clampf(p.x, 14, 306)
@@ -1718,6 +1725,10 @@ func update(dt: float) -> void:
 		for b in G.eb:
 			if not b.dead and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
 				b.dead = true
+				if b.k == "web":
+					p.web = 2.0
+					sfx("deny")
+					continue
 				hurt(p)
 				was_hit = true
 				break
@@ -1893,7 +1904,9 @@ func draw_game() -> void:
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "btn":
+		if b.k == "web":
+			spr(WEBSHOT, WEBPAL, x - 9, y - 7, 2)
+		elif b.k == "btn":
 			R(x - 1, y - 2, 3, 5, "#ffd92e")
 			R(x - 2, y - 1, 5, 3, "#ffd92e")
 			R(x - 1, y, 1, 1, "#8a5a10")
@@ -1950,6 +1963,8 @@ func draw_game() -> void:
 		if p.eq.has("shield") and p.sh <= 0:
 			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt)
 		spr(C.spr2 if int(floor(gt * 4 + i)) % 2 == 1 else C.spr, C.pals[p.n], px - 12, 196 + bob, 2)
+		if p.web > 0:
+			spr(WEBSHOT, WEBPAL, px - 9, 203 + bob, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
 	for i in 5:
