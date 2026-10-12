@@ -505,8 +505,10 @@ var lcg := 7
 # PLAYER SETUP, only for this session: player slot -> the device that plays it ({"pad", "side"})
 var assign := {}
 var setup_sel := 0
-var setup_box := false     # PLAYER SETUP: the cursor is on the row's colour box
+var setup_col := 0         # PLAYER SETUP: the cursor's column on a row: 0 the slot, 1 its colour box, 2 its favourite
 var sw_open := false       # PLAYER SETUP: the colour swatch is open
+var fav_open := false      # PLAYER SETUP: the favourite character drop-down is open
+var fav_sel := 0
 var sw_r := 0
 var sw_c := 1
 var pal_cache := {}
@@ -1242,10 +1244,12 @@ func start_game(pad: int, side := "wasd") -> void:
 		smsg = "P%d HAS NO CHARACTERS: BUY ONE TO PLAY." % (slot + 1)
 		sfx("deny")
 		return
-	add_player(160, pad, "" if pad >= 0 else "both", pick_char(slot), slot)
+	# whoever pressed PLAY picks their character first (the picker opens on their favourite), over the empty
+	# graveyard; wave 1 starts when they confirm
 	mode = "game"
 	panel = ""
-	next_wave()
+	G.prestart = true
+	open_picker({"pad": pad, "side": side})
 
 func next_wave() -> void:
 	G.wave += 1
@@ -1525,9 +1529,21 @@ func close_picker(k: Dictionary) -> void:
 func pick_cancel(k: Dictionary) -> void:
 	close_picker(k)
 	sfx("back")
+	# backing out of the PLAY picker before anyone is in: back to the title
+	if G.get("prestart", false) and G.players.is_empty() and G.picks.is_empty():
+		to_menu()
 
+# a pick is for this game only: the favourite (PLAYER SETUP) isn't changed by it
 func pick_ok(k: Dictionary) -> void:
 	close_picker(k)
+	if G.get("prestart", false):
+		# the first player of the game: no lives to share yet, wave 1 starts now
+		G.prestart = false
+		var ch0: int = k.ch if k.ch >= 0 else pick(owned_chars(k.slot))
+		add_player(160, k.dev.pad, "" if k.dev.pad >= 0 else "both", ch0, k.slot)
+		sfx("join")
+		next_wave()
+		return
 	if not spare_life():
 		say("NO LIVES TO SHARE", 1.2)
 		sfx("deny")
@@ -1536,7 +1552,6 @@ func pick_ok(k: Dictionary) -> void:
 		for q in G.players:
 			if q.kb == "both":
 				q.kb = "wasd"
-	sv_set(pkey(k.slot, "char"), k.ch)
 	var ch: int = k.ch if k.ch >= 0 else pick(owned_chars(k.slot))
 	var np: Dictionary
 	if k.rejoin != null:
@@ -3433,7 +3448,7 @@ func update(dt: float) -> void:
 	G.gifts = G.gifts.filter(keep)
 	G.parts = G.parts.filter(func(o): return o.life > 0)
 
-	if mode == "game":
+	if mode == "game" and not G.get("prestart", false):
 		if G.en.is_empty() and G.sp_q.is_empty() and G.clearing <= 0:
 			G.clearing = 1.7
 			say("WAVE %d CLEARED" % shown_wave(w), 1.5)
@@ -3847,11 +3862,12 @@ func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> voi
 	smooth_line(pts, col, 5)
 
 func draw_hud() -> void:
-	T("STATS", 13, 12, 2, "#ff8a1f")
-	draw_texture_rect(tex(BUCKET, BUCKETPAL), Rect2(13, 32, 20, 18), false)
-	# each player's own candy (what they have to spend in the CHARACTERS menu)
+	# each player's own candy (what they have to spend in the CHARACTERS menu); nothing while they're still picking
 	var ps: Array = G.players.duplicate()
 	ps.sort_custom(func(a, b): return a.n < b.n)
+	if not ps.is_empty():
+		T("STATS", 13, 12, 2, "#ff8a1f")
+		draw_texture_rect(tex(BUCKET, BUCKETPAL), Rect2(13, 32, 20, 18), false)
 	if ps.size() == 1:
 		T("CANDY: %d" % candy_of(ps[0].n), 40, 34, 2, "#f6f1ff")
 	else:
@@ -3859,7 +3875,8 @@ func draw_hud() -> void:
 			T("P%d CANDY: %d" % [ps[i].n + 1, candy_of(ps[i].n)], 40, 30 + i * 11, 1, "#f6f1ff")
 	T("SCORE %06d" % G.score, 627, 12, 2, "#ffd92e", 2)
 	T("HIGH %06d" % maxi(G.high, G.score), 627, 30, 2, "#ffd92e", 2)
-	T("WAVE %d" % shown_wave(G.wave), 627, 48, 2, "#ffd92e", 2)
+	if not G.get("prestart", false):
+		T("WAVE %d" % shown_wave(G.wave), 627, 48, 2, "#ffd92e", 2)
 	for p in G.players:
 		var codes := ""
 		for w in chars[p.ch].pow:
@@ -3890,6 +3907,8 @@ func draw_hud() -> void:
 			draw_picker(k)
 	if banner != "" and mode != "pause":
 		T(banner, 320, 200, 3, "#ffd92e", 1)
+	if mode == "game" and G.get("prestart", false):
+		T("PICK YOUR CHARACTER", 320, 200, 3, "#ffd92e", 1)
 
 # ---------------------------------------------------------------- panels
 func draw_box(y: float, h: float) -> void:
@@ -3918,7 +3937,8 @@ func draw_panel(title: String, rows: Array, footer: String, cursor := -1, note :
 
 # ---------------------------------------------------------------- CHARACTERS menu
 # A tab for each player. The first page lists characters (buy for char_cost, or open one);
-# a character's page lets you play as it and buy upgrades (pow_cost) or switch them ON / OFF.
+# a character's page buys it and its upgrades (pow_cost) or switches them ON / OFF. Who you play is picked in
+# PLAYER SETUP (your favourite) and at PLAY, not here.
 # Once all its upgrades are bought, a PRESTIGE row shows at the bottom (and stays from then on):
 # confirming relocks the character and its upgrades for +1 of every boost for that character.
 func shop_rows() -> Array:
@@ -3929,16 +3949,12 @@ func shop_rows() -> Array:
 			if not has_char(stab, i):
 				rows.append([chars[i].name, "%d CANDY" % char_cost(stab, i), c < char_cost(stab, i)])
 			else:
-				rows.append([chars[i].name, "PLAYING" if char_pref(stab) == i else "OWNED", false])
-		if owned_chars(stab).size() >= 2:
-			rows.append(["RANDOM", "PLAYING" if char_pref(stab) < 0 else "", false])
+				rows.append([chars[i].name, "OWNED", false])
 	else:
 		# switching tabs keeps this page open, so it may show a character this player hasn't bought yet:
 		# then the top row buys it, and its upgrades stay greyed out until it's bought
 		var got := has_char(stab, sch)
-		if got:
-			rows.append(["PLAY AS " + chars[sch].name, "PLAYING" if char_pref(stab) == sch else "", false])
-		else:
+		if not got:
 			rows.append(["BUY " + chars[sch].name, "%d CANDY" % char_cost(stab, sch), c < char_cost(stab, sch)])
 		var own := owns(stab, sch)
 		var pc := pow_cost(stab, sch)
@@ -3952,6 +3968,10 @@ func shop_rows() -> Array:
 			rows.append(["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != ""])
 	rows.append(["BACK", "", false])
 	return rows
+
+# rows above the upgrades on a character's page: the BUY row, until it's bought
+func shop_top() -> int:
+	return 0 if has_char(stab, sch) else 1
 
 func maxed(n: int, ch: int) -> bool:
 	return has_char(n, ch) and owns(n, ch).size() == chars[ch].pow.size()
@@ -3979,13 +3999,11 @@ func pre_why(n: int, ch: int) -> String:
 func shop_note() -> String:
 	if smsg != "":
 		return smsg
-	if sch >= 0 and scur >= 1 and scur <= chars[sch].pow.size():
-		return chars[sch].pow[scur - 1][2] + "."
-	if sch >= 0 and scur == chars[sch].pow.size() + 1 and pre_shown(stab, sch):
+	if sch >= 0 and scur >= shop_top() and scur < shop_top() + chars[sch].pow.size():
+		return chars[sch].pow[scur - shop_top()][2] + "."
+	if sch >= 0 and scur == shop_top() + chars[sch].pow.size() and pre_shown(stab, sch):
 		var why := pre_why(stab, sch)
 		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
-	if sch < 0 and scur == chars.size() and owned_chars(stab).size() >= 2:
-		return "PLAY A RANDOM ONE OF YOUR CHARACTERS EACH GAME."
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
 	if sch >= 0:
@@ -4038,12 +4056,6 @@ func shop_choose() -> void:
 		shop_back()
 		return
 	var c := candy_of(stab)
-	if sch < 0 and scur == chars.size():
-		sv_set(pkey(stab, "char"), -1)
-		if stab == 0:
-			cur = -1
-		sfx("select")
-		return
 	if sch < 0:
 		if has_char(stab, scur):
 			sch = scur
@@ -4059,20 +4071,14 @@ func shop_choose() -> void:
 			smsg = "BUY %s FIRST." % chars[sch].name
 			sfx("deny")
 		return
-	if scur == 0:
-		sv_set(pkey(stab, "char"), sch)
-		if stab == 0:
-			cur = sch
-		sfx("select")
-		return
-	if scur == chars[sch].pow.size() + 1:
+	if scur == chars[sch].pow.size():
 		if pre_why(stab, sch) != "":
 			sfx("deny")
 		else:
 			spre = 0
 			sfx("select")
 		return
-	var k: String = chars[sch].pow[scur - 1][0]
+	var k: String = chars[sch].pow[scur][0]
 	var id: String = chars[sch].id
 	if not owns(stab, sch).has(k):
 		var pc := pow_cost(stab, sch)
@@ -4266,7 +4272,7 @@ func draw_picker(k: Dictionary) -> void:
 		T(">", cx + 34, y + 22, 2, "#9d8cc4", 1)
 	T("RANDOM" if k.ch < 0 else chars[k.ch].name, cx, y + 46, 1, "#f6f1ff", 1)
 	if int(floor(t * 2)) % 2 == 0:
-		T("SHOOT: JOIN", cx, y + 58, 1, "#9d8cc4", 1)
+		T("SHOOT: PLAY" if G.get("prestart", false) else "SHOOT: JOIN", cx, y + 58, 1, "#9d8cc4", 1)
 
 # shown for a moment when someone catches a power-up: the name biggest, what it does right under it,
 # and who got it small underneath. The game keeps going.
@@ -4446,14 +4452,38 @@ func dev_name(dev: Dictionary) -> String:
 func setup_move(d: int) -> void:
 	setup_sel = posmod(setup_sel + d, MAX_PLAYERS + 1)
 	if setup_sel == MAX_PLAYERS:
-		setup_box = false
+		setup_col = 0
 	sfx("move")
 
-# left / right on a player row moves between the slot and its colour box
+# left / right on a player row moves between the slot, its colour box and its favourite
 func setup_side(d: int) -> void:
-	if setup_sel < MAX_PLAYERS and setup_box != (d > 0):
-		setup_box = d > 0
+	var c := clampi(setup_col + d, 0, 2)
+	if setup_sel < MAX_PLAYERS and c != setup_col:
+		setup_col = c
 		sfx("move")
+
+# the favourite drop-down: every character with its icon, unowned ones greyed, RANDOM at the bottom once the
+# slot owns 2 or more. Picking saves it as the slot's usual character.
+func fav_opts() -> Array:
+	var o := range(chars.size())
+	if owned_chars(setup_sel).size() >= 2:
+		o.append(-1)
+	return o
+
+func fav_move(d: int) -> void:
+	fav_sel = posmod(fav_sel + d, fav_opts().size())
+	sfx("move")
+
+func fav_pick() -> void:
+	var ch: int = fav_opts()[fav_sel]
+	if ch >= 0 and not has_char(setup_sel, ch):
+		sfx("deny")
+		return
+	sv_set(pkey(setup_sel, "char"), ch)
+	if setup_sel == 0:
+		cur = ch
+	fav_open = false
+	sfx("select")
 
 func sw_move(dr: int, dc: int) -> void:
 	sw_r = posmod(sw_r + dr, SWATCH.size())
@@ -4476,12 +4506,17 @@ func setup_choose(dev: Dictionary) -> void:
 	if setup_sel == MAX_PLAYERS:
 		setup_back()
 		return
-	# on the colour box: open the swatch on the slot's colour
-	if setup_box:
+	# on the colour box: open the swatch on the slot's colour; on the favourite: the drop-down on it
+	if setup_col == 1:
 		var c := slot_col(setup_sel)
 		sw_r = c[0]
 		sw_c = c[1]
 		sw_open = true
+		sfx("select")
+		return
+	if setup_col == 2:
+		fav_sel = maxi(0, fav_opts().find(char_pref(setup_sel)))
+		fav_open = true
 		sfx("select")
 		return
 	var s := setup_sel
@@ -4520,6 +4555,17 @@ func move_controls(s: int, dev: Dictionary) -> void:
 		q.kb = was.kb
 
 func setup_key(k: int) -> void:
+	if fav_open:
+		if k == KEY_SPACE or k == KEY_ENTER:
+			fav_pick()
+		elif k == KEY_UP or k == KEY_W:
+			fav_move(-1)
+		elif k == KEY_DOWN or k == KEY_S:
+			fav_move(1)
+		elif k == KEY_ESCAPE or k == KEY_BACKSPACE or k == KEY_P:
+			fav_open = false
+			sfx("back")
+		return
 	if sw_open:
 		if k == KEY_SPACE or k == KEY_ENTER:
 			sw_pick()
@@ -4551,6 +4597,17 @@ func setup_key(k: int) -> void:
 		setup_back()
 
 func setup_pad(d: int, hit: Callable) -> void:
+	if fav_open:
+		if hit.call("sel"):
+			fav_pick()
+		elif hit.call("up"):
+			fav_move(-1)
+		elif hit.call("down"):
+			fav_move(1)
+		elif hit.call("b") or hit.call("start") or hit.call("back"):
+			fav_open = false
+			sfx("back")
+		return
 	if sw_open:
 		if hit.call("sel"):
 			sw_pick()
@@ -4586,15 +4643,44 @@ func draw_setup() -> void:
 	for s in MAX_PLAYERS:
 		rows.append(["P%d" % (s + 1), dev_name(assign[s]) if assign.has(s) else "NONE", not assign.has(s)])
 	rows.append(["BACK", "", false])
-	draw_panel("PLAYER SETUP", rows, "", setup_sel, "A, SPACE OR ENTER TAKES THE SLOT. RIGHT, THEN A: PICK ITS COLOUR.")
-	# each slot's colour box, after its name
+	draw_panel("PLAYER SETUP", rows, "", setup_sel, "A, SPACE OR ENTER TAKES THE SLOT. RIGHT: ITS COLOUR, THEN ITS FAVOURITE.")
+	# each slot's colour box after its name, then its favourite character
 	for s in MAX_PLAYERS:
 		var by := 140 + 54 + s * 26
-		if setup_box and setup_sel == s:
+		if setup_col == 1 and setup_sel == s:
 			R(146, by - 3, 20, 20, "#f6f1ff")
 		R(148, by - 1, 16, 16, col_hex(s))
+		if setup_col == 2 and setup_sel == s:
+			R(176, by - 6, 28, 26, "#f6f1ff")
+		draw_fav(char_pref(s), s, 178, by - 5)
 	if sw_open:
 		draw_swatch()
+	if fav_open:
+		draw_favs()
+
+# a character's icon (or ? for random) in the slot's colours
+func draw_fav(ch: int, slot: int, x: float, y: float, dim := false) -> void:
+	if ch < 0:
+		T("?", x + 12, y + 2, 3, "#9d8cc4" if dim else "#ffd92e", 1)
+	else:
+		draw_texture_rect(tex(chars[ch].spr, chars[ch].sil if dim else char_pal(ch, slot)), Rect2(x, y, 24, 26), false)
+
+func draw_favs() -> void:
+	var opts := fav_opts()
+	var x0 := 200
+	var y0 := 120
+	draw_box(y0, 44 + opts.size() * 30 + 8)
+	T("P%d FAVOURITE" % (setup_sel + 1), x0, y0 + 14, 2, "#ff8a1f")
+	for i in opts.size():
+		var ch: int = opts[i]
+		var y := y0 + 42 + i * 30
+		var dim: bool = ch >= 0 and not has_char(setup_sel, ch)
+		if i == fav_sel:
+			R(x0 - 4, y - 3, 300, 30, "#f6f1ff", 0.12)
+		draw_fav(ch, setup_sel, x0, y - 1, dim)
+		T("RANDOM" if ch < 0 else chars[ch].name, x0 + 34, y + 6, 2, "#9d8cc4" if dim else "#f6f1ff")
+		if dim:
+			T("NOT BOUGHT", x0 + 290, y + 9, 1, "#9d8cc4", 2)
 
 # the colour swatch for the selected slot: a row for each colour, dark / normal / light
 func draw_swatch() -> void:

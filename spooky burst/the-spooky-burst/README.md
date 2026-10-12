@@ -16,9 +16,12 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   One keyboard player can use both sides. A second keyboard player presses Backspace to join and gets the right side.
 - Xbox controller: D-pad or left stick to move (the stick moves slower when only pushed partway),
   A/B/X/Y or the right trigger (R2) to shoot, Start for the game menu.
-- Start, Esc or Backspace opens the game menu if you're playing. If you aren't, a little character picker
-  pops up at your spot while the game keeps going: left / right picks, A (or shoot on the keyboard) joins,
+- PLAY GAME asks whoever pressed it which character to play: the picker pops up at their spot over the empty
+  graveyard, open on their favourite, and wave 1 starts when they shoot. B / Start / Back goes back to the title.
+- Start, Esc or Backspace opens the game menu if you're playing. If you aren't, the same picker pops up at
+  your spot while the game keeps going: left / right picks, A (or shoot on the keyboard) joins,
   B / Start / Back cancels. Once you own 2 or more characters there's a ? at the end that picks one at random.
+  A pick is for that game only; your favourite stays what PLAYER SETUP says.
 - Game menu: Resume, Join, Player Setup, Quit (that player leaves, the others keep playing) and Main Menu.
 - QUIT on the title screen (or Esc / Start there) asks if you want to quit the game.
 - Settings: full screen or windowed, the window size, and pixel perfect. Use left / right to change them.
@@ -38,6 +41,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - Each slot also has a colour box: move right onto it and press to open a swatch of white, blue, purple, pink,
   orange, yellow and green, each in dark, normal and light. It colours that player's shots and character
   (the Cat's tummy, the Zombie's shirt, the Ghost's and Skeleton's tint, the Jester's colour parts).
+- Right again is the slot's FAVOURITE: the character it usually plays, shown as its icon. Press to open a
+  drop-down of every character with its icon and name; ones not bought are greyed out, and RANDOM is at the
+  bottom once the slot owns 2 or more. The favourite is what the picker opens on at PLAY and when joining.
   Normal white is each character's own look. Slots start white, green, blue and orange, and the choice is saved.
 - Lives are shared, never created. Someone joining takes lives one at a time from whoever has the most
   until everyone is within one life of each other. Someone leaving hands their lives to whoever has the fewest.
@@ -130,8 +136,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   that character and its upgrades cost 10% of the base price more. After the first prestige the row
   always shows its level, greyed out until everything is bought again. You can't prestige your only
   character unless you have the candy to buy one back. In a game, PRE 1 and so on shows under your upgrades.
-- Pick a character to see its upgrades: PLAY AS chooses it, and bought upgrades switch ON or OFF.
-  With 2 or more characters there's also RANDOM, which picks one of yours each game.
+- Pick a character to see its upgrades: bought ones switch ON or OFF. Who you play is set in PLAYER SETUP
+  (your favourite) and asked at PLAY, not here.
 - Nothing unlocks during a game. Every run starts with no upgrades; shoot the glowing pumpkin each wave and
   it drops one. Whoever catches it gets one of their bought, ON upgrades straight away.
   The pumpkin flies in below the lowest enemy still alive, so clearing the bottom rows lets it come in higher.

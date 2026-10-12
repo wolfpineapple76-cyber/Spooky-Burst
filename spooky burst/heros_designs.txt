@@ -86,6 +86,9 @@ MENUS AND CONTROLS
 - On a controller, B goes back and LB/RB switch tabs. Switching tabs keeps the page you're on.
 - Start joins instantly with a small character picker that doesn't pause the game.
   It only pauses if you're already playing. The picker has a "?" for random.
+- Each slot has a FAVOURITE character, picked from a drop-down (icon and name) in PLAYER SETUP. CHARACTERS is
+  for buying and upgrades only (no PLAY AS). PLAY asks whoever pressed it which character, defaulting to their
+  favourite; a pick there or when joining is for that game only and never changes the favourite.
 - In the upgrade pop-up, the name is biggest, the description goes right under it,
   and the player number is played down.
 - The Jester isn't a grey silhouette on the title screen while locked; once bought he pops out of the right-hand
