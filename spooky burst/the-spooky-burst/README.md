@@ -44,6 +44,33 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   so a player who rejoins starts with nothing. You keep all the candy you caught.
 - SECOND WIND (Skeleton) wipes you the same way, then brings you straight back with 2 lives.
 
+## Waves and enemies
+- Bats (2 HP) stream in fast from the top corners and dive at you. Witches (2 HP) swoop in low from the
+  sides, dropping a slow shot or two, then drop candy corn and swoop across. Vampires (12 HP) drop in
+  as dark red-eyed bats, turn back into vampires in their spot and shoot at you. Vampire rows are spaced
+  out and staggered: 4 in one row, 5 in the next.
+- Spiders (6 HP, from wave 3) lower themselves on threads at the top corners and the top middle. Each
+  one webs the spot just below a front enemy (up to 2 webs each); once its webs are up it spits green
+  venom that falls faster and faster. A web tile soaks up 4 damage of your shots, piercing ones too,
+  and sways with the rows. Enemies and their shots pass straight through webs.
+- Every enemy has its own chance to attack, so more of a kind means more attacks, about one per row of
+  them at a time. A wave calms down as you clear it.
+- Everything is on a doubled scale: orbs do 2 damage before boosts. SPECTRAL SHOT halves each time it
+  goes through an enemy and stops once it's under 1 damage (or after 3 enemies).
+- Every 5th wave is a boss, in this order: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN,
+  PUMPKIN KING. Each boss's own kind fills the waves before the next one:
+  - Waves 1-4 ease in (bats, then witches, then vampires; spiders from wave 3).
+  - After the PRIMAL BAT: vampires, witches and 3 rows of bats; a killed spider is replaced, up to 6.
+  - After the BLACK WIDOW the top bat row turns to vampires, after the VAMPIRE LORD the next one to
+    witches, and after the WITCH QUEEN it's witches, vampires, witches, vampires and one row of bats.
+  - After the PUMPKIN KING it loops back to the full lineup before the PRIMAL BAT, and every enemy
+    has +1 HP for each PUMPKIN KING beaten.
+- The PRIMAL BAT swoops, screeches rings of sound and calls swarms of bats into formation. The BLACK
+  WIDOW hangs on her thread, spits venom, drops down at you, spins web walls and calls spiders. The
+  VAMPIRE LORD launches bats at you and sometimes calls vampires. The WITCH QUEEN calls witches.
+  The PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders,
+  and they act just like the ones in a normal wave.
+
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). DOUBLE CANDY, GRAVE ROBBER and
   SOUL MATE help you earn it faster.

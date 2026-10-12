@@ -30,6 +30,22 @@ const HATPAL := {"P": "#7a35d6", "O": "#ff8a1f", "K": "#5a5285", "R": "#e0364f",
 const HANGBAT := ["...X.X...", "...XXX...", "..XXXXX..", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", ".XXXXXXX.", "..XXXXX..", "..XlXrX..", "..XXXXX..", "..X...X.."]
 const BATA := ["X...X.X...X", "XX.XXXXX.XX", "XXXXXXXXXXX", ".XXXeXeXXX.", "..X.XXX.X.."]
 const BATB := ["....X.X....", "...XXXXX...", ".XXXeXeXXX.", "XXXXXXXXXXX", "XX..XXX..XX", "X.........X"]
+# a vampire flying in as a bat: darker, with red eyes
+const VBATA := ["R...D.D...R", "RD.DDDDD.DR", "DDDDDDDDDDD", ".DDDrDrDDD.", "..D.DDD.D.."]
+const VBATB := ["....D.D....", "...DDDDD...", ".DDDrDrDDD.", "RDDDDDDDDDR", "RD..DDD..DR", "R.........R"]
+# spiders hang on threads and web the front enemies
+const SPIDER := ["L.L.....L.L", ".L.L...L.L.", "..L.NNN.L..", "LLLNNNNNLLL", "..NNrNrNN..",
+	"LLLNNNNNLLL", "..L.NNN.L..", ".L.L...L.L.", "L.L.....L.L"]
+# a web tile, whole and torn (once it's taken half its damage)
+const WEB := ["w...w.w...w", ".w..w.w..w.", "..wwwwwww..", "www.www.www", "..wwwwwww..", ".w..w.w..w."]
+const WEB_TORN := ["w.....w...w", ".w....w..w.", "..ww.ww.w..", "w.w..ww..ww", "..w.www....", ".w....w...."]
+# the PRIMAL BAT (wings up and down) and the BLACK WIDOW
+const PBAT_A := ["RR.................RR", "RRR...............RRR", "RRRR....D...D....RRRR", ".RXXX...DDDDD...XXXR.", "..RXXXXDDDDDDDXXXXR..",
+	"...RXXXDrDDDrDXXXR...", "....RXXDDDDDDDXXR....", ".....RXDDWDWDDXR.....", "......R.DDDDD.R......", ".........D.D........."]
+const PBAT_B := [".....................", "........D...D........", "........DDDDD........", ".....RXDDDDDDDXR.....", "...RXXXDrDDDrDXXXR...",
+	".RXXXXXDDDDDDDXXXXXR.", "RXXXXXXDDWDWDDXXXXXXR", "RRX.XXX.DDDDD.XXX.XRR", "RR....X..D.D..X....RR", "R...................R"]
+const WIDOW := ["L.....Q.Q.....L", ".L....QQQ....L.", "..L..QQQQQ..L..", "LLLLLQrQrQLLLLL", "....QWQQQWQ....", "LLLQQQQQQQQQLLL", "...QQQQHQQQQ...",
+	"..LQQQHHHQQQL..", ".L.QQQQHQQQQ.L.", "L...QQQQQQQ...L", ".....QQQQQ.....", "....L.....L....", "...L.......L..."]
 # the witch enemy: a small witch riding a broomstick, facing right (WITCH) or left (WITCH_L)
 const WITCH := ["P...........", ".PP.........", "..PPP.......", "..OOOO......", "PPPPPPPP....", "...GkGGG....", "..PPPPP.....", "YYYBBBBBBBBB", "YY..PPk....."]
 const WITCH_L := ["...........P", ".........PP.", ".......PPP..", "......OOOO..", "....PPPPPPPP", "....GGGkG...", ".....PPPPP..", "BBBBBBBBBYYY", ".....kPP..YY"]
@@ -40,7 +56,9 @@ const WQUEEN := [".......P.......", "......PPP......", ".....PPPPP.....", "....P
 	"....GGGmGGG....", ".....GGGGG.....", "...PPPPPPPPP...", "..PPPPPPPPPPP..", "BBBBBBBBBBBBYYY", "..P.........YYY"]
 const CROWN := ["Y.Y.Y", "YYYYY"]
 const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "G": "#8fd66a", "k": "#1b0f33", "B": "#a8743a", "Y": "#ffd92e",
-	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420"}
+	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420", "D": "#3a2252", "N": "#4a2f5a",
+	"H": "#e0213f", "L": "#7a5a8e", "Q": "#2a1830"}
+const WEBPAL := {"w": "#e6e0f5"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 # the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
@@ -64,7 +82,22 @@ const ACCPAL := {"B": "#ff4f9a", "d": "#b02670", "R": "#140a1a", "r": "#7a5a8e",
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING"]
+# boss kinds (bk): the first three are the old bosses, so their code keeps its numbers
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "PRIMAL BAT", "BLACK WIDOW"]
+# every 5th wave is a boss, in this order, then it loops (and the PUMPKIN KING makes enemies +1 HP)
+const BOSS_ORDER := [3, 4, 0, 1, 2]
+# health of each enemy (bat, witch, vampire, spider) before PUMPKIN KING kills add to it.
+# Everything is on a doubled scale: orbs do 2 damage before boosts.
+const HP := {"b": 2, "w": 2, "v": 12, "s": 6}
+# formation spots across a row: 8 for bats and witches; vampire rows are wider apart and staggered,
+# 4 in one row and 5 in the next (one each side of the 4 and one in each gap)
+const SLOT8 := [62.0, 90.0, 118.0, 146.0, 174.0, 202.0, 230.0, 258.0]
+const SLOT_V4 := [76.0, 132.0, 188.0, 244.0]
+const SLOT_V5 := [48.0, 104.0, 160.0, 216.0, 272.0]
+# where spiders hang on their threads: the top left corner, the top right corner and the top middle
+const SPIDER_SPOTS := [[12.0, 112.0], [308.0, 112.0], [160.0, 22.0]]
+# a web tile soaks up this much damage from player shots, piercing ones too
+const WEB_HP := 4.0
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["PLAYER SETUP", "setup"], ["SETTINGS", "settings"],
 	["RESET SAVE", "reset"], ["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
@@ -758,6 +791,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
+		"hpup": 0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0},
 		"shake": 0.0, "boom": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to UPGRADES to buy one
@@ -786,33 +820,81 @@ func next_wave() -> void:
 		for p in G.players:
 			if not p.out and p.eq.has("regen") and p.lives < 5:
 				p.lives += 1
+	G.webs = []
+	G.sp_q = []
+	G.sp_more = 0
 	if w % 5 == 0:
 		G.bm = boss_mult()
-		var hp := int(round((36 + w * 4) * G.bm))
+		var hp := int(round((72 + w * 8) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		b.bk = (w / 5 - 1) % 3
+		b.bk = BOSS_ORDER[(w / 5 - 1) % BOSS_ORDER.size()]
 		b.t = 0.0
 		G.en.append(b)
 		say(BOSS_NAMES[b.bk], 2.2)
 		sfx("roar")
 		G.shake = 1.0
 		return
-	var rows := []
-	if w >= 4:
-		rows.append("v")
-	if w >= 2:
-		rows.append("w")
-	rows.append("b")
-	rows.append("b")
-	if w >= 6:
-		rows.append("b")
+	var rows := wave_rows(w)
 	for r in rows.size():
 		var ty: String = rows[r]
-		for q in 8:
-			if ty == "v" and (q < 2 or q > 5):
-				continue
-			G.en.append(new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 3 if ty == "v" else 1, "enter"))
+		var xs: Array = SLOT_V4 if ty == "v4" else (SLOT_V5 if ty == "v5" else SLOT8)
+		for i in xs.size():
+			G.en.append(arrive(ty.left(1), xs[i], 44 + r * 22, i, r))
+	# spiders from wave 3; after the first boss each one killed is replaced, up to 6 in all
+	if w >= 3:
+		for spot in SPIDER_SPOTS.size():
+			G.en.append(new_spider(spot))
+		if (w - 1) % 25 >= 5:
+			G.sp_more = 3
 	say("WAVE %d" % w, 1.4)
+
+# The rows of a normal wave, top to bottom (b bats, w witches, v4 / v5 vampire rows of 4 / 5).
+# The first four waves ease in. After that each boss brings its own kind into the waves before the next
+# boss: after the PRIMAL BAT (and on every later loop before him) the full lineup, after the BLACK WIDOW the top
+# bat row turns to vampires, after the VAMPIRE LORD the next one to witches, after the WITCH QUEEN it's
+# witches and vampires with one bat row. After the PUMPKIN KING it loops.
+func wave_rows(w: int) -> Array:
+	if w <= 4:
+		return [["b", "b"], ["w", "b", "b"], ["w", "b", "b"], ["v4", "w", "b", "b"]][w - 1]
+	match ((w - 1) % 25) / 5:
+		2:
+			return ["v4", "w", "v5", "b", "b"]
+		3:
+			return ["v4", "w", "v5", "w", "b"]
+		4:
+			return ["w", "v4", "w", "v5", "b"]
+	return ["v4", "w", "b", "b", "b"]
+
+# a new enemy flying in to its spot (hx, hy), each kind its own way:
+# bats stream in fast from a top corner, witches swoop in low from the sides firing a slow shot or two,
+# vampires drop in from above as dark red-eyed bats and turn into vampires when they get there
+func arrive(ty: String, hx: float, hy: float, i: int, r: int) -> Dictionary:
+	var e: Dictionary
+	if ty == "b":
+		var left := i % 2 == 0
+		e = new_enemy("b", hx, hy, -24.0 if left else 344.0, 16.0 + r * 8, HP.b + G.hpup, "enter")
+		e.wait = r * 0.3 + (i / 2) * 0.1
+		e.es = 330.0
+	elif ty == "w":
+		var left := i % 2 == 0
+		e = new_enemy("w", hx, hy, -24.0 if left else 344.0, 130.0 + randf() * 40, HP.w + G.hpup, "enter")
+		e.wait = r * 0.3 + i * 0.12
+		e.es = 170.0
+		e.shots = 1 + randi() % 2
+		e.drop = 0.4 + randf() * 0.4
+	else:
+		e = new_enemy("v", hx, hy, hx, -30.0 - r * 18 - i * 8, HP.v + G.hpup, "enter")
+		e.es = 110.0
+		e.bat = true
+	return e
+
+func new_spider(spot: int) -> Dictionary:
+	var a: Array = SPIDER_SPOTS[spot]
+	var e := new_enemy("s", a[0], a[1], a[0], -16, HP.s + G.hpup, "enter")
+	e.spot = spot
+	e.wt = 2.0 + randf() * 2.0
+	e.silk = 0.0
+	return e
 
 # ---------------------------------------------------------------- co-op
 # Lives are shared, never created: a player joining takes lives one at a time from whoever has
@@ -1079,15 +1161,25 @@ func kill(e: Dictionary) -> void:
 				burst(o.x, o.y, "#8a66e0", 8)
 		for b in G.eb:
 			b.dead = true
+		G.webs = []
+		G.sp_q = []
+		G.sp_more = 0
+		# every PUMPKIN KING beaten makes every enemy after him 1 HP tougher
+		if e.bk == 2:
+			G.hpup += 1
 		G.clearing = 2.4
 		say(BOSS_NAMES[e.bk] + " DEFEATED", 2.0)
 		sfx("roar")
 		G.shake = 1.2
 		G.boom = {"x": e.x, "y": e.y, "t": 1.2, "n": 0.0}
 		return
-	var base: int = {"b": 50, "w": 80, "v": 150}[e.ty]
+	var base: int = {"b": 50, "w": 80, "v": 150, "s": 120}[e.ty]
 	pts(base * (2 if e.st == "dive" else 1))
-	burst(e.x, e.y, {"b": "#8a66e0", "w": "#8fd66a", "v": "#b3122e"}[e.ty], 10)
+	burst(e.x, e.y, {"b": "#8a66e0", "w": "#8fd66a", "v": "#b3122e", "s": "#6b4a7a"}[e.ty], 10)
+	# after the first boss a dead spider is replaced from the same spot, up to 6 spiders a wave
+	if e.ty == "s" and G.sp_more > 0:
+		G.sp_more -= 1
+		G.sp_q.append({"spot": e.spot, "t": 1.6})
 	if randf() < (0.56 if any_eq("cdrop") else 0.28):
 		G.candy.append({"x": e.x, "y": e.y, "dead": false})
 	sfx("pop")
@@ -1148,8 +1240,18 @@ func pk_height() -> float:
 			low = maxf(low, e.hy + 22.0)
 	return randf_range(minf(low, 160.0), 160.0)
 
-func corn(e: Dictionary) -> void:
-	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
+func corn(e: Dictionary, vy := -1.0) -> void:
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3 if vy < 0 else vy, "k": "c", "ph": randf() * TAU, "dead": false})
+
+# a green venom drop: thrown at a player, then falling faster and faster
+func venom(x: float, y: float, ang := 0.0) -> void:
+	var alive_p := live()
+	var tx: float = (pick(alive_p).x if not alive_p.is_empty() else 160.0)
+	var dx := tx - x
+	var dy := 209.0 - y
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	var v := Vector2(dx / d * 55, dy / d * 55).rotated(ang)
+	G.eb.append({"x": x, "y": y + 6, "vx": v.x, "vy": v.y, "k": "g", "ph": 0.0, "dead": false})
 
 # cap: a boss shot that only drifts sideways for 2 character widths (24 px), then falls straight down
 func bshot(e: Dictionary, vx: float, vy: float, k: String, x = null, y = null, cap := false) -> void:
@@ -1217,7 +1319,8 @@ func boss(e: Dictionary, dt: float) -> void:
 			e.at = 1.2
 		return
 	var rage: bool = e.hp < e.max / 2.0
-	var K := "r" if e.bk == 0 else "c"
+	# what each boss shoots: blood, candy corn, sonic rings (PRIMAL BAT) or venom (BLACK WIDOW)
+	var K: String = {0: "r", 3: "p", 4: "g"}.get(e.bk, "c")
 	if rage and not e.raged:
 		e.raged = true
 		say("ENRAGED!", 1.2)
@@ -1232,6 +1335,14 @@ func boss(e: Dictionary, dt: float) -> void:
 	elif e.bk == 2:
 		bx = 160 + sin(e.ph * 1.1) * 108
 		by = 62 + absf(sin(e.ph * 2.4)) * 26
+	elif e.bk == 3:
+		# the PRIMAL BAT flaps about in a wide figure of eight
+		bx = 160 + sin(e.ph * 0.9) * 112
+		by = 58 + sin(e.ph * 1.8) * 16
+	elif e.bk == 4:
+		# the BLACK WIDOW hangs on her thread, swinging side to side
+		bx = 160 + sin(e.ph * 0.8) * 100
+		by = 56 + sin(e.ph * 1.6) * 8
 	else:
 		bx = 160 + sin(e.ph * 0.7) * 112
 		by = 66 + sin(e.ph * 1.9) * 10
@@ -1257,9 +1368,17 @@ func boss(e: Dictionary, dt: float) -> void:
 	e.n += 1
 	var m: int = e.n % 5
 	if m == 1:
-		var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
-		for a in angs:
-			bshot(e, sin(a) * 85, cos(a) * 85, K)
+		if e.bk == 4:
+			for a in [-0.6, -0.3, 0.0, 0.3, 0.6]:
+				venom(e.x, e.y + 20, a)
+		else:
+			var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 or e.bk == 3 else [-0.6, -0.3, 0.0, 0.3, 0.6]
+			for a in angs:
+				bshot(e, sin(a) * 85, cos(a) * 85, K)
+		sfx("spread")
+	elif m == 2 and e.bk == 4:
+		for i in 3:
+			venom(e.x + (i - 1) * 14, e.y + 20, (i - 1) * 0.15)
 		sfx("spread")
 	elif m == 2:
 		var alive_p := live()
@@ -1275,17 +1394,39 @@ func boss(e: Dictionary, dt: float) -> void:
 	elif m == 3:
 		if e.bk == 1:
 			for i in 2:
-				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, 1, "fly")
+				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, HP.w + G.hpup, "fly")
 				w.dir = 1 if i == 1 else -1
 				w.fy = 120.0 + i * 24
 				G.en.append(w)
 			sfx("cackle")
+		elif e.bk == 2:
+			# the PUMPKIN KING calls a batch of one kind at a time, in turn: bats, witches, vampires, spiders
+			var ty: String = ["b", "w", "v", "s"][e.get("batch", 0) % 4]
+			e.batch = e.get("batch", 0) + 1
+			if ty == "s":
+				summon_spiders(2 if rage else 1)
+			else:
+				summon(e, ty, {"b": 4, "w": 2, "v": 2}[ty] + ((2 if ty == "b" else 1) if rage else 0))
+			sfx("cackle")
+		elif e.bk == 3:
+			# the PRIMAL BAT calls a swarm of bats into formation
+			summon(e, "b", 6 if rage else 5)
+			sfx("squeak")
+		elif e.bk == 4:
+			summon_spiders(2 if rage else 1)
+			sfx("squeak")
 		else:
-			for i in (4 if rage else 3):
-				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, 1, "dive"))
+			# the VAMPIRE LORD launches bats straight at you, and every other time calls two vampires in instead
+			e.calls = e.get("calls", 0) + 1
+			if e.calls % 2 == 0:
+				summon(e, "v", 2)
+			else:
+				for i in (4 if rage else 3):
+					G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + G.hpup, "dive"))
 			sfx("squeak")
 	elif m == 4:
-		if e.bk == 0:
+		# the VAMPIRE LORD dashes down at you, the PRIMAL BAT swoops, the BLACK WIDOW drops on her thread
+		if e.bk == 0 or e.bk == 3 or e.bk == 4:
 			e.dz = 1.6
 			sfx("dash")
 		elif e.bk == 1:
@@ -1298,12 +1439,21 @@ func boss(e: Dictionary, dt: float) -> void:
 				bshot(e, cos(a) * 80, sin(a) * 80, "c")
 			sfx("ring")
 			G.shake = 0.3
+	elif e.bk == 4:
+		web_wall(e.x)
+		sfx("move")
+	elif e.bk == 3:
+		# the PRIMAL BAT screeches a slow ring of sound
+		for i in 10:
+			var a := i / 10.0 * TAU
+			bshot(e, cos(a) * 70, sin(a) * 70, "p")
+		sfx("ring")
 	else:
 		e.sp = 1.4
 		e.spt = 0.0
 
 func formed(ty: String) -> Array:
-	return G.en.filter(func(e): return e.ty == ty and e.st == "form")
+	return G.en.filter(func(e): return e.ty == ty and e.st == "form" and e.get("wait", 0.0) <= 0)
 
 # sideways speeds of one volley's orbs (before DEEP POCKETS pairs them)
 func vxs_of(p: Dictionary) -> Array:
@@ -1314,7 +1464,7 @@ func vxs_of(p: Dictionary) -> Array:
 	return vxs
 
 func orb_dmg(p: Dictionary) -> float:
-	return (2.0 if p.eq.has("heavy") else 1.0) * (1.0 + 0.05 * lvl(p, "dmg"))
+	return (4.0 if p.eq.has("heavy") else 2.0) * (1.0 + 0.05 * lvl(p, "dmg"))
 
 # one volley of p's orbs from x, y. lean (degrees, + is right) only bends GHOST SHOT.
 # helper is true for SOUL MATE's and GHOSTRESS's volleys.
@@ -1409,6 +1559,132 @@ func soul_catch(o: Dictionary):
 	return null
 
 # dir is -1 to 1: keys and the d-pad are always full speed, the left stick gives finer speeds
+# Attacks: every enemy in formation has its own small chance to attack each moment, tuned so a row's
+# worth of a kind averages one attack per interval (the intervals shorten in later waves). So more of a
+# kind means more attacks, and a wave calms down as it's cleared. A cap stops more than one per row
+# (plus one) of bats diving, or of witches swooping, at once, and shots of a kind come at least 0.12s apart.
+func enemy_attacks(dt: float, w: int) -> void:
+	for k in G.gap:
+		G.gap[k] -= dt
+	var bats := formed("b")
+	var ws := formed("w")
+	var vs := formed("v")
+	var diving: int = G.en.filter(func(o): return o.ty == "b" and o.st == "dive").size()
+	var flying: int = G.en.filter(func(o): return o.ty == "w" and o.st == "fly").size()
+	var pd := dt / (maxf(0.55, 2.1 - w * 0.14) * 8)
+	for e in bats:
+		if diving < ceili(bats.size() / 8.0) + 1 and randf() < pd:
+			e.st = "dive"
+			e.vx = 0.0
+			diving += 1
+			sfx("squeak")
+	var pc := dt / (maxf(0.45, 1.25 - w * 0.07) * 8)
+	var pf := dt / (maxf(1.6, 3.6 - w * 0.2) * 8)
+	for e in ws:
+		if G.gap.c <= 0 and randf() < pc:
+			corn(e)
+			G.gap.c = 0.12
+		if flying < ceili(ws.size() / 8.0) + 1 and randf() < pf:
+			e.st = "fly"
+			e.dir = 1 if e.x < 160 else -1
+			e.fy = 118 + randf() * 30
+			e.pass = 0
+			e.drop = 0.3
+			flying += 1
+			sfx("cackle")
+	var alive_p := live()
+	var pv := dt / (maxf(1.2, 2.8 - w * 0.1) * 4)
+	for e in vs:
+		if G.gap.v <= 0 and not alive_p.is_empty() and randf() < pv:
+			var tg: Dictionary = pick(alive_p)
+			var dx: float = tg.x - e.x
+			var dy: float = 209 - e.y
+			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
+			G.gap.v = 0.12
+
+func form_sway() -> float:
+	return sin(G.t * 0.8) * 22
+
+# where a web tile is now: formation webs sway with the rows, the BLACK WIDOW's stay put
+func web_x(wb: Dictionary, sw: float) -> float:
+	return wb.hx + (0.0 if wb.fixed else sw)
+
+# A spider drops down on its thread, then every few seconds either webs the spot just below the front
+# enemy of a random column (while fewer than 2 of its own webs are up) or spits venom.
+func spider(e: Dictionary, dt: float) -> void:
+	var a: Array = SPIDER_SPOTS[e.spot]
+	if e.st == "enter":
+		e.y = minf(e.y + 70 * dt, a[1])
+		if e.y >= a[1]:
+			e.st = "form"
+	e.x = a[0] + sin(e.t * 1.3) * 3
+	e.silk -= dt
+	if e.st != "form":
+		return
+	e.wt -= dt
+	if e.wt > 0:
+		return
+	e.wt = maxf(2.2, 4.2 - G.wave * 0.05) + randf()
+	var spot = web_spot()
+	if spot != null and G.webs.filter(func(o): return is_same(o.own, e)).size() < 2:
+		var wb := {"hx": spot.x, "y": spot.y, "hp": WEB_HP, "own": e, "fixed": false, "g": 0.0}
+		G.webs.append(wb)
+		e.silk = 0.25
+		e.silk_to = wb
+	else:
+		venom(e.x, e.y)
+
+# the spot just below the front (lowest) enemy of a random column that has no web yet, or null
+func web_spot():
+	var low := {}
+	for o in G.en:
+		if o.dead or o.ty == "B" or o.ty == "s":
+			continue
+		if not low.has(o.hx) or o.hy > low[o.hx]:
+			low[o.hx] = o.hy
+	var spots := []
+	for x in low:
+		var y: float = low[x] + 14
+		if G.webs.filter(func(wb): return absf(wb.hx - x) < 4 and absf(wb.y - y) < 4).is_empty():
+			spots.append(Vector2(x, y))
+	return pick(spots) if not spots.is_empty() else null
+
+# formation spots at height y that no living enemy is using
+func free_spots(y: float, xs: Array) -> Array:
+	return xs.filter(func(x): return G.en.filter(func(o): return not o.dead and o.ty != "B" and absf(o.hx - x) < 1 and absf(o.hy - y) < 1).is_empty())
+
+# A boss calls up to n of a kind into free formation spots below it. They fly out from the boss, then
+# act like any others (vampires come as bats and turn back when they get there).
+func summon(e: Dictionary, ty: String, n: int) -> void:
+	var y: float = {"v": 100.0, "w": 120.0, "b": 140.0}[ty]
+	var spots := free_spots(y, SLOT_V5 if ty == "v" else SLOT8)
+	spots.shuffle()
+	for i in mini(n, spots.size()):
+		var o := arrive(ty, spots[i], y, i, 0)
+		o.x = e.x
+		o.y = e.y + 10
+		o.wait = i * 0.08
+		o.shots = 0
+		G.en.append(o)
+
+# spiders drop in at up to n spider spots that are free
+func summon_spiders(n: int) -> void:
+	var free := []
+	for spot in SPIDER_SPOTS.size():
+		if G.en.filter(func(o): return o.ty == "s" and not o.dead and o.spot == spot).is_empty():
+			free.append(spot)
+	free.shuffle()
+	for i in mini(n, free.size()):
+		G.en.append(new_spider(free[i]))
+
+# the BLACK WIDOW spins three web tiles across, below her, that stay put
+func web_wall(x: float) -> void:
+	for dx in [-26.0, 0.0, 26.0]:
+		var wx := clampf(x + dx, 20, 300)
+		if G.webs.filter(func(wb): return absf(web_x(wb, form_sway()) - wx) < 14 and absf(wb.y - 116) < 6).is_empty():
+			G.webs.append({"hx": wx, "y": 116.0, "hp": WEB_HP, "own": null, "fixed": true, "g": 0.0})
+
 func player_input(p: Dictionary) -> Dictionary:
 	var dir := 0.0
 	var fire := false
@@ -1537,10 +1813,17 @@ func update(dt: float) -> void:
 	var sway := sin(G.t * 0.8) * 22
 	var w: int = G.wave
 	for e in G.en.duplicate():
+		# still waiting off screen for its turn to fly in
+		if e.get("wait", 0.0) > 0:
+			e.wait -= dt
+			continue
 		e.t += dt
 		e.flash -= dt
 		if e.ty == "B":
 			boss(e, dt)
+			continue
+		if e.ty == "s":
+			spider(e, dt)
 			continue
 		var tx: float = e.hx + sway
 		var ty: float = e.hy
@@ -1579,56 +1862,41 @@ func update(dt: float) -> void:
 			var d := sqrt(dx * dx + dy * dy)
 			if absf(dx) > 2:
 				e.face = int(signf(dx))
+			if e.st == "enter" and e.ty == "w" and e.get("shots", 0) > 0:
+				e.drop -= dt
+				if e.drop <= 0:
+					corn(e, 55.0)
+					e.shots -= 1
+					e.drop = 0.6
 			if d < 4:
 				e.st = "form"
+				e.es = 150.0
+				# a vampire arriving as a bat turns back into a vampire
+				if e.get("bat", false):
+					e.bat = false
+					burst(e.x, e.y, "#3a2252", 10)
 			else:
-				var sp := minf(d, 150 * dt)
+				var sp := minf(d, e.get("es", 150.0) * dt)
 				e.x += dx / d * sp
 				e.y += dy / d * sp
+				# bats flutter on the way in, witches swoop
+				if e.st == "enter" and e.ty == "b":
+					e.y += sin(e.t * 9) * 40 * dt
+				elif e.st == "enter" and e.ty == "w":
+					e.y += sin(e.t * 4) * 30 * dt
 
-	G.dive -= dt
-	if G.dive <= 0:
-		var bats := formed("b")
-		if not bats.is_empty():
-			var e: Dictionary = pick(bats)
-			e.st = "dive"
-			e.vx = 0.0
-			sfx("squeak")
-		G.dive = maxf(0.55, 2.1 - w * 0.14)
-	G.wt -= dt
-	if G.wt <= 0:
-		var ws := formed("w")
-		if not ws.is_empty():
-			corn(pick(ws))
-		G.wt = maxf(0.45, 1.25 - w * 0.07)
-	G.wf -= dt
-	if G.wf <= 0:
-		var ws := formed("w")
-		if not ws.is_empty():
-			var e: Dictionary = pick(ws)
-			e.st = "fly"
-			e.dir = 1 if e.x < 160 else -1
-			e.fy = 118 + randf() * 30
-			e.pass = 0
-			e.drop = 0.3
-			sfx("cackle")
-		G.wf = maxf(1.6, 3.6 - w * 0.2)
-	G.vt -= dt
-	if G.vt <= 0:
-		var vs := formed("v")
-		var alive_p := live()
-		if not vs.is_empty() and not alive_p.is_empty():
-			var e: Dictionary = pick(vs)
-			var tg: Dictionary = pick(alive_p)
-			var dx: float = tg.x - e.x
-			var dy: float = 209 - e.y
-			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-			G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
-		G.vt = maxf(1.2, 2.8 - w * 0.1)
+	enemy_attacks(dt, w)
+	for q in G.sp_q.duplicate():
+		q.t -= dt
+		if q.t <= 0:
+			G.sp_q.erase(q)
+			G.en.append(new_spider(q.spot))
 
 	for b in G.eb:
 		if b.k == "c":
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
+		if b.k == "g":
+			b.vy = minf(b.vy + 120 * dt, 170)
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
 		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
@@ -1636,6 +1904,23 @@ func update(dt: float) -> void:
 			b.vx = 0.0
 		if b.y > 246 or b.y < -60 or b.x < -6 or b.x > 326:
 			b.dead = true
+
+	# webs catch player orbs, piercing ones too (enemies and their shots go straight through)
+	for wb in G.webs:
+		wb.g += dt
+		wb.flash = wb.get("flash", 0.0) - dt
+	for s in G.shots:
+		if s.dead:
+			continue
+		for wb in G.webs:
+			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and absf(s.y - wb.y) < 5:
+				wb.hp -= s.dmg
+				wb.flash = 0.1
+				s.dead = true
+				if wb.hp <= 0:
+					burst(web_x(wb, sway), wb.y, "#d8d2e8", 8)
+				break
+	G.webs = G.webs.filter(func(o): return o.hp > 0)
 
 	# orbs hitting enemies
 	for s in G.shots:
@@ -1647,11 +1932,13 @@ func update(dt: float) -> void:
 			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and absf(s.y - e.y) < hh:
+				e.hp -= s.dmg
 				s.pc -= 1
 				s.last = e
-				if s.pc <= 0:
+				# SPECTRAL SHOT: each enemy it goes through halves it, and it stops under 1 damage or after 3
+				s.dmg *= 0.5
+				if s.pc <= 0 or s.dmg < 1.0:
 					s.dead = true
-				e.hp -= s.dmg
 				e.flash = 0.1
 				if e.hp <= 0:
 					kill(e)
@@ -1727,7 +2014,7 @@ func update(dt: float) -> void:
 	G.parts = G.parts.filter(func(o): return o.life > 0)
 
 	if mode == "game":
-		if G.en.is_empty() and G.clearing <= 0:
+		if G.en.is_empty() and G.sp_q.is_empty() and G.clearing <= 0:
 			G.clearing = 1.7
 			say("WAVE %d CLEARED" % w, 1.5)
 			wave_drop()
@@ -1759,6 +2046,12 @@ func draw_game() -> void:
 		R(x - 1, y - 1, 1, 1, "#ffffff")
 		if int(floor(gt * 6)) % 2 == 1:
 			R(x + 5, y - 5, 1, 1, "#ffffff")
+	var sw := form_sway()
+	for wb in G.webs:
+		var wt: Texture2D = tex(WEB if wb.hp > WEB_HP / 2.0 else WEB_TORN, WEBPAL)
+		var gw := minf(1.0, wb.g * 5.0)
+		var c := Color(8, 8, 8, 1) if wb.get("flash", 0.0) > 0 else Color(1, 1, 1, 0.85)
+		draw_texture_rect(wt, Rect2(web_x(wb, sw) - 11 * gw, wb.y - 6, 22 * gw, 12), false, c)
 	for e in G.en:
 		var fl: bool = e.flash > 0
 		var x := int(round(e.x)) - 11
@@ -1778,12 +2071,28 @@ func draw_game() -> void:
 				if fl:
 					ellipse(bx + 30, by + 28, 28, 21, "#ffffff", 0.6)
 			else:
-				spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
+				if e.bk == 3:
+					spr(PBAT_A if int(floor(gt * 6)) % 2 == 0 else PBAT_B, EPAL, int(round(e.x)) - 31, int(round(e.y)) - 16, 3, fl)
+				elif e.bk == 4:
+					R(int(round(e.x)), 0, 1, by + 2, "#cbbcff", 0.5)
+					spr(WIDOW, EPAL, bx, by, 4, fl)
+				else:
+					spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
 					spr(CROWN, EPAL, bx + 20, by - 8, 4, fl)
-		elif e.ty == "b":
+		elif e.ty == "b" or e.get("bat", false):
 			var f := int(floor(e.t * (10 if e.st == "dive" else 5))) % 2
-			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
+			if e.ty == "v":
+				spr(VBATB if f == 1 else VBATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
+			else:
+				spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
+		elif e.ty == "s":
+			var sx := int(round(e.x))
+			var sy := int(round(e.y))
+			R(sx, 0, 1, maxi(0, sy - 6), "#cbbcff", 0.45)
+			if e.silk > 0 and e.has("silk_to"):
+				pline(sx, sy, web_x(e.silk_to, sw), e.silk_to.y, 1, "#e6e0f5")
+			spr(SPIDER, EPAL, sx - 11, sy - 9, 2, fl)
 		else:
 			if e.ty == "w":
 				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, EPAL, x - 1, int(round(e.y)) - 9, 2, fl)
@@ -1813,6 +2122,14 @@ func draw_game() -> void:
 			R(x - 2, y - 3, 5, 2, "#ffd92e")
 			R(x - 1, y - 1, 3, 2, "#ff8a1f")
 			R(x, y + 1, 1, 2, "#fffaf0")
+		elif b.k == "g":
+			R(x - 1, y - 1, 3, 3, "#5fd63a")
+			R(x, y - 3, 1, 2, "#5fd63a")
+			R(x - 1, y - 1, 1, 1, "#c8ff9a")
+		elif b.k == "p":
+			R(x - 2, y - 1, 5, 3, "#c77dff", 0.8)
+			R(x - 1, y - 2, 3, 5, "#c77dff", 0.8)
+			R(x, y, 1, 1, "#f3dcff")
 		else:
 			R(x - 1, y - 1, 3, 4, "#ff2244")
 			R(x, y - 3, 1, 2, "#ff2244")

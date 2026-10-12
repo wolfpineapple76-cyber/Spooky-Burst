@@ -33,6 +33,18 @@ PROGRESSION
 - A boost collected during a run never beats the character ability it matches. It stacks on top of it,
   so the Black Cat with BIG ORB has the biggest orbs. Prestige can go past that.
 
+WAVES AND ENEMIES
+- Everything is on a doubled scale (orbs do 2, bats and witches have 2 HP, vampires 12, spiders 6).
+  Each PUMPKIN KING beaten adds 1 HP to every enemy after him.
+- SPECTRAL SHOT halves with each enemy it goes through and stops under 1 damage, so it can't clear whole screens.
+- Each enemy enters its own way: bats swarm in from the corners, witches swoop in from the sides firing,
+  vampires come as dark red-eyed bats and transform.
+- Spiders hang on threads and web the spot below a front enemy. Webs only stop player shots (piercing too).
+  With its webs up a spider spits venom instead.
+- Every enemy has its own chance to attack, about one attack per row of a kind at a time, with a cap.
+- Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the
+  waves before it, as a warning. After the PUMPKIN KING it loops back to the full lineup.
+
 MENUS AND CONTROLS
 - The title screen has a proper QUIT, and Start/Esc gives you options.
 - On a controller, B goes back and LB/RB switch tabs. Switching tabs keeps the page you're on.
