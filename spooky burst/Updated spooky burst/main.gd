@@ -88,6 +88,17 @@ const FRANK_A := [".......bbbbbbbbbbbb.......", ".......bbbbbbbbbbbb.......", ".
 	"....bbbbbbbb..bbbbbbbb....", "....bbbbbbbb..bbbbbbbb...."]
 const FRANKPAL := {"a": "#3b3350", "b": "#2a2238", "c": "#86c96a", "d": "#2a2440", "e": "#5e9a4c", "f": "#2c3a22", "g": "#5a5470", "h": "#b9c2cc",
 	"i": "#ffe45c", "j": "#7df2ff", "k": "#7d8791", "l": "#1b0f33"}
+# the Pumpkin King boss: an angry carved pumpkin with a jewelled crown
+const PKING := ["..............................", "...........Y......Y...........", "........Y..Y..YY..Y..Y........",
+	"........YY.YY.YY.YY.YY........", "........YY.YY.YY.YY.YY........", "........YY.YY.YY.YY.YY........", "........YYYYYYYYYYYYYY........",
+	"........YrYYrYYYYrYYrY........", "........YYYYYYYYYYYYYY........", "........JJJJJJJJJJJJJJ........", "........DDDMooooooMDDD........",
+	".....oooooMooooooooMooooo.....", "....lyyoooMooooooooMoooyyl....", "...llyyyyoMooooooooMoyyyyll...", "..ollyyffyyooooooooyyffyyllo..",
+	"..olllyffyyyooooooyyyffylllo..", ".oooloooyyyyooooooyyyyooolooo.", ".oooooooooMoooyyoooMooooooooo.", ".oooooooooMooyyyyooMooooooooo.",
+	".oooooooooMooooooooMooooooooo.", ".oooooooooMooooooooMooooooooo.", ".oooyyooooMooooooooMooooyyooo.", ".ooooyyMMyyMMyyyyMMyyMMyyoooo.",
+	"..oooyyyyyyyyyyyyyyyyyyyyooo..", "..oooyyyyMMyyMMMMyyMMyyyyooo..", "...ooooyyMMyyMMMMyyMMyyoooo...", "....ooooooMMooooooMMoooooo....",
+	".....oooooMMMooooMMMooooo.....", "........DDDMMMMMMMMDDD........", "...........DDDDDDDD...........", ".............................."]
+const PKPAL := {"D": "#7a3006", "J": "#c9a24a", "M": "#c2520c", "Y": "#ffd92e", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "r": "#ff3355",
+	"y": "#ffe45c"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1582,15 +1593,11 @@ func draw_game() -> void:
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
 			if e.bk == 2:
-				var wv := int(round(sin(gt * 5) * 6))
-				pline(bx + 4, by + 30, bx - 12, by + 22 + wv, 3, "#3d8b3a")
-				pline(bx - 12, by + 22 + wv, bx - 18, by + 12 + wv, 2, "#3d8b3a")
-				pline(bx + 56, by + 30, bx + 72, by + 22 - wv, 3, "#3d8b3a")
-				pline(bx + 72, by + 22 - wv, bx + 78, by + 12 - wv, 2, "#3d8b3a")
-				pumpkin(bx + 30, by + 28, 28, 21, true, gt, 1)
-				spr(CROWN, EPAL, bx + 18, by - 6, 5)
-				if fl:
-					ellipse(bx + 30, by + 28, 28, 21, "#ffffff", 0.6)
+				# candle-light flicker behind the carved face
+				var fk := (sin(gt * 9 + 7) + sin(gt * 5.3 + 1)) * 0.5
+				ellipse(bx + 30, by + 28, 35, 27, "#ff9a2e", 0.10 + 0.04 * fk)
+				ellipse(bx + 30, by + 28, 31, 24, "#ffb84a", 0.14 + 0.05 * fk)
+				spr(PKING, PKPAL, bx, by - 11, 2, fl)
 			else:
 				spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
