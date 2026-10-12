@@ -210,6 +210,10 @@ const WEBPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
 const BOWSHOT := ["a...a", "aa.aa", "aacaa", "aa.aa", "a...a"]
 const BOWPINK := {"a": "#ff5c8a", "c": "#fff0f5"}
 const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
+# Bat Cat's claw swipe: red scratch marks that shoot out along the floor (CLAWL faces left)
+const CLAW := ["P...P...P.", ".P...P...P", ".P...P...P", "..P...P...", "..P...P...", "...P...P.."]
+const CLAWL := [".P...P...P", "P...P...P.", "P...P...P.", "...P...P..", "...P...P..", "..P...P..."]
+const CLAWPAL := {"P": "#ff3355"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1350,6 +1354,14 @@ func boss(e: Dictionary, dt: float) -> void:
 	if e.dz > 0:
 		e.dz -= dt
 		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
+		if e.bk == 5:
+			# Bat Cat: swoops at the player it picked (e.vx), and swipes its claws at the bottom
+			bx = lerpf(bx, e.vx, sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)))
+			if e.dz < 0.8 and e.pass == 0:
+				e.pass = 1
+				for side in [-1, 1]:
+					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.45})
+				sfx("dash")
 	e.x = bx
 	e.y = by
 	if e.sp > 0:
@@ -1434,6 +1446,12 @@ func boss(e: Dictionary, dt: float) -> void:
 			for i in 9:
 				bshot(e, 0, 95 + randf() * 30, "c", 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
+		elif e.bk == 5:
+			var alive_c := live()
+			e.vx = (pick(alive_c).x if not alive_c.is_empty() else 160.0)
+			e.pass = 0
+			e.dz = 1.6
+			sfx("squeak")
 		else:
 			for i in 12:
 				var a := i / 12.0 * TAU
@@ -1726,6 +1744,10 @@ func update(dt: float) -> void:
 		b.y += b.vy * dt * G.slow
 		if b.y > 246 or b.y < -60 or b.x < -6 or b.x > 326:
 			b.dead = true
+		if b.k == "claw":
+			b.life -= dt
+			if b.life <= 0:
+				b.dead = true
 
 	# orbs hitting enemies
 	for s in G.shots:
@@ -1938,7 +1960,9 @@ func draw_game() -> void:
 	for b in G.eb:
 		var x := int(round(b.x))
 		var y := int(round(b.y))
-		if b.k == "tp" or b.k == "tb":
+		if b.k == "claw":
+			spr(CLAW if b.vx > 0 else CLAWL, CLAWPAL, x - 10, y - 6, 2)
+		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
 		elif b.k == "web":
 			spr(WEBSHOT, WEBPAL, x - 9, y - 7, 2)
