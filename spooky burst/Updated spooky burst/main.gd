@@ -170,10 +170,46 @@ const PKROT3 := ["..............................", "............................
 	"..n.nG..nn.nn.GGnn.nn.G.Gnn...", "....nnG...Gn..nnnn.G.G.Gn.....", ".....nn.GnnG.Gnn.nGnnGGnn.....", ".....nnnn.n..GG..GGnnn.nn....."]
 const PK2PAL := {"D": "#7a3006", "E": "#3ad65a", "G": "#4f6a2a", "J": "#c9a24a", "M": "#c2520c", "Y": "#ffd92e", "b": "#4a2a10", "e": "#9dff6a",
 	"g": "#8aa04a", "n": "#24140a", "r": "#ff3355", "z": "#0c0806"}
+# mansion bosses: the bat-winged cat portrait (wave 30) and the giant puppet doll (wave 35)
+const CATBOSS := ["......LLLLLjjjjjjjjjjLLLLjjjjjjjjjjLLLLL......", "......LLLLLJJJJJJJJJJvvvbbJJJJJJJJJLLLLL......",
+	".......LLLjjjjjjjjjjjvvvbbjjjjjjjjjjLLL.......", "........jJjjjjjjjjjvvvvvvvvjjjjjjjjjJj........",
+	"........jJjjBBBBBBBvvvvvvvvBBBBBBBjjJj........", ".Q......jJjjBBBBKkKvvvvvvvvKkKBBBBjjJj......Q.",
+	".qQq....jJjjBBBBKkkvvvvvvvvkkKBBBBjjJj....qQq.", ".qqQQqq.jJjjbbbKkkkOOOOOOOOkkkKbbbjjJj.qqQQqq.",
+	".qqqqQqqqJjjbbbvvvvvvvvvvvvvvvvbbbjjJqqqQqqqq.", ".qqqqqQqqqjjbbKvvvvvvvvvvvvvvvvKbbjjqqqQqqqqq.",
+	".qqqqqqQqqqjbbKkkkkkkkkkkkkkkkkKbbjqqqQqqqqqq.", ".qqqqqqqQqQqbbbbKKkkkkkkkkkkKKbbbbqQqQqqqqqqq.",
+	"qqqqqqqqqqqQqbbbKkkkkkkkkkkkkKbbbqQqqqqqqqqqqq", "qqqqqqqqqqqqQqbKkkkkkkkkkkkkkkKbqQqqqqqqqqqqqq",
+	"qqqqqqqqqqqqqQqKkkkYXkkkkXYkkkKqQqqqqqqqqqqqqq", "qqqqqqqqqqqqqqQKkkkYYkkkkYYkkkKQqqqqqqqqqqqqqq",
+	"qqq.QQQQQQQqqqqKkkkkkkkkkkkkkkKqqqqQQQQQQQ.qqq", "qq..qqqqqqqQQQQKkkkkkkkkkkkkkkKQQQQqqqqqqq..qq",
+	"q...qqqqqqqqQQQQKkkkkkKKkkkkkKQQQQqqqqqqqq...q", "....qqqqqJQQqqqqKKkkkkkkkkkkKKqqqqQQJqqqqq....",
+	".....qqqjJqqqqqqqKKkkkkkkkkKKqqqqqqqJjqqq.....", ".....qq.jJjqqqqqqbKKkkkkkkKKbqqqqqqjJj.qq.....",
+	".....q..jJjqqqqqKKkkkkkkkkkkKKqqqqqjJj..q.....", "........jJjqqqqKKkkkkkkkkkkkkKKqqqqjJj........",
+	"........jJjjqqqKkkkkkkkkkkkkkkKqqqjjJj........", "........jJjjqqKkkkkkkkkkkkkkkkkKqqjjJj........",
+	"........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........", "........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........",
+	"........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........", "........jJjjbbKkkkkkkkkkkkkkkkkKbbjjJj........",
+	"........jJjjbbbKkkkkkkkkkkkkkkKbbbjjJj........", "........jJjjbbbKKkkkkkkkkkkkkKKbbbjjJj........",
+	"........jJjjjjjjKKkkkkkkkkkkKKjjjjjjJj........", ".......LLLjjjjjjjjKKkkkkkkKKjjjjjjjjLLL.......",
+	"......LLLLLJJJJJJJJJKKKKKKJJJJJJJJJLLLLL......", "......LLLLLjjjjjjjjjjLLLLjjjjjjjjjjLLLLL......"]
+const CATPAL := {"B": "#3a2258", "J": "#8a6a2a", "K": "#4a4170", "L": "#ffe9a8", "O": "#ff8a1f", "Q": "#3a1a6a", "X": "#000000", "Y": "#ffd92e",
+	"b": "#2a1840", "j": "#c9a24a", "k": "#14101f", "q": "#5a2a9a", "v": "#7a35d6"}
+const DOLLBOSS := ["......nnnnnnnnnnnnnnnnnnnn......", "......nnnnnnnnnnnnnnnnnnnn......", ".......t.......tt.......t.......",
+	".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......", ".......t.......tt.......t.......",
+	".......t.......tt.......t.......", ".......t....HHHHHHHH....t.......", ".......t.HHHHHHHHHHHHHH.t.......", ".......tHHHHHHHHHHHHHHHHt.......",
+	".......tHHHHHHHHHHHHHHHHt.......", "......HtHHHHHHHHHHHHHHHHtH......", "......HtHHHHHHHHHHHHHHHHtH......", ".pppppHtHHHHHHHHHHHHHHHHtHppppp.",
+	"PpppppPtHHHHHHHHHHHHHHHHtPpppppP", ".ppppp.tHHHHHHHHHHHHHHHHt.ppppp.", "..HHH.StHHHHHHHHHHHHHHHHtS.HHH..", "..HHH.StSSSSHHHHHHHHSSSStS.HHH..",
+	".HHHHHStSSSSSSSSSSSSSSSStSHHHHH.", ".HHHHHStSSkkkSSSSSSkkkSStSHHHHH.", ".HHHHHStSSkrkSSSSSSkrkSStSHHHHH.", ".HHIHHStSSkkkSSSSSSkkkSStSHHIHH.",
+	".HIIIHStSSSSSSSSSSSSSSSStSHIIIH.", ".HIIIH.taaSSSSSSSSSSSSaat.HIIIH.", ".HIIIH.tSSSSSSSSSSSSSSSSt.HIIIH.", ".HIIIH.tSSSkSkSkSkSkSSSSt.HIIIH.",
+	".HIIIH.t.SSrrrrrrrrrrSS.t.HIIIH.", "..III..t..SkSkSkSkSkSS..t..III..", "..III..t...SSSSSSSSSS...t..III..", "...I...t.....SSSSSS.....t...I...",
+	".......t.uuuduuuuuuduuu.t.......", "......SSSuudddddddddduuSSS......", "......SSSuudyddddddyduuSSS......", "......SSSuudddddddddduuSSS......",
+	"...........dddddddddd...........", "...........ddddUUdddd...........", "...........ddddUUdddd...........", "...........ddddUUdddd...........",
+	"...........UUUd..dUUU...........", "...........UUUd..dUUU...........", "..........kkkk....kkkk.........."]
+const DOLLPAL := {"H": "#e0482a", "I": "#a8301c", "P": "#c94f8a", "S": "#f3e2d4", "U": "#33519c", "a": "#ffb3c9", "d": "#4a6fc4", "k": "#14101f",
+	"n": "#6b3f2a", "p": "#ff7fb5", "r": "#ff3355", "t": "#c9b8ee", "u": "#f6f1ff", "y": "#ffd92e"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING"]
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT PORTRAIT", "PUPPET DOLL"]
+# which level-1 boss each boss moves and attacks like (the mansion bosses borrow these for now)
+const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1]
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
 	["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
@@ -836,7 +872,8 @@ func next_wave() -> void:
 		G.bm = boss_mult()
 		var hp := int(round((36 + w * 4) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
-		b.bk = (w / 5 - 1) % 3
+		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, cat portrait, puppet doll
+		b.bk = 3 + (w / 5 - 4) % 4 if in_mansion() else (w / 5 - 1) % 3
 		b.t = 0.0
 		G.en.append(b)
 		say(BOSS_NAMES[b.bk], 2.2)
@@ -1284,7 +1321,8 @@ func boss(e: Dictionary, dt: float) -> void:
 			G.shake = 0.8
 		return
 	var rage: bool = e.hp < e.max / 2.0
-	var K := "r" if e.bk == 0 else ("s" if e.p2 else "c")
+	var sty: int = BOSS_STYLE[e.bk]
+	var K := "r" if sty == 0 else ("s" if e.p2 else "c")
 	var fast := 1.15 if e.p2 else 1.0   # phase 2 is a little faster
 	if rage and not e.raged:
 		e.raged = true
@@ -1294,10 +1332,10 @@ func boss(e: Dictionary, dt: float) -> void:
 	e.ph += dt * (1.25 if rage else 1.0) * fast
 	var bx := 0.0
 	var by := 0.0
-	if e.bk == 1:
+	if sty == 1:
 		bx = 160 + sin(e.ph * 1.0) * 112
 		by = 70 + sin(e.ph * 2.0) * 18
-	elif e.bk == 2:
+	elif sty == 2:
 		bx = 160 + sin(e.ph * 1.1) * 108
 		by = 62 + absf(sin(e.ph * 2.4)) * 26
 	else:
@@ -1325,7 +1363,7 @@ func boss(e: Dictionary, dt: float) -> void:
 	e.n += 1
 	var m: int = e.n % 5
 	if m == 1:
-		var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if e.bk == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
+		var angs := [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9] if sty == 2 else [-0.6, -0.3, 0.0, 0.3, 0.6]
 		for a in angs:
 			bshot(e, sin(a) * 85, cos(a) * 85, K)
 		sfx("spread")
@@ -1340,7 +1378,7 @@ func boss(e: Dictionary, dt: float) -> void:
 				bshot(e, dx / d * 105, dy / d * 105, K)
 		sfx("spread")
 	elif m == 3:
-		if e.bk == 1:
+		if sty == 1:
 			for i in 2:
 				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, 1, "fly")
 				w.dir = 1 if i == 1 else -1
@@ -1352,10 +1390,10 @@ func boss(e: Dictionary, dt: float) -> void:
 				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, 1, "dive"))
 			sfx("squeak")
 	elif m == 4:
-		if e.bk == 0:
+		if sty == 0:
 			e.dz = 1.6
 			sfx("dash")
-		elif e.bk == 1:
+		elif sty == 1:
 			for i in 9:
 				bshot(e, 0, 95 + randf() * 30, "c", 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
@@ -1784,7 +1822,11 @@ func draw_game() -> void:
 			var by := int(round(e.y)) - 26
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
-			if e.bk == 2:
+			if e.bk >= 3:
+				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS][e.bk - 3]
+				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL][e.bk - 3]
+				spr(brows, bpal, int(round(e.x)) - brows[0].length(), int(round(e.y)) - brows.size(), 2, fl)
+			elif e.bk == 2:
 				# candle-light flicker behind the carved face
 				var fk := (sin(gt * 9 + 7) + sin(gt * 5.3 + 1)) * 0.5
 				var moldy: bool = e.p2 or e.laugh > 0
