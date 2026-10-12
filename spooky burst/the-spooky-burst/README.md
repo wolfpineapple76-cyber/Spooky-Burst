@@ -35,6 +35,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   then press A on that controller, Space (left keys) or Enter (right keys). Pressing again on its own slot
   clears it. It lasts until the game is closed. In a game it moves that player's controls straight over.
   Anyone not set up joins as the lowest slot nobody else is set up for.
+- Each slot also has a colour box: move right onto it and press to open a swatch of white, blue, purple, pink,
+  orange, yellow and green, each in dark, normal and light. It colours that player's shots and character
+  (the Cat's tummy, the Zombie's shirt, the Ghost's and Skeleton's tint, the Jester's colour parts).
+  Normal white is each character's own look. Slots start white, green, blue and orange, and the choice is saved.
 - Lives are shared, never created. Someone joining takes lives one at a time from whoever has the most
   until everyone is within one life of each other. Someone leaving hands their lives to whoever has the fewest.
 - A player who runs out of lives can press Start (or their menu key) to pick a character and join again,

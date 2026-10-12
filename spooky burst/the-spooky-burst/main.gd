@@ -234,6 +234,15 @@ const BOOST_MAX := 10
 # and power-up codes (x, text align).
 const MAX_PLAYERS := 4
 const SHOT_COLS := ["", "#228b22", "#4169e1", "#ff7518"]
+# PLAYER SETUP colours: each slot picks one from this swatch, [name, dark, normal, light]. Normal WHITE is the
+# default: each character's own colours (P1's look). Green, blue and orange's normal shades are the old P2-P4
+# colours, and keep the hand-made character palettes.
+const SWATCH := [["WHITE", "#a8a2b8", "#e6e2f0", "#ffffff"], ["BLUE", "#2f55c8", "#4169e1", "#8fb0ff"],
+	["PURPLE", "#8a45e0", "#a86cf5", "#d2b4ff"], ["PINK", "#e0408a", "#ff6fae", "#ffb0d6"],
+	["ORANGE", "#d65a0e", "#ff7518", "#ffae6b"], ["YELLOW", "#d9b000", "#ffd92e", "#fff08a"],
+	["GREEN", "#1d7a1d", "#228b22", "#6fd06f"]]
+# each slot's starting colour [row, column]: P1 white (default), P2 green, P3 blue, P4 orange
+const COL_START := [[0, 1], [6, 1], [1, 1], [4, 1]]
 const LIFE_X := [[6, 14], [86, 14], [166, 14], [246, 14]]
 const CODE_X := [[13, 0], [173, 0], [333, 0], [493, 0]]
 # GHOST SHOT: two shots GS_GAP either side of the shooter that fly up side by side, weaving as mirror images
@@ -312,6 +321,11 @@ var lcg := 7
 # PLAYER SETUP, only for this session: player slot -> the device that plays it ({"pad", "side"})
 var assign := {}
 var setup_sel := 0
+var setup_box := false     # PLAYER SETUP: the cursor is on the row's colour box
+var sw_open := false       # PLAYER SETUP: the colour swatch is open
+var sw_r := 0
+var sw_c := 1
+var pal_cache := {}
 
 # ---------------------------------------------------------------- setup
 func _ready() -> void:
@@ -490,6 +504,62 @@ func to_obj(a: Array) -> Dictionary:
 # Saved as "p0.candy", "p0.chars", "p0.char", "p0.own.ghost", "p0.off.ghost" and so on.
 func pkey(n: int, key: String) -> String:
 	return "p%d.%s" % [n, key]
+
+# a player slot's colour: [row, column] in SWATCH, saved
+func slot_col(n: int) -> Array:
+	var v = sv(pkey(n, "col"), COL_START[n])
+	return v if v is Array and v.size() == 2 else COL_START[n]
+
+func col_default(n: int) -> bool:
+	return slot_col(n) == [0, 1]
+
+func col_hex(n: int) -> String:
+	var c := slot_col(n)
+	return SWATCH[c[0]][c[1] + 1]
+
+# any shade of blue (the blue player's secret NEEDS FOOD BADLY bonus)
+func col_blue(n: int) -> bool:
+	return slot_col(n)[0] == 1
+
+# the colour of a player's shots: the character's own on the default, else their colour
+func shot_col(n: int, ch: int) -> String:
+	return chars[ch].orb if col_default(n) else col_hex(n)
+
+# a character's palette in a player's colour: the default is the character's own, green, blue and orange use the
+# hand-made palettes, anything else is worked out from the colour
+func char_pal(ch: int, n: int) -> Dictionary:
+	if col_default(n):
+		return chars[ch].pals[0]
+	var hx := col_hex(n)
+	var made := ["", SWATCH[6][2], SWATCH[1][2], SWATCH[4][2]].find(hx)
+	if made > 0:
+		return chars[ch].pals[made]
+	var key := "%d_%s" % [ch, hx]
+	if pal_cache.has(key):
+		return pal_cache[key]
+	var c := Color(hx)
+	var o: Dictionary = chars[ch].pals[0].duplicate()
+	match chars[ch].id:
+		"ghost":
+			o.X = "#" + Color("#f6f1ff").lerp(c, 0.4).to_html(false)
+		"cat":
+			o.c = hx
+		"zombie":
+			o.G = "#" + Color("#8fd66a").lerp(c, 0.25).to_html(false)
+			o.S = hx
+		"skeleton":
+			o.W = "#" + Color("#f3efe0").lerp(c, 0.3).to_html(false)
+		"jester":
+			o.D = hx
+			o.o = hx
+	pal_cache[key] = o
+	return o
+
+# SOUL MATE (slightly pink) and GHOSTRESS (slightly purple) in a player's ghost colour
+func helper_pal(n: int, key: String) -> Dictionary:
+	var o: Dictionary = char_pal(0, n).duplicate()
+	o.X = "#" + Color(o.X).lerp(Color("#ff9ec2" if key == "smp" else "#b07cff"), 0.2).to_html(false)
+	return o
 
 func candy_of(n: int) -> int:
 	return int(sv(pkey(n, "candy"), 0))
@@ -1754,7 +1824,7 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 		xs = [x - 4, x + 4]
 	var gs: bool = p.eq.has("ghostshot")
 	var vxs := vxs_of(p)
-	var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
+	var col: String = shot_col(p.n, p.ch)
 	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
 	# THE JESTER always shoots 30 degrees the way he's moving (straight up when still)
@@ -1903,7 +1973,7 @@ func food_pull(d: Dictionary, dt: float) -> void:
 	for p in live():
 		if p.eq.has("food") and p.lives == 1:
 			# a little secret: the blue player (P3) reaches half a character width further and pulls a bit harder
-			var blue: bool = p.n == 2
+			var blue: bool = col_blue(p.n)
 			var to := Vector2(p.x - d.x, 209.0 - d.y)
 			if to.length() < FOOD_REACH + (12.0 if blue else 0.0):
 				var step := to.limit_length((161.0 if blue else 140.0) * dt)
@@ -2733,7 +2803,7 @@ func draw_game() -> void:
 			var s: Array = stars[i]
 			R(s[0], s[1], 1, 1, "#ffffff", 0.5 + 0.5 * sin(gt * 2 + s[2]))
 	for g in G.gifts:
-		var gc: String = "#e0213f" if g.n == 0 else SHOT_COLS[g.n]
+		var gc: String = "#e0213f" if col_default(g.n) else col_hex(g.n)
 		spr(GIFT, {"W": "#f6f1ff", "r": gc, "R": "#" + Color(gc).darkened(0.3).to_html(false), "g": "#9a93a8"},
 			int(round(g.x)) - 9, int(round(g.y)) - 8, 2)
 	for k in G.candy + G.pieces:
@@ -2878,7 +2948,7 @@ func draw_game() -> void:
 			spr_mid(JBELL_B if bg else JBELL, {"c": col, "W": "#ffffff", "k": "#000000"}, x, y, sc)
 			continue
 		if s.get("tb", false):
-			spr_mid(TBALL_B if bg else TBALL, {"c": "#5a5468" if s.o == 0 else col, "W": "#ffffff", "w": "#f3efe0"}, x, y, sc)
+			spr_mid(TBALL_B if bg else TBALL, {"c": "#5a5468" if col_default(s.o) else col, "W": "#ffffff", "w": "#f3efe0"}, x, y, sc)
 			continue
 		# GHOST SHOT has no glow trail, which made it look like a sign on a post
 		if s.gs:
@@ -2922,7 +2992,7 @@ func draw_game() -> void:
 			if p.has(h[0]):
 				var hx := int(round(p[h[0]].x)) - 6
 				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
-				spr(C.spr, C[h[1]][p.n], hx, hb, 1)
+				spr(C.spr, helper_pal(p.n, h[1]), hx, hb, 1)
 				spr(h[2], ACCPAL, hx + h[3], hb + h[4], 1)
 		# JUGGLING BALLS don't blink when he does
 		for b in p.get("jb", []):
@@ -2934,12 +3004,12 @@ func draw_game() -> void:
 		var px := int(round(p.x))
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.eq.has("shield") and p.sh <= 0:
-			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt, p.get("tl"))
+			draw_tail(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.get("tl"))
 		elif p.get("tl") != null:
-			draw_swoop(px, 196 + bob, C.pals[p.n].values()[0], gt, p.tl)
+			draw_swoop(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.tl)
 		var fr := int(floor(gt * 4 + i)) % 2
 		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
-		spr(look[fr], C.pals[p.n], px - 12, 196 + bob, 2)
+		spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
 	for i in 5:
@@ -2951,7 +3021,7 @@ func draw_game() -> void:
 		var C: Dictionary = chars[p.ch]
 		var lx: Array = LIFE_X[p.n]
 		for i in p.lives:
-			spr(C.spr, C.pals[p.n], lx[0] + i * lx[1], 225, 1)
+			spr(C.spr, char_pal(p.ch, p.n), lx[0] + i * lx[1], 225, 1)
 	if B != null:
 		R(98, 5, 124, 9, "#ffd92e")
 		R(99, 6, 122, 7, "#1b0f33")
@@ -3446,7 +3516,7 @@ func draw_picker(k: Dictionary) -> void:
 	if k.ch < 0:
 		T("?", cx, y + 14 + bob, 4, "#ffd92e", 1)
 	else:
-		draw_texture_rect(tex(chars[k.ch].spr, chars[k.ch].pals[k.slot]), Rect2(cx - 12, y + 14 + bob, 24, 26), false)
+		draw_texture_rect(tex(chars[k.ch].spr, char_pal(k.ch, k.slot)), Rect2(cx - 12, y + 14 + bob, 24, 26), false)
 	if pick_opts(k.slot).size() > 1:
 		T("<", cx - 34, y + 22, 2, "#9d8cc4", 1)
 		T(">", cx + 34, y + 22, 2, "#9d8cc4", 1)
@@ -3630,7 +3700,25 @@ func dev_name(dev: Dictionary) -> String:
 
 func setup_move(d: int) -> void:
 	setup_sel = posmod(setup_sel + d, MAX_PLAYERS + 1)
+	if setup_sel == MAX_PLAYERS:
+		setup_box = false
 	sfx("move")
+
+# left / right on a player row moves between the slot and its colour box
+func setup_side(d: int) -> void:
+	if setup_sel < MAX_PLAYERS and setup_box != (d > 0):
+		setup_box = d > 0
+		sfx("move")
+
+func sw_move(dr: int, dc: int) -> void:
+	sw_r = posmod(sw_r + dr, SWATCH.size())
+	sw_c = posmod(sw_c + dc, 3)
+	sfx("move")
+
+func sw_pick() -> void:
+	sv_set(pkey(setup_sel, "col"), [sw_r, sw_c])
+	sw_open = false
+	sfx("select")
 
 func setup_back() -> void:
 	if mode == "pause":
@@ -3642,6 +3730,14 @@ func setup_back() -> void:
 func setup_choose(dev: Dictionary) -> void:
 	if setup_sel == MAX_PLAYERS:
 		setup_back()
+		return
+	# on the colour box: open the swatch on the slot's colour
+	if setup_box:
+		var c := slot_col(setup_sel)
+		sw_r = c[0]
+		sw_c = c[1]
+		sw_open = true
+		sfx("select")
 		return
 	var s := setup_sel
 	if assign.has(s) and same_dev(assign[s], dev):
@@ -3679,6 +3775,21 @@ func move_controls(s: int, dev: Dictionary) -> void:
 		q.kb = was.kb
 
 func setup_key(k: int) -> void:
+	if sw_open:
+		if k == KEY_SPACE or k == KEY_ENTER:
+			sw_pick()
+		elif k == KEY_UP or k == KEY_W:
+			sw_move(-1, 0)
+		elif k == KEY_DOWN or k == KEY_S:
+			sw_move(1, 0)
+		elif k == KEY_LEFT or k == KEY_A:
+			sw_move(0, -1)
+		elif k == KEY_RIGHT or k == KEY_D:
+			sw_move(0, 1)
+		elif k == KEY_ESCAPE or k == KEY_BACKSPACE or k == KEY_P:
+			sw_open = false
+			sfx("back")
+		return
 	if k == KEY_SPACE or k == KEY_ENTER:
 		setup_choose({"pad": -1, "side": "wasd" if k == KEY_SPACE else "arrows"})
 	elif mode == "pause" and G.menu.dev.pad >= 0:
@@ -3687,10 +3798,29 @@ func setup_key(k: int) -> void:
 		setup_move(-1)
 	elif k == KEY_DOWN or k == KEY_S:
 		setup_move(1)
+	elif k == KEY_LEFT or k == KEY_A:
+		setup_side(-1)
+	elif k == KEY_RIGHT or k == KEY_D:
+		setup_side(1)
 	elif k == KEY_ESCAPE or k == KEY_BACKSPACE or k == KEY_P:
 		setup_back()
 
 func setup_pad(d: int, hit: Callable) -> void:
+	if sw_open:
+		if hit.call("sel"):
+			sw_pick()
+		elif hit.call("up"):
+			sw_move(-1, 0)
+		elif hit.call("down"):
+			sw_move(1, 0)
+		elif hit.call("left"):
+			sw_move(0, -1)
+		elif hit.call("right"):
+			sw_move(0, 1)
+		elif hit.call("b") or hit.call("start") or hit.call("back"):
+			sw_open = false
+			sfx("back")
+		return
 	if hit.call("sel"):
 		setup_choose({"pad": d, "side": ""})
 	elif mode == "pause" and G.menu.dev.pad != d:
@@ -3699,6 +3829,10 @@ func setup_pad(d: int, hit: Callable) -> void:
 		setup_move(-1)
 	elif hit.call("down"):
 		setup_move(1)
+	elif hit.call("left"):
+		setup_side(-1)
+	elif hit.call("right"):
+		setup_side(1)
 	elif hit.call("b") or hit.call("start") or hit.call("back"):
 		setup_back()
 
@@ -3707,7 +3841,30 @@ func draw_setup() -> void:
 	for s in MAX_PLAYERS:
 		rows.append(["P%d" % (s + 1), dev_name(assign[s]) if assign.has(s) else "NONE", not assign.has(s)])
 	rows.append(["BACK", "", false])
-	draw_panel("PLAYER SETUP", rows, "", setup_sel, "A ON A CONTROLLER, SPACE (LEFT KEYS) OR ENTER (RIGHT KEYS) TAKES THE SLOT.")
+	draw_panel("PLAYER SETUP", rows, "", setup_sel, "A, SPACE OR ENTER TAKES THE SLOT. RIGHT, THEN A: PICK ITS COLOUR.")
+	# each slot's colour box, after its name
+	for s in MAX_PLAYERS:
+		var by := 140 + 54 + s * 26
+		if setup_box and setup_sel == s:
+			R(146, by - 3, 20, 20, "#f6f1ff")
+		R(148, by - 1, 16, 16, col_hex(s))
+	if sw_open:
+		draw_swatch()
+
+# the colour swatch for the selected slot: a row for each colour, dark / normal / light
+func draw_swatch() -> void:
+	var x0 := 200
+	var y0 := 120
+	draw_box(y0, 30 + SWATCH.size() * 30 + 20)
+	T("P%d COLOUR" % (setup_sel + 1), x0, y0 + 14, 2, "#ff8a1f")
+	for r in SWATCH.size():
+		var y := y0 + 44 + r * 30
+		T(SWATCH[r][0], x0, y + 4, 1, "#f6f1ff")
+		for c in 3:
+			var x := x0 + 90 + c * 40
+			if r == sw_r and c == sw_c:
+				R(x - 3, y - 3, 28, 28, "#f6f1ff")
+			R(x, y, 22, 22, SWATCH[r][c + 1])
 
 # ---------------------------------------------------------------- input
 func _unhandled_input(event: InputEvent) -> void:
