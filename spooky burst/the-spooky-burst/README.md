@@ -86,8 +86,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
   The Ghost starts free. Each character's page shows a line about what it's a bit better at:
-  the Ghost shoots 10% faster, the Black Cat moves 8% faster, the Zombie does 10% more damage
-  and the Skeleton's orbs fly 8% faster (each worth 2 boosts, stacking with everything else).
+  the Ghost shoots 10% faster, the Black Cat moves 8% faster, the Zombie does 10% more damage,
+  the Skeleton's orbs fly 8% faster and the Jester's orbs are bigger (each worth 2 boosts, stacking with everything else).
 - PRESTIGE: once you own a character and all its upgrades, a PRESTIGE row shows at the bottom of its page.
   Confirming relocks the character and all its upgrades, and gives that character +1 of every boost
   for good, up to PRESTIGE 10/10 (so 10 more on top of the 10 a run can give). Each prestige level makes
@@ -123,6 +123,14 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   and through a web tile they break (halving the same way).
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.
+- The Jester is black and white; players 2-4 have their colour on his left bell, his diamonds and his right leg.
+  The glint in his eyes looks the way he's moving. He shoots jingle bells, angled 30 degrees the way he's moving.
+- TRICK SHOT turns his shots into balls that do 1 damage and get one hit for every third of their damage (3 to
+  start). They bounce off enemies, leaning a little toward the next one, but not off the sides or the floor.
+  Each time one goes off the top it falls back down with one more hit, speeding up as it falls.
+- WICKED CLOWN gives him a life back the first time he's down to 1, then it's used up until a pumpkin gives it
+  again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to him while he's on 1 life.
+- JUGGLING BALLS and I'M NOT A PINATA are listed but don't do anything yet.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.

@@ -92,6 +92,16 @@ const DORBPAL := {"a": "#6b4a8a", "b": "#3a2252", "h": "#9d7ac4"}
 const BUCKET := ["..KKKKKK..", ".K......K.", "OOOOOOOOOO", "OOOOOOOOOO", ".OyOOOOyO.", ".OOOOOOOO.", ".OOyyyyOO.", "..OOOOOO..", "..OOOOOO.."]
 const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 # the extra life drop: a candied apple on a stick, dipped in caramel at a slope with one drip
+# THE JESTER: black and white, the player's colour (o) on his left bell, diamonds (D), right leg and boot.
+# The glint in his eyes looks the way he's moving (JESTER_EYES: left, still, right).
+const JESTER := [".BBB....BBB.", "BB.BB..BB.BB", "o..BBBBBB..e", "..BBBBBBBB..", "..SSSSSSSS..", "..SkWSSWkS..",
+	"..pkkSSkkp..", "...SSmmSS...", ".WBWBWBWBWB.", ".BDBBDBBDBB.", ".DBDDBDDBDD.", "..BB....oo..", ".BBB....ooo."]
+const JESTER_EYES := {-1: "..SWkSSWkS..", 0: "..SkWSSWkS..", 1: "..SkWSSkWS.."}
+# his basic shot is a jingle bell, and TRICK SHOT's ball (P1's is dark grey): the normal and the bigger image
+const JBELL := [".ccc.", "cWccc", "ccccc", "ckkkc", "..c.."]
+const JBELL_B := ["..ccc..", ".cWccc.", "ccWcccc", "ccccccc", "ccccccc", "ckkkkkc", "...c..."]
+const TBALL := [".cc.", "cWcc", "cccw", ".cw."]
+const TBALL_B := ["..cc..", ".cWcc.", "cWcccc", "ccccww", ".cccw.", "..cw.."]
 # a gumball: the double candy
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
@@ -361,13 +371,28 @@ func _build_chars() -> void:
 			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
 			"pow": [["ribs", "RIBBED SHOT", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ALL ENEMIES DROP MORE CANDY", "ROB"],
-				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]}]
+				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]},
+		{"id": "jester", "name": "JESTER", "spr": JESTER, "orb": "#f3efe0",
+			"spr2": _alt(JESTER, {11: ".BB......oo.", 12: "BBB......ooo"}),
+			"pals": [{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#f3efe0", "o": "#f6f1ff"},
+				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#228b22", "o": "#228b22"},
+				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#4169e1", "o": "#4169e1"},
+				{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#ff7518", "o": "#ff7518"}],
+			"tr": {"size": 2}, "desc": "IT'S JUST A JOKE.",
+			"pow": [["trick", "TRICK SHOT", "BOUNCY BALLS, MANY HITS", "TRK"], ["wicked", "WICKED CLOWN", "AT 1 LIFE, GET ONE BACK", "WKD"],
+				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
+				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]}]
 	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
 	for tint in [["smp", "#ff9ec2"], ["grp", "#b07cff"]]:
 		chars[0][tint[0]] = chars[0].pals.map(func(pal):
 			var o: Dictionary = pal.duplicate()
 			o.X = "#" + Color(pal.X).lerp(Color(tint[1]), 0.2).to_html(false)
 			return o)
+	# the Jester's eyes follow his movement: a still and a walking frame for each way he can look
+	var jc: Dictionary = chars[4]
+	jc["looks"] = {}
+	for d in JESTER_EYES:
+		jc.looks[d] = [_alt(JESTER, {5: JESTER_EYES[d]}), _alt(jc.spr2, {5: JESTER_EYES[d]})]
 	for ch in chars:
 		var sil := {}
 		for k in ch.pals[0].keys():
@@ -1339,6 +1364,13 @@ func hurt(p: Dictionary) -> void:
 		sfx("shield")
 		return
 	p.lives -= 1
+	# WICKED CLOWN: the first time he's down to 1 life he gets one straight back, and it's used up (a pumpkin can
+	# give it to him again)
+	if p.lives == 1 and p.eq.has("wicked"):
+		p.eq.erase("wicked")
+		p.lives += 1
+		say("WICKED CLOWN!", 1.4)
+		sfx("life")
 	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe"))
 	burst(p.x, 209, "#ffffff", 16)
 	sfx("hurt")
@@ -1700,6 +1732,7 @@ func vxs_of(p: Dictionary) -> Array:
 		vxs.append(95.0)
 	return vxs
 
+const JEST_ANGLE := 30.0
 func orb_dmg(p: Dictionary) -> float:
 	return (4.0 if p.eq.has("fist") else 2.0) * (1.0 + 0.05 * lvl(p, "dmg"))
 
@@ -1716,6 +1749,11 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 	var col: String = chars[p.ch].orb if p.n == 0 else SHOT_COLS[p.n]
 	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
+	# THE JESTER always shoots 30 degrees the way he's moving (straight up when still)
+	var jest: bool = chars[p.ch].id == "jester"
+	if jest:
+		lv = sp * tan(deg_to_rad(JEST_ANGLE)) * p.md
+	var trick: bool = p.eq.has("trick")
 	var made := []
 	for ox in xs:
 		var row := []
@@ -1725,7 +1763,15 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 			var s := {"x": sx, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col,
 				"pierce": p.eq.has("spectral") or p.eq.has("punch"), "punch": p.eq.has("punch"), "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
 				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p),
-				"sp": sp, "hit": [], "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y}
+				"sp": sp, "hit": [], "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y,
+				"bell": jest and not trick, "tb": trick}
+			if trick:
+				# TRICK SHOT: a ball doing 1 damage (boosted as usual) that has one hit per third of that damage
+				s.dmg = 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
+				s.hl = int(floor(s.dmg * 3.0 + 0.0001))
+				s.vy = -sp
+				s.grav = false
+				s.inside = null
 			G.shots.append(s)
 			row.append(s)
 		made.append(row)
@@ -1842,6 +1888,20 @@ func wiggle_reach(o: Dictionary) -> bool:
 				return true
 	return false
 
+# NEEDS FOOD BADLY: while he's on 1 life, candied apples and power-up pumpkins within FOOD_REACH px drift to him
+const FOOD_REACH := 48.0
+func food_pull(d: Dictionary, dt: float) -> void:
+	if d.k != "h" and d.k != "p":
+		return
+	for p in live():
+		if p.eq.has("food") and p.lives == 1:
+			var to := Vector2(p.x - d.x, 209.0 - d.y)
+			if to.length() < FOOD_REACH:
+				var step := to.limit_length(140.0 * dt)
+				d.x += step.x
+				d.y += step.y
+				return
+
 func wiggle(p: Dictionary, dt: float) -> void:
 	if p.get("tl") == null:
 		return
@@ -1950,7 +2010,71 @@ func form_sway() -> float:
 # where a web tile is now: formation webs sway with the rows, the BLACK WIDOW's stay put
 # did shot s pass within h of height y since last frame (anywhere between where it was and where it is)?
 func swept(s: Dictionary, y: float, h: float) -> bool:
-	return y > s.y - h and y < s.get("py", s.y) + h
+	var py: float = s.get("py", s.y)
+	return y > minf(s.y, py) - h and y < maxf(s.y, py) + h
+
+# TRICK SHOT's balls fly straight until they've gone off the top once; from then on gravity pulls them back down,
+# speeding up as they fall. Every time one goes off the top it comes back with one more hit. They don't bounce off
+# the sides: off the left, the right or the bottom they're gone.
+const TRICK_GRAV := 520.0
+func trick_move(s: Dictionary, dt: float) -> void:
+	if s.grav:
+		s.vy += TRICK_GRAV * dt
+	s.x += s.vx * dt
+	s.y += s.vy * dt
+	if s.y < -6 and s.vy < 0 and not s.get("up", false):
+		s.up = true
+		s.hl += 1
+		s.grav = true
+	if s.y > -6:
+		s.up = false
+	if s.x < -6 or s.x > 326 or s.y > 246:
+		s.dead = true
+
+# a TRICK SHOT ball against the enemies: any enemy, the same one again included, as long as the ball has hits left.
+# (inside is the one it's touching right now, so one touch is one hit)
+func trick_hits(s: Dictionary) -> void:
+	if s.inside != null and (s.inside.dead or not trick_touch(s, s.inside)):
+		s.inside = null
+	for e in G.en:
+		if e.dead or e.laugh > 0 or is_same(e, s.inside) or not trick_touch(s, e):
+			continue
+		e.hp -= s.dmg
+		e.flash = 0.1
+		s.hl -= 1
+		s.inside = e
+		trick_bounce(s, e)
+		if s.hl <= 0:
+			s.dead = true
+		if e.hp <= 0:
+			down(e)
+		else:
+			sfx("bosshit")
+		break
+
+func trick_touch(s: Dictionary, e: Dictionary) -> bool:
+	var hw: float = (27 if e.ty == "B" else 11) + s.grow
+	var hh: float = (20 if e.ty == "B" else 9) + s.grow / 2.0
+	return absf(s.x - e.x) < hw and swept(s, e.y, hh)
+
+# a TRICK SHOT ball bounces off enemy e: off its centre like a ball off a round thing, leaning a little toward
+# the nearest other enemy, keeping its speed
+func trick_bounce(s: Dictionary, e: Dictionary) -> void:
+	var v := Vector2(s.vx, s.vy)
+	var n := Vector2(s.x - e.x, s.y - e.y).normalized()
+	if n == Vector2.ZERO:
+		n = Vector2(0, 1)
+	if v.dot(n) < 0:
+		v = v - 2.0 * v.dot(n) * n
+	var best = null
+	for o in G.en:
+		if not o.dead and not is_same(o, e) and (best == null or Vector2(o.x - s.x, o.y - s.y).length() < Vector2(best.x - s.x, best.y - s.y).length()):
+			best = o
+	if best != null:
+		var to := Vector2(best.x - s.x, best.y - s.y).normalized()
+		v = v.normalized().lerp(to, 0.2).normalized() * v.length()
+	s.vx = v.x
+	s.vy = v.y
 
 func web_x(wb: Dictionary, sw: float) -> float:
 	return wb.hx + (0.0 if wb.fixed else sw)
@@ -2119,16 +2243,19 @@ func update(dt: float) -> void:
 		p.inv -= dt
 		helpers(p, dt)
 		wiggle(p, dt)
+		# The shot limit is switched off. The shot limit may not even have been needed for this game: shots just fly
+		# away and vanish, and at the normal fire rate about 3 are out at once anyway. It was:
 		# how many orbs can be out at once: 3 per stream, +1 per 3 FIRE RATE UP boosts, doubled by RESTLESS SHOT
 		# (otherwise faster shooting just hits the limit) and BONE THROW.
 		# SOUL MATE's and GHOSTRESS's shots don't count toward it.
-		var per := 3 + lvl(p, "rate") / 3
-		var lim := per * vxs_of(p).size() * (2 if p.eq.has("bone") else 1) * (2 if p.eq.has("restless") else 1)
-		var mine := 0
-		for s in G.shots:
-			if s.o == p.n and not s.h:
-				mine += 1
-		if I.fire and p.cd <= 0 and mine < lim:
+		#var per := 3 + lvl(p, "rate") / 3
+		#var lim := per * vxs_of(p).size() * (2 if p.eq.has("bone") else 1) * (2 if p.eq.has("restless") else 1)
+		#var mine := 0
+		#for s in G.shots:
+		#	if s.o == p.n and not s.h:
+		#		mine += 1
+		#if I.fire and p.cd <= 0 and mine < lim:
+		if I.fire and p.cd <= 0:
 			volley(p, p.x, 194.0, lean(p), false)
 			if p.has("gr"):
 				volley(p, p.gr.x, HELP_Y - 8, lean(p.gr), true)
@@ -2146,6 +2273,9 @@ func update(dt: float) -> void:
 				s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
 		# where it was last frame, so a fast shot or a slow frame can't skip over a web or an enemy
 		s.py = s.y
+		if s.get("tb", false):
+			trick_move(s, dt)
+			continue
 		s.y -= s.sp * dt
 		s.x += s.vx * dt
 		if s.gs:
@@ -2305,6 +2435,9 @@ func update(dt: float) -> void:
 	for s in G.shots:
 		if s.dead:
 			continue
+		if s.get("tb", false):
+			trick_hits(s)
+			continue
 		for e in G.en:
 			# a piercing shot never hits the same enemy twice
 			if e.dead or e.laugh > 0 or s.hit.any(func(h): return is_same(h, e)):
@@ -2378,6 +2511,7 @@ func update(dt: float) -> void:
 		p.life -= dt
 	for d in G.drops:
 		d.y += (45 if d.k == "p" else 80) * dt
+		food_pull(d, dt)
 		var got = null
 		for p in live():
 			if absf(d.x - p.x) < 14 and absf(d.y - 209) < 14:
@@ -2561,6 +2695,13 @@ func draw_game() -> void:
 		var r := shot_rung(s)
 		var bg := r % 2 == 1
 		var sc := 1 + r / 2
+		# THE JESTER's jingle bells and TRICK SHOT balls (P1's ball is dark grey)
+		if s.get("bell", false):
+			spr_mid(JBELL_B if bg else JBELL, {"c": col, "W": "#ffffff", "k": "#2c2638"}, x, y, sc)
+			continue
+		if s.get("tb", false):
+			spr_mid(TBALL_B if bg else TBALL, {"c": "#5a5468" if s.o == 0 else col, "W": "#ffffff", "w": "#f3efe0"}, x, y, sc)
+			continue
 		# GHOST SHOT has no glow trail, which made it look like a sign on a post
 		if s.gs:
 			spr_mid(GSHOT_B if bg else GSHOT, {"c": col, "k": "#1b0f33"}, x, y, sc)
@@ -2613,7 +2754,9 @@ func draw_game() -> void:
 			draw_tail(px, 196 + bob, C.pals[p.n].values()[0], gt, p.get("tl"))
 		elif p.get("tl") != null:
 			draw_swoop(px, 196 + bob, C.pals[p.n].values()[0], gt, p.tl)
-		spr(C.spr2 if int(floor(gt * 4 + i)) % 2 == 1 else C.spr, C.pals[p.n], px - 12, 196 + bob, 2)
+		var fr := int(floor(gt * 4 + i)) % 2
+		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
+		spr(look[fr], C.pals[p.n], px - 12, 196 + bob, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
 	for i in 5:
