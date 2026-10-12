@@ -2018,6 +2018,7 @@ func swept(s: Dictionary, y: float, h: float) -> bool:
 # the sides: off the left, the right or the bottom they're gone.
 const TRICK_GRAV := 520.0
 func trick_move(s: Dictionary, dt: float) -> void:
+	s.pxl = s.x
 	if s.grav:
 		s.vy += TRICK_GRAV * dt
 	s.x += s.vx * dt
@@ -2057,15 +2058,30 @@ func trick_touch(s: Dictionary, e: Dictionary) -> bool:
 	var hh: float = (20 if e.ty == "B" else 9) + s.grow / 2.0
 	return absf(s.x - e.x) < hw and swept(s, e.y, hh)
 
-# a TRICK SHOT ball bounces off enemy e: off its centre like a ball off a round thing, leaning a little toward
-# the nearest other enemy, keeping its speed
+# a TRICK SHOT ball bounces off enemy e like a ball off a box (its hit area): off a side it turns back sideways
+# and keeps going up or down, off the bottom or the top it turns back up or down. Which side it hit is the one
+# it crossed last on its way in. It leans a little toward the nearest other enemy and keeps its speed.
 func trick_bounce(s: Dictionary, e: Dictionary) -> void:
+	var hw: float = (27 if e.ty == "B" else 11) + s.grow
+	var hh: float = (20 if e.ty == "B" else 9) + s.grow / 2.0
+	var px: float = s.get("pxl", s.x) - e.x
+	var py: float = s.get("py", s.y) - e.y
+	var side: bool
+	if absf(px) < hw:
+		side = false
+	elif absf(py) < hh:
+		side = true
+	else:
+		var mx := absf(s.x - s.get("pxl", s.x))
+		var my := absf(s.y - s.get("py", s.y))
+		var tx := (absf(px) - hw) / mx if mx > 0.0 else -1.0
+		var ty := (absf(py) - hh) / my if my > 0.0 else -1.0
+		side = tx > ty
 	var v := Vector2(s.vx, s.vy)
-	var n := Vector2(s.x - e.x, s.y - e.y).normalized()
-	if n == Vector2.ZERO:
-		n = Vector2(0, 1)
-	if v.dot(n) < 0:
-		v = v - 2.0 * v.dot(n) * n
+	if side:
+		v.x = absf(v.x) * (1.0 if px >= 0.0 else -1.0)
+	else:
+		v.y = absf(v.y) * (1.0 if py >= 0.0 else -1.0)
 	var best = null
 	for o in G.en:
 		if not o.dead and not is_same(o, e) and (best == null or Vector2(o.x - s.x, o.y - s.y).length() < Vector2(best.x - s.x, best.y - s.y).length()):
