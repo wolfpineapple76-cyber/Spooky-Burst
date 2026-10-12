@@ -1905,16 +1905,16 @@ func draw_hud() -> void:
 		for w in chars[p.ch].pow:
 			if p.eq.has(w[0]):
 				codes += w[3] + " "
-		T(codes.strip_edges(), CODE_X[p.n][0], 432, 1, "#ffd92e", CODE_X[p.n][1])
+		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
 		# their prestige level for this character, which counts for every stat
 		var pr := prestige(p.n, p.ch)
 		if pr > 0:
-			T("PRE %d" % pr, CODE_X[p.n][0], 442, 1, "#c9a8ff", CODE_X[p.n][1])
+			T("PRE %d" % pr, CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
 		var boosts := ""
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:
 				boosts += "%s%d " % [b[3], bo(p, b[0])]
-		T(boosts.strip_edges(), CODE_X[p.n][0], 420, 1, "#7df2ff", CODE_X[p.n][1])
+		T(boosts.strip_edges(), CODE_X[p.n][0], 408, 1, "#7df2ff", CODE_X[p.n][1])
 	if G.players.size() == 1 and mode == "game":
 		T("TO JOIN: START ON A CONTROLLER, OR BACKSPACE ON THE KEYBOARD", 320, 466, 1, "#9d8cc4", 1)
 	if G.toast != null and mode == "game":
@@ -2053,7 +2053,7 @@ func draw_shop() -> void:
 	if spre >= 0:
 		var n := prestige(stab, sch) + 1
 		draw_panel("PRESTIGE", [["NO, KEEP IT", ""], ["YES, PRESTIGE", "%d/%d" % [n, PRESTIGE_MAX]]], "", spre,
-			"RELOCK %s AND ALL %d UPGRADES? PRICES GO UP 10%%." % [chars[sch].name, chars[sch].pow.size()])
+			"RELOCK %s AND ALL %d UPGRADES FOR +1 OF EVERY BOOST? PRICES GO UP 10%%." % [chars[sch].name, chars[sch].pow.size()])
 
 func shop_choose() -> void:
 	if spre >= 0:
