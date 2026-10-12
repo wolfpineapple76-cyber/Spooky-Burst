@@ -219,6 +219,10 @@ const BIGBUTTON := [".pppp.", "pPppPp", "ppwpwp", "pppppp", "ppwpwp", "pPppPp", 
 const BIGBUTTONPAL := {"p": "#ff7fb5", "P": "#c94f8a", "w": "#ffffff"}
 const NEEDLE := [".S.", "S.S", ".S.", ".s.", ".s.", ".s.", ".s.", ".s.", ".s.", ".S."]
 const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
+# mansion pick-ups: the candelabra replaces the power-up pumpkin, the brass candle replaces the treat bucket
+const CANDELABRA := [".y..y..y..", "yoy.yoy.yo", ".w..w..w..", ".w..w..w..", ".g..g..g..", ".gg.g.gg..", "..ggggg...", "....g.....", "....g.....", "...ggg....", "..GGGGG..."]
+const CANDLE := ["....y.....", "...yoy....", "...yfy....", "....o.....", "...www....", "...wwW....", "...wwW....", "...wwW....", "..gggggg..", ".gGGGGGGg.", "..gggggg.."]
+const CANDLEPAL := {"G": "#8a6a2a", "W": "#c9c2b4", "f": "#fff6c8", "g": "#c9a24a", "o": "#ff9a2e", "w": "#f3efe6", "y": "#ffe45c"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -1942,7 +1946,12 @@ func draw_game() -> void:
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
-		if d.k == "b":
+		if d.k == "b" and in_mansion():
+			spr(CANDLE, CANDLEPAL, x - 10, y - 11, 2)
+		elif d.k == "p" and in_mansion():
+			ellipse(x, y, 11, 11, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
+			spr(CANDELABRA, CANDLEPAL, x - 10, y - 11, 2)
+		elif d.k == "b":
 			spr(BUCKET, BUCKETPAL, x - 10, y - 9, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
@@ -1959,8 +1968,12 @@ func draw_game() -> void:
 			R(x - 10, y + 3, 1, 1, "#ffffff")
 	if G.pk != null:
 		var k: Dictionary = G.pk
-		pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
-		if k.flash > 0:
+		if in_mansion():
+			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
+			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
+		else:
+			pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
+		if k.flash > 0 and not in_mansion():
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
 	for b in G.eb:
 		var x := int(round(b.x))
