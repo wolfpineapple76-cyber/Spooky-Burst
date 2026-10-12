@@ -339,7 +339,7 @@ func _build_chars() -> void:
 				{"K": "#4a4170", "c": "#4169e1", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"},
 				{"K": "#4a4170", "c": "#ff7518", "y": "#ffe45c", "o": "#1b0f33", "p": "#ff9ec2"}],
 			"tr": {"move": 2}, "desc": "AGILE AND DOESN'T LIKE BEING ATTACKED",
-			"pow": [["coin", "LUCKY COIN", "BIG COINS THAT KNOCK FOES UP", "LCK"], ["home", "CAT'S EYE", "ORBS CURVE TOWARD ENEMIES", "EYE"],
+			"pow": [["coin", "LUCKY COIN", "HALF KNOCK BACK, HALF HIT X2", "LCK"], ["home", "CAT'S EYE", "ORBS CURVE TOWARD ENEMIES", "EYE"],
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
 				["tail", "WIGGLE TAIL", "TAIL SNATCHES NEARBY CANDY", "WIG"]]},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
@@ -2292,10 +2292,15 @@ func update(dt: float) -> void:
 			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and swept(s, e.y, hh):
-				e.hp -= s.dmg
-				# LUCKY COIN: half the time the hit shoves the enemy away from the shooter, 4 px per point of damage
-				if s.coin and randf() < 0.5:
-					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
+				# LUCKY COIN flips on every hit: half the time it shoves the enemy away from the shooter, 4 px per point
+				# of damage, and the other half it does double damage
+				var dmg: float = s.dmg
+				if s.coin:
+					if randf() < 0.5:
+						shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
+					else:
+						dmg *= 2.0
+				e.hp -= dmg
 				s.hit.append(e)
 				# SPECTRAL SHOT and PUNCH THROUGH: each enemy it goes through halves it, and it stops under 1 damage
 				s.dmg *= 0.5
