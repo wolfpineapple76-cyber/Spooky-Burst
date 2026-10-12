@@ -893,7 +893,7 @@ func burst(x: float, y: float, col: String, n: int) -> void:
 func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st: String) -> Dictionary:
 	return {"ty": ty, "hx": hx, "hy": hy, "x": x, "y": y, "hp": hp, "max": hp, "st": st, "t": randf() * 6.0, "vx": 0.0, "flash": 0.0,
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
-		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "p2": false, "laugh": 0.0}
+		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "p2": false, "laugh": 0.0, "pnc": 0.0, "pncx": 0.0}
 
 func start_game(pad: int) -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
@@ -1399,6 +1399,25 @@ func boss(e: Dictionary, dt: float) -> void:
 				for side in [-1, 1]:
 					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.45})
 				sfx("dash")
+	if e.pnc > 0:
+		# Spider Beast pounce: 0.8 s moving above the target (with a warning on the floor),
+		# a fast drop on its thread, a short hang at the players' height, then back up
+		e.pnc += dt
+		var pk: float = e.pnc
+		if pk < 0.8:
+			bx = lerpf(e.x, e.pncx, minf(1.0, 8.0 * dt))
+		elif pk < 1.05:
+			bx = e.pncx
+			by = lerpf(by, 196.0, (pk - 0.8) / 0.25)
+		elif pk < 1.4:
+			bx = e.pncx
+			by = 196.0
+		elif pk < 2.2:
+			var r := (pk - 1.4) / 0.8
+			bx = lerpf(e.pncx, bx, r)
+			by = lerpf(196.0, by, r)
+		else:
+			e.pnc = 0.0
 	e.x = bx
 	e.y = by
 	if e.sp > 0:
@@ -1415,7 +1434,7 @@ func boss(e: Dictionary, dt: float) -> void:
 				bshot(e, -sin(a) * 95, cos(a) * 95, "tb", e.x + 14)
 			else:
 				bshot(e, sin(a) * 95, cos(a) * 95, K)
-	if e.dz > 0 or e.sp > 0:
+	if e.dz > 0 or e.sp > 0 or e.pnc > 0:
 		return
 	e.at -= dt
 	if e.at > 0:
@@ -1475,6 +1494,11 @@ func boss(e: Dictionary, dt: float) -> void:
 			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false}
 			e.at = 1.6
 			sfx("deny")
+		elif e.bk == 3:
+			var alive_s := live()
+			e.pncx = (pick(alive_s).x if not alive_s.is_empty() else 160.0)
+			e.pnc = 0.001
+			sfx("squeak")
 		elif sty == 0:
 			e.dz = 1.6
 			sfx("dash")
@@ -1943,6 +1967,10 @@ func draw_game() -> void:
 			var by := int(round(e.y)) - 26
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
+			if e.bk == 3 and e.pnc > 0 and e.pnc < 1.05:
+				var px := int(round(e.pncx))
+				ellipse(px, 214, 30, 6, "#7dff5a", 0.35 + 0.25 * (int(floor(e.pnc * 10)) % 2))
+				R(px, int(round(e.y)) + 20, 1, maxi(0, 214 - int(round(e.y)) - 20), "#c9b8ee", 0.5)
 			if e.bk >= 3:
 				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS, REAPER][e.bk - 3]
 				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL, REAPERPAL][e.bk - 3]
