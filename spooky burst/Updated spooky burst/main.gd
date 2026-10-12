@@ -250,27 +250,13 @@ const SLASH := ["..............................b.............................", 
 	".bbbaa.................................................aabbb", ".bbba...................................................abbb",
 	".bba.....................................................abb", ".bba.....................................................abb"]
 const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
-# new jack-o'-lantern designs: cute, spooky, cat, bat, ghost (the title screen mixes them; the power-up pumpkin is the spooky one)
-const JACK0 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
-	"..DollooooooooooD.", ".DoolyyooooyyooooD", ".DoooyyooooyyooooD", ".DoooooooooooooooD", ".DopoyooooooyopooD", ".DooooyyyyyyoooooD",
-	"..DoooooooooooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
-const JACK1 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
-	"..DollyooooyooooD.", ".DoolyoyooyoyooooD", ".DooyyyyooyyyyoooD", ".DoooooooooooooooD", ".DoooooooooooooooD", ".DooyykyykyykyoooD",
-	"..DooyyoyyoyyoooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
-const JACK2 := ["..................", "..................", "..................", "....D.DDsssDDD....", "...ooooSssooooo...", "...oooDossooDooo..",
-	"..DollooooooooooD.", ".DoolyooooooyooooD", ".DoooyyooooyyooooD", ".DoooooooooooooooD", ".DyyooooppooooyyoD", ".DoyooooyyooooyooD",
-	"..yooooyooyooooyD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
-const JACK3 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoooooDooo..",
-	"..DolloyoyoyooooD.", ".DooyyyyyyyyyyyooD", ".DoooyyyryryyyoooD", ".DooooyoyyoyoooooD", ".DoooooyooyooooooD", ".DoooooooooooooooD",
-	"..DoooyyyyyyooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
-const JACK4 := ["..................", "..................", "........sss.......", "......DSssDDD.....", "....oooossooooo...", "...oooDoyyooDooo..",
-	"..DolloyyyyoooooD.", ".DooloykyykyoooooD", ".DooooykyykyoooooD", ".DooooyyyyyyoooooD", ".DooooyykkyyoooooD", ".DooooyyyyyyoooooD",
-	"..DoooyoyyoyooooD.", "...oooDoooooDooo..", "....ooooooooooo...", "......DDDDDDD....."]
-const JACKS := [JACK0, JACK1, JACK2, JACK3, JACK4]
-const JACKPAL := {"D": "#c2520c", "S": "#5a9a3a", "k": "#2a0c04", "l": "#ff9a33", "o": "#ee7a14", "p": "#ff7fb5", "r": "#ff3355", "s": "#3d6b2a",
-	"y": "#ffe45c"}
-const JACKPALB := {"D": "#c2520c", "S": "#5a9a3a", "k": "#2a0c04", "l": "#ff9a33", "o": "#ee7a14", "p": "#ff7fb5", "r": "#ff3355", "s": "#3d6b2a",
-	"y": "#ffc23a"}
+# the carved jack-o'-lanterns look like the Pumpkin King's face: angry slanted eyes, a nose and a toothy grin (no crown, he's the only king)
+const JACK0 := ["..................", "..................", "........SSS.......", "......DDSSoDD.....", "....ooDoSSooDoo...", "...oooDoooooDooo..",
+	"..DyyooooooooyyoD.", ".DolyyyooooyyyoooD", ".DoooyyyooyyyooooD", ".DooooooffoooooooD", ".DoooooooooooooooD", ".DoDyooyyyyooyDooD",
+	"..DoyyyyyyyyyyooD.", "...ooffoffoffooo..", "....ooDMMMMMDoo...", "......DDDDDDD....."]
+const JACKS := [JACK0]
+const JACKPAL := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffe45c"}
+const JACKPALB := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffc23a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -2086,7 +2072,7 @@ func draw_game() -> void:
 			spr(BUCKET, BUCKETPAL, x - 10, y - 9, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
-			jack(x, y, 6, 5, gt * 2, 4, 1)
+			jack(x, y, 6, 5, gt * 2, 4, 0)
 		else:
 			R(x - 5, y - 4, 4, 3, "#ff4d7a")
 			R(x + 1, y - 4, 4, 3, "#ff4d7a")
@@ -2103,7 +2089,7 @@ func draw_game() -> void:
 			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
 			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
 		else:
-			jack(int(round(k.x)), int(round(k.y)), 8, 6, gt * 2, 3, 1)
+			jack(int(round(k.x)), int(round(k.y)), 8, 6, gt * 2, 3, 0)
 		if k.flash > 0 and not in_mansion():
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
 	for b in G.eb:
