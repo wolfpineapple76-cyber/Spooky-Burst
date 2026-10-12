@@ -48,8 +48,8 @@ WAVES AND ENEMIES
   After the PUMPKIN KING it loops back to the full lineup.
 - Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players
   (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
-  Only the PUMPKIN KING gets a ring of shots. Only bats swoop at you: the VAMPIRE LORD stays distant and
-  commanding and sends bats instead.
+  Only the PUMPKIN KING gets a ring of shots. The VAMPIRE LORD stays distant and commanding, so he doesn't
+  dive at you himself; he sends bats instead.
 
 MENUS AND CONTROLS
 - The title screen has a proper QUIT, and Start/Esc gives you options.
