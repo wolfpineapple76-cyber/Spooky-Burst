@@ -1814,23 +1814,32 @@ func got_candy(k: Dictionary, p: Dictionary) -> void:
 	sfx("candy")
 
 # WIGGLE TAIL: falling candy or a drop that comes within one character width (24 px) beyond the Cat's body,
-# as high as his head, is collected straight away, and his tail swipes the full reach out on that side (0.25 s)
-# and back (0.25 s). The swipe is only for show: a cat's tail can't hold things.
-const TAIL_OUT := 0.25
-const TAIL_BACK := 0.25
+# as high as his head, is collected straight away. His tail starts its swipe a little early, once something is
+# within TAIL_EARLY px of that reach, and gets out fast (TAIL_OUT) and back slowly (TAIL_BACK), so it lands on
+# the spot about when the thing is caught (it can swing and miss). The swipe is only for show: a cat's tail
+# can't hold things.
+const TAIL_OUT := 0.1
+const TAIL_BACK := 0.4
+const TAIL_EARLY := 8.0
 func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
-		if p.eq.has("tail") and absf(o.x - p.x) < 36 and o.y > 188 and o.y < 224:
-			# the swipe always goes the full reach on that side, at its height
-			var rx := 36.0 if o.x >= p.x else -36.0
-			# with NINE LIVES the curl wags instead, and the wag to the left takes longer (see draw_tail)
-			var wag: bool = p.eq.has("shield") and p.sh <= 0
-			p.tl = {"t": 0.0, "rx": rx, "ty": o.y, "wag": wag, "end": WAG_LEFT[-1][0] if wag and rx < 0 else TAIL_OUT + TAIL_BACK}
-			if o.has("k"):
-				catch_drop(o, p)
-			else:
-				got_candy(o, p)
-			return true
+		if not p.eq.has("tail"):
+			continue
+		var dx := absf(o.x - p.x)
+		if dx < 36.0 + TAIL_EARLY and o.y > 188.0 - TAIL_EARLY and o.y < 224:
+			if p.get("tl") == null:
+				# the swipe always goes the full reach on that side, at its height
+				var rx := 36.0 if o.x >= p.x else -36.0
+				# with NINE LIVES the curl wags instead, and the wag to the left takes longer (see draw_tail)
+				var wag: bool = p.eq.has("shield") and p.sh <= 0
+				p.tl = {"t": 0.0, "rx": rx, "ty": maxf(o.y, 188.0), "wag": wag,
+					"end": WAG_LEFT[-1][0] if wag and rx < 0 else TAIL_OUT + TAIL_BACK}
+			if dx < 36.0 and o.y > 188:
+				if o.has("k"):
+					catch_drop(o, p)
+				else:
+					got_candy(o, p)
+				return true
 	return false
 
 func wiggle(p: Dictionary, dt: float) -> void:
@@ -2639,9 +2648,10 @@ const TAIL_UP := [Vector2(0, 20), Vector2(0, 12.2), Vector2(0, 3), Vector2(0, -5
 # WIGGLE TAIL with NINE LIVES wags: to the right the curl turns over to the other side and back. To the left it
 # goes straight up behind him, the whole cat flips (the tail is straight so it doesn't show), the same wag plays
 # mirrored, and it goes back up behind him and flips home. [time, pose, mirrored]
-const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.25, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
-const WAG_LEFT := [[0.0, TAIL_REST, false], [0.1, TAIL_UP, false], [0.2, TAIL_REST, true], [0.38, TAIL_FLIP, true],
-	[0.56, TAIL_REST, true], [0.66, TAIL_UP, false], [0.76, TAIL_REST, false]]
+# Out fast, back slowly, like the swipe.
+const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.12, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
+const WAG_LEFT := [[0.0, TAIL_REST, false], [0.05, TAIL_UP, false], [0.1, TAIL_REST, true], [0.2, TAIL_FLIP, true],
+	[0.45, TAIL_REST, true], [0.55, TAIL_UP, false], [0.65, TAIL_REST, false]]
 func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
 	var pts := []
 	if tl != null and tl.get("wag", false):
