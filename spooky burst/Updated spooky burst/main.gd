@@ -236,6 +236,20 @@ const REAPER := ["............nnnnnnnn............", ".sssssssssnnnnnnnnnnnn....
 	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnWWWWnnnnnnWWWWnnn......",
 	"................................"]
 const REAPERPAL := {"S": "#6a7088", "W": "#f0ead8", "b": "#6b3f2a", "g": "#7dff6a", "k": "#14101f", "n": "#1b1424", "s": "#a8b0c0", "w": "#c8c0a8"}
+# Grim Reaper's scythe slash: a black crescent with a purple glow that sweeps half the floor
+const SLASH := ["..............................b.............................", "......................bbbbbbbbbbbbbbbbb.....................",
+	"...................bbbbbbbbbbbbbbbbbbbbbbb..................", "................bbbbbbbbaaaaaaaaaaaaabbbbbbbb...............",
+	"..............bbbbbbaaaaaaaaaaaaaaaaaaaaabbbbbb.............", "............bbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbb...........",
+	"...........bbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb..........", ".........bbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbb........",
+	"........bbbbaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaabbbb.......", ".......bbbbaaaaaaaaaaa.................aaaaaaaaaaabbbb......",
+	"......bbbbaaaaaaaaa.......................aaaaaaaaabbbb.....", ".....bbbbaaaaaaa.............................aaaaaaabbbb....",
+	".....bbbaaaaaa.................................aaaaaabbb....", "....bbbaaaaaa...................................aaaaaabbb...",
+	"...bbbaaaaa.......................................aaaaabbb..", "...bbbaaaa.........................................aaaabbb..",
+	"..bbbaaaa...........................................aaaabbb.", "..bbbaaa.............................................aaabbb.",
+	".bbbaaa...............................................aaabbb", ".bbbaa.................................................aabbb",
+	".bbbaa.................................................aabbb", ".bbba...................................................abbb",
+	".bba.....................................................abb", ".bba.....................................................abb"]
+const SLASHPAL := {"a": "#1e1428", "b": "#b48cff"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -885,7 +899,7 @@ func start_game(pad: int) -> void:
 	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pk": null, "pk_t": 5.0, "pk_done": false,
-		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
+		"shake": 0.0, "boom": null, "rot": null, "slash": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
 	add_player(160, pad, "" if pad >= 0 else "both", pick_char(0), 0)
 	mode = "game"
 	panel = ""
@@ -1195,6 +1209,7 @@ func pk_laugh(e: Dictionary) -> void:
 func kill(e: Dictionary) -> void:
 	e.dead = true
 	if e.ty == "B":
+		G.slash = null
 		pts(2000)
 		for i in 6:
 			burst(e.x + (randf() - 0.5) * 50, e.y + (randf() - 0.5) * 36, "#b3122e" if i % 2 == 1 else "#ffd92e", 14)
@@ -1455,7 +1470,12 @@ func boss(e: Dictionary, dt: float) -> void:
 				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, 1, "dive"))
 			sfx("squeak")
 	elif m == 4:
-		if sty == 0:
+		if e.bk == 7:
+			# Grim Reaper: warns on the half of the floor it is floating over, then slashes across it
+			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false}
+			e.at = 1.6
+			sfx("deny")
+		elif sty == 0:
 			e.dz = 1.6
 			sfx("dash")
 		elif e.bk == 4:
@@ -1513,6 +1533,19 @@ func player_input(p: Dictionary) -> Dictionary:
 func update(dt: float) -> void:
 	if G.shake > 0:
 		G.shake -= dt
+	if G.slash != null:
+		var sl: Dictionary = G.slash
+		sl.t += dt
+		if sl.t >= 0.75 and not sl.hit:
+			sl.hit = true
+			sfx("dash")
+			G.shake = 0.4
+		if sl.t >= 0.75 and sl.t <= 1.05:
+			for p in live():
+				if p.inv <= 0 and (p.x > 160 if sl.side > 0 else p.x < 160):
+					hurt(p)
+		if sl.t > 1.2:
+			G.slash = null
 	if G.boom != null:
 		var o: Dictionary = G.boom
 		o.t -= dt
@@ -1948,6 +1981,15 @@ func draw_game() -> void:
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
 		else:
 			spr(WITCH if e.ty == "w" else VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+	if G.slash != null:
+		var sl: Dictionary = G.slash
+		var hx := 160 if sl.side > 0 else 0
+		if sl.t < 0.75:
+			R(hx, 192, 160, 32, "#ff2244", 0.12 + 0.10 * (int(floor(sl.t * 10)) % 2))
+		elif sl.t <= 1.05:
+			var k: float = (sl.t - 0.75) / 0.3
+			var cx: float = 160 + sl.side * (10 + 130 * k)
+			spr(SLASH, SLASHPAL, int(round(cx)) - SLASH[0].length(), 224 - SLASH.size() * 2, 2)
 	if G.rot != null:
 		# the Pumpkin King rotting away after his final defeat
 		var rk: float = G.t - G.rot.t0
