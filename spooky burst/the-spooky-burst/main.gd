@@ -97,11 +97,12 @@ const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 const JESTER := [".BBB....BBB.", "BB.BB..BB.BB", "o..BBBBBB..e", "..BBBBBBBB..", "..SSSSSSSS..", "..SkWSSWkS..",
 	"..pkkSSkkp..", "...SSmmSS...", ".WBWBWBWBWB.", ".BDBBDBBDBB.", ".DBDDBDDBDD.", "..BB....oo..", ".BBB....ooo."]
 const JESTER_EYES := {-1: "..SWkSSWkS..", 0: "..SkWSSWkS..", 1: "..SkWSSkWS.."}
-# his basic shot is a jingle bell, and TRICK SHOT's ball (P1's is dark grey): the normal and the bigger image
-const JBELL := [".ccc.", "cWccc", "ccccc", "ckkkc", "..c.."]
-const JBELL_B := ["..ccc..", ".cWccc.", "ccWcccc", "ccccccc", "ccccccc", "ckkkkkc", "...c..."]
-const TBALL := [".cc.", "cWcc", "cccw", ".cw."]
-const TBALL_B := ["..cc..", ".cWcc.", "cWcccc", "ccccww", ".cccw.", "..cw.."]
+# his basic shot is a jingle bell, and TRICK SHOT's ball (P1's is dark grey): the normal image (the size of a plain
+# orb with its glow) and the bigger one
+const JBELL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "ccccccc", "ckkkkkc", "...c..."]
+const JBELL_B := ["...ccc...", "..cWccc..", ".cWccccc.", ".cWccccc.", "ccccccccc", "ccccccccc", "ckkkkkkkc", "....c...."]
+const TBALL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "cccccwc", ".cccww.", "..cww.."]
+const TBALL_B := ["...ccc...", "..cWccc..", ".cWccccc.", "cWccccccc", "ccccccccc", "cccccccwc", ".ccccccw.", "..cccww..", "...cww..."]
 # JUGGLING BALLS: a shiny ball, always one green, one blue and one orange
 const JUGBALL := ["..ccc..", ".cWlcc.", "cWlcccc", "clccccc", "cccccdc", ".ccccd.", "..ddd.."]
 const JUG_COLS := ["#228b22", "#4169e1", "#ff7518"]
