@@ -222,19 +222,19 @@ const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
 const CANDELABRA := [".y..y..y..", "yoy.yoy.yo", ".w..w..w..", ".w..w..w..", ".g..g..g..", ".gg.g.gg..", "..ggggg...", "....g.....", "....g.....", "...ggg....", "..GGGGG..."]
 const CANDLE := ["....y.....", "...yoy....", "...yfy....", "....o.....", "...www....", "...wwW....", "...wwW....", "...wwW....", "..gggggg..", ".gGGGGGGg.", "..gggggg.."]
 const CANDLEPAL := {"G": "#8a6a2a", "W": "#c9c2b4", "f": "#fff6c8", "g": "#c9a24a", "o": "#ff9a2e", "w": "#f3efe6", "y": "#ffe45c"}
-# mansion boss 5 (wave 40): the Grim Reaper, a skeleton in a hood with a scythe
-const REAPER := ["............nnnnnnnn............", ".sssssssssnnnnnnnnnnnn..........", ".sssssssssnnnWWWWWWnnn..........",
-	".bSSSSS.nnnWWWWWWWWWWnnn........", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b....nnnWWWWWWWWWWWWWWnnn......",
-	".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWkgkWWWWkgkWWnnn......", ".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWWWWWWWWWWWWWnnn......",
-	".b....nnnnWWWWWkkWWWWWnnnn......", ".b....nnnnWWWWkWWkWWWWnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......",
-	".b....nnnnnkwwwnnwwwknnnnn......", ".b....nnnnnnwwwnnwwwnnnnnn......", ".b....nnnnnnnnwwwwnnnnnnnn......", ".b....WWnnnnnnwwwwnnnnnnWW......",
-	".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......",
-	".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......",
-	".b...WWWnnnnnnwwwwnnnnnnWWW.....", ".b...WWWnnWWWWWWWWWWWWnnWWW.....", ".b....nnnnWWWWWWWWWWWWnnnn......", ".b....nnnnWWWWWWWWWWWWnnnn......",
-	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......",
-	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnWWWWnnnnnnWWWWnnn......",
+# mansion boss 5 (wave 40): the Grim Reaper, a skull in a ragged black cloak with a scythe
+const REAPER := ["...........oonnnnnnoo...........", "...sssssssssnnnnnnnnno..........", "...ssssssssssnnnnnnnnno.........",
+	"...sssssssssnnnnnnnnnnno........", "...SSSSSSSnSnnnnnnnnnnnno.......", "...SSSSonnnnSnWWWWnnnnnno.......", "...b...onnnnSWWWWWWnnnnno.......",
+	"...b...onnnnWWWWWWWWnnnno.......", "...b..onnnnnWWWWWWWWnnnnno......", "...b...onnnnkkWWWWkknnnno.......", "...b...onnnWkkWWWWkkWnnno.......",
+	"...b...onnnnkkWWWWkknnnno.......", "...b...onnnnWWWkkWWWnnnno.......", "...b....onnnWWWWWWWWnnno........", "...b.....onnnwwwwwwnnno.........",
+	"...b......onnnwwwwnnno..........", "...b......ooonnnnnnooo..........", "...b......onnoooooonno..........", "...b.....onnnnnnnnnnnno.........",
+	"..WWW....onnnnnnnnnnnno.........", "..WWW...onnnnnnnnnnnnnno...W....", "...b....onnnnnnnnnnnnnno....W...", "...b...onnnnnnnnnnnnnnnno...W...",
+	"..WWW..onnnnnnnnnnnnnnnno.......", "..WWW.onnnnnnnnnnnnnnnnnno......", "...b..onnnnnnnnnnnnnnnnnno......", "...b.onnnnnnnnnnnnnnnnnnnno.....",
+	"...b.onnnnnnnnnnnnnnnnnnnno.....", "...bonnnnnnnnnnnnnnnnnnnnnno....", "...bonnnnnnnnnnnnnnnnnnnnnno....", "...bnnnnnnnnnnnnnnnnnnnnnnnno...",
+	"...bnnnnnnnnnnnnnnnnnnnnnnnno...", "..obnnnnnnnnnnnnnnnnnnnnnnnnno..", "..obnnnnnnnnnnnnnnnnnnnnnnnnno..", ".onbnnnnnnnnnnnnnnnnnnnnnnnnnno.",
+	".onbnnnnnnnnnnnnnnnnnnnnnnnnnno.", ".onbnn.nn.nn.nn..nn.nn.nn.nn.no.", ".o.bn.nn.nn.nn.nn.nn.nn.nn.nn.o.", ".onb.nn.nn.nn.nnnn.nn.nn.nn.nno.",
 	"................................"]
-const REAPERPAL := {"S": "#6a7088", "W": "#f0ead8", "b": "#6b3f2a", "g": "#7dff6a", "k": "#14101f", "n": "#1b1424", "s": "#a8b0c0", "w": "#c8c0a8"}
+const REAPERPAL := {"S": "#8a90a8", "W": "#f0ead8", "b": "#6b3f2a", "k": "#0a0610", "n": "#1b1424", "o": "#3a2d52", "s": "#c8ccd8", "w": "#c8c0a8"}
 # Grim Reaper's scythe slash: a black crescent with a purple glow that sweeps half the floor
 const SLASH := ["..............................b.............................", "......................bbbbbbbbbbbbbbbbb.....................",
 	"...................bbbbbbbbbbbbbbbbbbbbbbb..................", "................bbbbbbbbaaaaaaaaaaaaabbbbbbbb...............",
