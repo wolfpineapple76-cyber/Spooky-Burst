@@ -31,10 +31,10 @@ rem the console version shows import progress; fall back to the normal one if it
 for %%F in ("%GD_EXE%") do set "GD_CON=%%~dpnF_console.exe"
 if not exist "%GD_CON%" set "GD_CON=%GD_EXE%"
 
-if not exist "%PROJ%\.godot\imported" (
-  echo First run: importing sounds, this takes a moment...
-  "%GD_CON%" --headless --path "%PROJ%" --import
-)
+rem Import every launch, so anything new (a sound, the mansion picture) is picked up. It's a second when
+rem nothing has changed; the first run takes a moment.
+if not exist "%PROJ%\.godot\imported" echo First run: importing sounds and pictures, this takes a moment...
+"%GD_CON%" --headless --path "%PROJ%" --import
 start "" "%GD_EXE%" --path "%PROJ%"
 exit /b 0
 

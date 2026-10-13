@@ -76,7 +76,12 @@ WAVES AND ENEMIES
   kinds. A second form is a Sammie discussion.
 - The wave counter counts 1-25 in each stage, starting again at WAVE 1 in the mansion and back in the graveyard.
   The real wave count keeps going underneath for difficulty.
-- Every boss attack must leave a hole. The WITCH QUEEN waits for her last attack's shots to pass the players
+- Every boss attack must leave a hole. Play test of stage 2 (two Zombies, a ROT CLOUD up the whole time):
+  waves calm, PUPPET DOLL just right, BAT CAT far too fast (dove the instant it picked you, claws both ways),
+  THE TWINS' bow walls had no lane. So: the cat crouches for half a second first, claws 45 px, a rest after
+  landing, half-rate stream; the Twins' walls are four bows 36 px apart and their streams take turns; the
+  SPIDER BEAST's web slows for 1 s and doesn't restart while you're slowed; sets 3-5 are a step harder.
+- ROT CLOUD: 25% slow, each further cloud adds half the last (75, 63, 56, 53%): diminishing returns, no cap. The WITCH QUEEN waits for her last attack's shots to pass the players
   (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
   Only the PUMPKIN KING gets a ring of shots. The VAMPIRE LORD stays distant and commanding, so he doesn't
   dive at you himself; he sends bats instead.

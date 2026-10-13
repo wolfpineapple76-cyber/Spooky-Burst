@@ -1083,7 +1083,15 @@ func draw_jack(cx: int, cy: int, ry: int) -> void:
 func draw_mansion(boss_here: bool) -> void:
 	if mansion_tex == null:
 		mansion_tex = load("res://mansion.png")
-	draw_texture(mansion_tex, Vector2.ZERO)
+		if mansion_tex == null:
+			# not imported (a copy that already had its .godot folder when mansion.png arrived): read the file itself
+			var img := Image.load_from_file(ProjectSettings.globalize_path("res://mansion.png"))
+			if img != null:
+				mansion_tex = ImageTexture.create_from_image(img)
+	if mansion_tex != null:
+		draw_texture(mansion_tex, Vector2.ZERO)
+	else:
+		R(0, 0, 320, 240, "#2a1a46")
 	if boss_here:
 		R(0, 0, 320, 240, "#ff1133", 0.07)
 
@@ -1319,7 +1327,7 @@ func wave_text(w: int) -> String:
 # (set 1 relaxed, set 2 medium, set 3 hard, set 4 harder, set 5 find the gap or get hit), and the first wave
 # after a boss is a breather. Every stage beaten adds a step with diminishing returns and a floor, so it never
 # stops climbing and never jumps. No caps anywhere.
-const SET_LEVEL := [0.0, 0.25, 0.5, 0.75, 1.0]
+const SET_LEVEL := [0.0, 0.25, 0.6, 0.9, 1.2]
 const WAVE_IN_SET := [-0.1, 0.0, 0.05, 0.1, 0.1]   # breather, then rising; the 5th is the boss
 func level(w: int) -> float:
 	var sw := shown_wave(w)
@@ -2179,17 +2187,26 @@ func mboss(e: Dictionary, dt: float) -> void:
 	else:
 		bx = 160 + sin(e.ph * 0.7) * 112
 		by = 66 + sin(e.ph * 1.9) * 10
+	if e.get("crouch", 0.0) > 0:
+		# BAT CAT's tell: it hangs still and crouches for half a second, then dives
+		e.crouch -= dt
+		by += 6
+		if e.crouch <= 0:
+			e.dz = 1.6
+			sfx("squeak")
 	if e.dz > 0:
 		e.dz -= dt
 		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
 		if mb == 2:
-			# BAT CAT: swoops at the player it picked (e.vx), and swipes its claws along the floor
+			# BAT CAT: swoops at the player it picked (e.vx), and swipes its claws along the floor (45 px each way)
 			bx = lerpf(bx, e.vx, sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)))
 			if e.dz < 0.8 and e.pass == 0:
 				e.pass = 1
 				for side in [-1, 1]:
-					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.45})
+					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.3})
 				sfx("dash")
+			if e.dz <= 0:
+				e.at = 2.6   # a proper rest after landing
 	e.x = bx
 	e.y = by
 	kicked(e)
@@ -2201,13 +2218,19 @@ func mboss(e: Dictionary, dt: float) -> void:
 			e.spa += 0.5
 			var a := sin(e.spa) * 1.15
 			if mb == 1:
-				# THE TWINS: two streams sweeping as mirror images, at half the rate so it stays fair
+				# THE TWINS: the streams take turns, one sister each time, at half the rate so it stays fair
 				e.spt = 0.18
-				bshot(e, sin(a) * 95, cos(a) * 95, "tp", e.x - 14)
-				bshot(e, -sin(a) * 95, cos(a) * 95, "tb", e.x + 14)
+				if (e.n / 5) % 2 == 0:
+					bshot(e, sin(a) * 95, cos(a) * 95, "tp", e.x - 14)
+				else:
+					bshot(e, -sin(a) * 95, cos(a) * 95, "tb", e.x + 14)
+			elif mb == 2:
+				# BAT CAT: half rate too
+				e.spt = 0.18
+				bshot(e, sin(a) * 95, cos(a) * 95, K)
 			else:
 				bshot(e, sin(a) * 95, cos(a) * 95, K)
-	if e.dz > 0 or e.sp > 0:
+	if e.dz > 0 or e.sp > 0 or e.get("crouch", 0.0) > 0:
 		return
 	e.at -= dt
 	if e.at > 0:
@@ -2283,21 +2306,24 @@ func mboss(e: Dictionary, dt: float) -> void:
 			e.dz = 1.6
 			sfx("dash")
 		elif mb == 1:
-			# THE TWINS: two diagonal lines of bows sweep down from the top corners and cross in an X
-			for i in 6:
-				bshot(e, 55, 95, "tp", 16 + i * 18, -8 - i * 30)
-				bshot(e, -55, 95, "tb", 304 - i * 18, -8 - i * 30)
+			# THE TWINS: two diagonal lines of bows sweep down from the top corners and cross in an X, four to a
+			# line and 36 px apart so there's a lane between them (all starting within the screen's top margin:
+			# anything above -60 is thrown away)
+			for i in 4:
+				bshot(e, 55, 95, "tp", 16 + i * 36, -8 - i * 16)
+				bshot(e, -55, 95, "tb", 304 - i * 36, -8 - i * 16)
 			sfx("ring")
 		elif sty == 1:
 			for i in 9:
 				bshot(e, 0, 95 + randf() * 30, "ndl" if mb == 3 else "c", 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
 		elif mb == 2:
+			# BAT CAT picks its target and crouches first; the dive follows
 			var alive_c := live()
 			e.vx = (pick(alive_c).x if not alive_c.is_empty() else 160.0)
 			e.pass = 0
-			e.dz = 1.6
-			sfx("squeak")
+			e.crouch = 0.5
+			sfx("deny")
 	else:
 		e.sp = 1.4
 		e.spt = 0.0
@@ -3028,10 +3054,13 @@ func update(dt: float) -> void:
 		if o.t <= 0:
 			G.boom = null
 	G.t += dt
+	# ROT CLOUD: the first slows enemy shots by 25%, each further one by half the last (75%, 63%, 56%, 53%...)
 	G.slow = 1.0
+	var clouds := 0
 	for p in G.players:
 		if not p.out and p.eq.has("slow"):
-			G.slow = 0.65
+			clouds += 1
+	G.slow = 1.0 - 0.5 * (1.0 - pow(0.5, clouds))
 	if G.bt > 0:
 		G.bt -= dt
 		if G.bt <= 0:
@@ -3381,7 +3410,8 @@ func update(dt: float) -> void:
 				b.dead = true
 				# SPIDER BEAST's web sticks to you and slows you down for a moment instead of hurting
 				if b.k == "web":
-					p.web = 2.0
+					if p.web <= 0:
+						p.web = 1.0
 					sfx("deny")
 					continue
 				hurt(p)

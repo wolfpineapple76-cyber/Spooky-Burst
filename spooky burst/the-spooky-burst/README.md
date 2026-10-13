@@ -101,9 +101,11 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   above where you were when it started and comes back up on the far side; dolls also shoot buttons at you.
   A ghost's eyes glow, then it cries three tears that fall straight down its column.
   The pick-ups are candles: a candelabra for the power-up pumpkin and a brass candle for the treat bucket.
-  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a moment, BAT CAT (10) swoops
-  at you, scratches along the floor and calls bats (the mansion's bats, in the PRIMAL BAT's colours), PUPPET
-  DOLL (15) shoots big buttons and sewing needles, THE TWINS (20) shoot mirror-image bows, and the GRIM
+  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a second, BAT CAT (10) crouches,
+  then swoops at you and scratches 45 px along the floor each way, and calls bats (the mansion's bats, in the
+  PRIMAL BAT's colours), PUPPET DOLL (15) shoots big buttons and sewing needles, THE TWINS (20) shoot
+  mirror-image bows (their crossing walls are four bows a line with a lane between, and their streams take
+  turns), and the GRIM
   REAPER (25) warns on half the floor, then slashes across it, borrows the others' webs, needles and bows,
   and calls spiders, dolls and ghosts into the room. In the waves before BAT CAT, the PUPPET DOLL and the GRIM
   REAPER, half the enemies are their kind. After the GRIM REAPER it's back to the graveyard.
@@ -162,7 +164,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   His tail swipes the full reach up over his back on that side, or with NINE LIVES the curled tail leans over and back.
 - HEAVY FIST makes the Zombie's shots little fists that do double damage, and enemies they finish off drop
   candy more often. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
-  and through a web tile they break (halving the same way).
+  and through a web tile they break (halving the same way). ROT CLOUD slows every enemy shot to 75%; each
+  further Zombie with one adds half the last slow (63%, 56%, 53%), so a crowd of them can't freeze the screen.
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.
 - The Jester is black and white; players 2-4 have their colour on his left bell, his diamonds and his right leg.
