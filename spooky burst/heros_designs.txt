@@ -8,6 +8,7 @@ HOW WE WORK
   If he asks for only a new look, keep the mechanics exactly the same.
 - For art, try at least 6 versions, pick the best, and show screenshots.
 - Check that abilities actually do what their names say, and measure them if unsure.
+- Always check the relevant part of the code or necessary information before suggesting a change.
 
 CO-OP FAIRNESS
 - Lives are shared and never created. Someone joining takes lives from whoever has the most until everyone
