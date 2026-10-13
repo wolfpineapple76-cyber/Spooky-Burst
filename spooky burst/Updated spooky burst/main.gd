@@ -210,10 +210,9 @@ const WEBPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
 const BOWSHOT := ["a...a", "aa.aa", "aacaa", "aa.aa", "a...a"]
 const BOWPINK := {"a": "#ff5c8a", "c": "#fff0f5"}
 const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
-# Bat Cat's claw swipe: red scratch marks that shoot out along the floor (CLAWL faces left)
-const CLAW := ["P...P...P.", ".P...P...P", ".P...P...P", "..P...P...", "..P...P...", "...P...P.."]
-const CLAWL := [".P...P...P", "P...P...P.", "P...P...P.", "...P...P..", "...P...P..", "..P...P..."]
-const CLAWPAL := {"P": "#ff3355"}
+# Bat Cat's scratch: one set of three claw marks straight under the cat, in dark violet
+const CLAW := ["..h..h..h.", "..P..P..P.", "..P..P..P.", ".P..P..P..", ".P..P..P..", ".P..P..P..", "P..P..P...", "P..P..P...", "...P..P..."]
+const CLAWPAL := {"P": "#6a44d0", "h": "#b8a4ff"}
 # Puppet Doll's shots: big pink buttons and silver sewing needles
 const BIGBUTTON := [".pppp.", "pPppPp", "ppwpwp", "pppppp", "ppwpwp", "pPppPp", ".pppp."]
 const BIGBUTTONPAL := {"p": "#ff7fb5", "P": "#c94f8a", "w": "#ffffff"}
@@ -1424,15 +1423,19 @@ func boss(e: Dictionary, dt: float) -> void:
 		by = 66 + sin(e.ph * 1.9) * 10
 	if e.dz > 0:
 		e.dz -= dt
-		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
 		if e.bk == 5:
-			# Bat Cat: swoops at the player it picked (e.vx), and swipes its claws at the bottom
-			bx = lerpf(bx, e.vx, sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)))
-			if e.dz < 0.8 and e.pass == 0:
+			# Bat Cat: slides over the player it picked (e.vx), drops STRAIGHT down, scratches once, climbs straight back up
+			var tt := 1.0 - maxf(0.0, e.dz) / 1.6
+			var slide := smoothstep(0.0, 0.35, tt) * (1.0 - smoothstep(0.78, 0.95, tt))
+			var depth := smoothstep(0.45, 0.6, tt) * (1.0 - smoothstep(0.68, 0.9, tt))
+			bx = lerpf(bx, e.vx, slide)
+			by += depth * 80   # stops high enough that the scratch comes out below its belly
+			if tt >= 0.6 and e.pass == 0:
 				e.pass = 1
-				for side in [-1, 1]:
-					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.45})
+				G.eb.append({"x": bx, "y": 207.0, "vx": 0.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.5})
 				sfx("dash")
+		else:
+			by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
 	if e.pnc > 0:
 		# Spider Beast pounce: 0.8 s moving above the target (with a warning on the floor),
 		# a fast drop on its thread, a short hang at the players' height, then back up
@@ -2100,7 +2103,7 @@ func draw_game() -> void:
 		elif b.k == "ndl":
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
-			spr(CLAW if b.vx > 0 else CLAWL, CLAWPAL, x - 10, y - 6, 2)
+			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
 		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
 		elif b.k == "web":
