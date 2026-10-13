@@ -101,12 +101,14 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   above where you were when it started and comes back up on the far side; dolls also shoot buttons at you.
   A ghost's eyes glow, then it cries three tears that fall straight down its column.
   The pick-ups are candles: a candelabra for the power-up pumpkin and a brass candle for the treat bucket.
-  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a second, BAT CAT (10) crouches,
-  then swoops at you and scratches 45 px along the floor each way, and calls bats (the mansion's bats, in the
-  PRIMAL BAT's colours), PUPPET DOLL (15) shoots big buttons and sewing needles, THE TWINS (20) shoot
+  Its bosses: SPIDER BEAST (wave 5) throws sticky webs that slow you down for a second and pounces: a green
+  circle blinks on the floor where it will land, then it drops straight down on its thread, hangs at your
+  height and climbs back (step out of the circle). BAT CAT (10) slides over you, drops straight down and
+  leaves one dark scratch under itself for half a second, then rests; it calls bats (the mansion's bats, in
+  the PRIMAL BAT's colours). PUPPET DOLL (15) shoots big buttons and sewing needles. THE TWINS (20) shoot
   mirror-image bows (their crossing walls are four bows a line with a lane between, and their streams take
-  turns), and the GRIM
-  REAPER (25) warns on half the floor, then slashes across it, borrows the others' webs, needles and bows,
+  turns). The GRIM REAPER is a skull in a ragged black cloak with a scythe; it
+  (25) warns on half the floor, then slashes across it, borrows the others' webs, needles and bows,
   and calls spiders, dolls and ghosts into the room. In the waves before BAT CAT, the PUPPET DOLL and the GRIM
   REAPER, half the enemies are their kind. After the GRIM REAPER it's back to the graveyard.
 
@@ -123,6 +125,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   you're out of lives.
 - Once the Jester is bought he pops out of the pumpkin on the right of the title screen, bobbing like a
   jack-in-the-box with the pumpkin's top on his head. While he's locked he isn't there at all: no silhouette.
+- The pumpkin the centre ghost holds on the title screen has the PUMPKIN KING's face (Sammie's). In play, each
+  glowing power-up pumpkin is a coin flip between that face and the plain carved one, and the pumpkin it drops
+  keeps the face it had.
 - An enemy drops candy a quarter of the time. GRAVE ROBBER (for everyone's kills while anyone has it) or a
   HEAVY FIST killing blow raises that to a third, and both together to half. A third of all candy, boss candy
   too, is a gumball worth 2.

@@ -221,10 +221,9 @@ const WEBSHOTPAL := {"g": "#9dff6a", "G": "#4fbf5a"}
 const BOWSHOT := ["a...a", "aa.aa", "aacaa", "aa.aa", "a...a"]
 const BOWPINK := {"a": "#ff5c8a", "c": "#fff0f5"}
 const BOWBLUE := {"a": "#5cc8ff", "c": "#f0faff"}
-# Bat Cat's claw swipe: red scratch marks that shoot out along the floor (CLAWL faces left)
-const CLAW := ["P...P...P.", ".P...P...P", ".P...P...P", "..P...P...", "..P...P...", "...P...P.."]
-const CLAWL := [".P...P...P", "P...P...P.", "P...P...P.", "...P...P..", "...P...P..", "..P...P..."]
-const CLAWPAL := {"P": "#ff3355"}
+# Bat Cat's scratch: one set of three claw marks straight under the cat, in dark violet
+const CLAW := ["..h..h..h.", "..P..P..P.", "..P..P..P.", ".P..P..P..", ".P..P..P..", ".P..P..P..", "P..P..P...", "P..P..P...", "...P..P..."]
+const CLAWPAL := {"P": "#6a44d0", "h": "#b8a4ff"}
 # Puppet Doll's shots: big pink buttons and silver sewing needles
 const BIGBUTTON := [".pppp.", "pPppPp", "ppwpwp", "pppppp", "ppwpwp", "pPppPp", ".pppp."]
 const BIGBUTTONPAL := {"p": "#ff7fb5", "P": "#c94f8a", "w": "#ffffff"}
@@ -234,19 +233,19 @@ const NEEDLEPAL := {"s": "#e6e8f0", "S": "#9a9cb0"}
 const CANDELABRA := [".y..y..y..", "yoy.yoy.yo", ".w..w..w..", ".w..w..w..", ".g..g..g..", ".gg.g.gg..", "..ggggg...", "....g.....", "....g.....", "...ggg....", "..GGGGG..."]
 const CANDLE := ["....y.....", "...yoy....", "...yfy....", "....o.....", "...www....", "...wwW....", "...wwW....", "...wwW....", "..gggggg..", ".gGGGGGGg.", "..gggggg.."]
 const CANDLEPAL := {"G": "#8a6a2a", "W": "#c9c2b4", "f": "#fff6c8", "g": "#c9a24a", "o": "#ff9a2e", "w": "#f3efe6", "y": "#ffe45c"}
-# mansion boss 5 (wave 50): the Grim Reaper, a skeleton in a hood with a scythe
-const REAPER := ["............nnnnnnnn............", ".sssssssssnnnnnnnnnnnn..........", ".sssssssssnnnWWWWWWnnn..........",
-	".bSSSSS.nnnWWWWWWWWWWnnn........", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b.....nnnWWWWWWWWWWWWnnn.......", ".b....nnnWWWWWWWWWWWWWWnnn......",
-	".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWkgkWWWWkgkWWnnn......", ".b....nnnWWkkkWWWWkkkWWnnn......", ".b....nnnWWWWWWWWWWWWWWnnn......",
-	".b....nnnnWWWWWkkWWWWWnnnn......", ".b....nnnnWWWWkWWkWWWWnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......", ".b....nnnnnWWWWWWWWWWnnnnn......",
-	".b....nnnnnkwwwnnwwwknnnnn......", ".b....nnnnnnwwwnnwwwnnnnnn......", ".b....nnnnnnnnwwwwnnnnnnnn......", ".b....WWnnnnnnwwwwnnnnnnWW......",
-	".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......",
-	".b....WWWnnnnnwwwwnnnnnWWW......", ".b....WWnnnnnnwwwwnnnnnnWW......", ".b....WWnWWWWWWwwWWWWWWnWW......", ".b....WWWnnnnnwwwwnnnnnWWW......",
-	".b...WWWnnnnnnwwwwnnnnnnWWW.....", ".b...WWWnnWWWWWWWWWWWWnnWWW.....", ".b....nnnnWWWWWWWWWWWWnnnn......", ".b....nnnnWWWWWWWWWWWWnnnn......",
-	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......",
-	".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnnnWWnnnnnnWWnnnnn......", ".b....nnnWWWWnnnnnnWWWWnnn......",
+# mansion boss 5 (wave 25 of the mansion): the Grim Reaper, a skull in a ragged black cloak with a scythe
+const REAPER := ["...........oonnnnnnoo...........", "...sssssssssnnnnnnnnno..........", "...ssssssssssnnnnnnnnno.........",
+	"...sssssssssnnnnnnnnnnno........", "...SSSSSSSnSnnnnnnnnnnnno.......", "...SSSSonnnnSnWWWWnnnnnno.......", "...b...onnnnSWWWWWWnnnnno.......",
+	"...b...onnnnWWWWWWWWnnnno.......", "...b..onnnnnWWWWWWWWnnnnno......", "...b...onnnnkkWWWWkknnnno.......", "...b...onnnWkkWWWWkkWnnno.......",
+	"...b...onnnnkkWWWWkknnnno.......", "...b...onnnnWWWkkWWWnnnno.......", "...b....onnnWWWWWWWWnnno........", "...b.....onnnwwwwwwnnno.........",
+	"...b......onnnwwwwnnno..........", "...b......ooonnnnnnooo..........", "...b......onnoooooonno..........", "...b.....onnnnnnnnnnnno.........",
+	"..WWW....onnnnnnnnnnnno.........", "..WWW...onnnnnnnnnnnnnno...W....", "...b....onnnnnnnnnnnnnno....W...", "...b...onnnnnnnnnnnnnnnno...W...",
+	"..WWW..onnnnnnnnnnnnnnnno.......", "..WWW.onnnnnnnnnnnnnnnnnno......", "...b..onnnnnnnnnnnnnnnnnno......", "...b.onnnnnnnnnnnnnnnnnnnno.....",
+	"...b.onnnnnnnnnnnnnnnnnnnno.....", "...bonnnnnnnnnnnnnnnnnnnnnno....", "...bonnnnnnnnnnnnnnnnnnnnnno....", "...bnnnnnnnnnnnnnnnnnnnnnnnno...",
+	"...bnnnnnnnnnnnnnnnnnnnnnnnno...", "..obnnnnnnnnnnnnnnnnnnnnnnnnno..", "..obnnnnnnnnnnnnnnnnnnnnnnnnno..", ".onbnnnnnnnnnnnnnnnnnnnnnnnnnno.",
+	".onbnnnnnnnnnnnnnnnnnnnnnnnnnno.", ".onbnn.nn.nn.nn..nn.nn.nn.nn.no.", ".o.bn.nn.nn.nn.nn.nn.nn.nn.nn.o.", ".onb.nn.nn.nn.nnnn.nn.nn.nn.nno.",
 	"................................"]
-const REAPERPAL := {"S": "#6a7088", "W": "#f0ead8", "b": "#6b3f2a", "g": "#7dff6a", "k": "#14101f", "n": "#1b1424", "s": "#a8b0c0", "w": "#c8c0a8"}
+const REAPERPAL := {"S": "#8a90a8", "W": "#f0ead8", "b": "#6b3f2a", "k": "#0a0610", "n": "#1b1424", "o": "#3a2d52", "s": "#c8ccd8", "w": "#c8c0a8"}
 # Grim Reaper's scythe slash: a black crescent with a purple glow that sweeps half the floor
 const SLASH := ["..............................b.............................", "......................bbbbbbbbbbbbbbbbb.....................",
 	"...................bbbbbbbbbbbbbbbbbbbbbbb..................", "................bbbbbbbbaaaaaaaaaaaaabbbbbbbb...............",
@@ -272,6 +271,13 @@ const SUGAR_MAX := 10
 const PK_LID := ["...........GGGG..........", "...........GG............", "...........GG............", "............O............", ".......OOOOOOOOOOO.......", "....KODOOOOOOOOOOODOK....", "...OOODOLOOOOOOOOODOOO...", "..OOOLDLLLLLOOOOOODOOOO..", ".KOOLLDLLLLLLOOOOODOOOOK."]
 const PK_BOTTOM := [".OOOLLDLLLLLLOOOOODOOOOO.", "KOOOLLDLLLLLLOOOOODOOOOOK", "KOOOOLDLLLLLOOOOOODOOOOOK", "KOOOOODOLOOOOOOOOODOOOOOK", "KOOOOODOOOOOOOOOOODOOOOOK", "KKOOOODOOOOOOOOOOODOOOOKK", ".KOOOODOOOOOOOOOOODOOOOK.", ".KKOOODOOOOOOOOOOODOOOKK.", "..KKKODOOOOOOOOOOODOKKK..", "...KKKDOOOOOOOOOOODKKK...", "....KKKKKKKKOKKKKKKKK....", ".......KKKKKKKKKKK.......", "............K............"]
 const PKCUTPAL := {"K": "#c2520c", "O": "#ee7a14", "L": "#ff9a33", "D": "#b4480a", "G": "#3d6b2a"}
+# the carved jack-o'-lanterns look like the Pumpkin King's face: angry slanted eyes, a nose and a toothy grin (no crown, he's the only king)
+const JACK0 := ["..................", "..................", "........SSS.......", "......DDSSoDD.....", "....ooDoSSooDoo...", "...oooDoooooDooo..",
+	"..DyyooooooooyyoD.", ".DolyyyooooyyyoooD", ".DoooyyyooyyyooooD", ".DooooooffoooooooD", ".DoooooooooooooooD", ".DoDyooyyyyooyDooD",
+	"..DoyyyyyyyyyyooD.", "...ooffoffoffooo..", "....ooDMMMMMDoo...", "......DDDDDDD....."]
+const JACKS := [JACK0]
+const JACKPAL := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffe45c"}
+const JACKPALB := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffc23a"}
 const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
 const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
 const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
@@ -619,7 +625,7 @@ func _build_things() -> void:
 		{"k": "g", "x": 204, "y": 208, "s": 2, "tint": "#d9ffdc", "cv": true, "ph": 3.1, "face": 2, "hat": "", "ch": 2},
 		{"k": "g", "x": 34, "y": 200, "s": 2, "tint": "#ffe0ef", "cv": false, "ph": 4.4, "face": 3, "hat": "", "ch": 3},
 		{"k": "g", "x": 268, "y": 236, "s": 3, "tint": "#fff3c9", "cv": false, "ph": 2.3, "face": 4, "hat": "top", "ch": 0},
-		{"k": "g", "x": 156, "y": 238, "s": 3, "tint": "#f6f1ff", "cv": true, "ph": 5.2, "face": 5, "hat": "lid", "ch": 0}]
+		{"k": "g", "x": 156, "y": 238, "s": 3, "tint": "#f6f1ff", "cv": true, "ph": 5.2, "face": 5, "hat": "lid", "ch": 0, "king": true}]
 	things.sort_custom(func(a, b): return a.y < b.y)
 	for o in things:
 		if o.k == "g":
@@ -893,6 +899,28 @@ func pumpkin(cx: int, cy: int, rx: int, ry: int, carved: bool, tt: float, seed_v
 				R(x, my + e - 1, 1, 1, "#ee7a14")
 				x += 3
 
+# Sammie's jack-o'-lantern with the PUMPKIN KING's face: the title's centre ghost holds one, and each glowing
+# power-up pumpkin is a coin flip between it and the carved face below
+func jack_tex(design: int, small: bool, bright: bool) -> ImageTexture:
+	var key := "jack_%d_%s_%s" % [design, small, bright]
+	if tcache.has(key):
+		return tcache[key]
+	var tx := tex(JACKS[design], JACKPAL if bright else JACKPALB)
+	if small:
+		var img := tx.get_image()
+		img.resize(12, 11, Image.INTERPOLATE_NEAREST)
+		tx = ImageTexture.create_from_image(img)
+	tcache[key] = tx
+	return tx
+
+func jack(cx: int, cy: int, rx: int, ry: int, tt: float, seed_v: float, design: int) -> void:
+	var fl := (sin(tt * 9 + seed_v * 7) + sin(tt * 5.3 + seed_v)) * 0.5
+	ellipse(cx, cy, rx + 7, ry + 6, "#ff9a2e", 0.10 + 0.04 * fl)
+	ellipse(cx, cy, rx + 3, ry + 3, "#ffb84a", 0.14 + 0.05 * fl)
+	var tx := jack_tex(design % JACKS.size(), rx <= 5, fl > 0)
+	draw_texture_rect(tx, Rect2(cx - tx.get_width() / 2, cy + ry - tx.get_height(), tx.get_width(), tx.get_height()), false)
+
+
 func draw_tree(flip: bool, oy: int) -> void:
 	for l in TREE:
 		var xa: float = 320 - l[0] if flip else l[0]
@@ -1009,7 +1037,10 @@ func draw_patch_figure(o: Dictionary) -> void:
 			spr(hat.r, HATPAL, gx, gy - (hat.r.size() - hat.ov) * s, s)
 	var pr := int(round(3.2 * s))
 	var py := gy + 9 * s
-	pumpkin(o.x, py, pr, pr - 1, o.cv, t, o.ph)
+	if o.get("king", false):
+		jack(o.x, py, pr, pr - 1, t, o.ph, 0)
+	else:
+		pumpkin(o.x, py, pr, pr - 1, o.cv, t, o.ph)
 	R(o.x - pr - s, py, s, s, hand)
 	R(o.x + pr + 1, py, s, s, hand)
 
@@ -1831,7 +1862,7 @@ func game_over() -> void:
 
 func launch_pk(y: float, bob: float) -> void:
 	var d := 1 if randf() < 0.5 else -1
-	G.pks.append({"x": -12.0 if d > 0 else 332.0, "y": y, "base": y, "bob": bob, "dir": d, "hp": 2, "flash": 0.0})
+	G.pks.append({"x": -12.0 if d > 0 else 332.0, "y": y, "base": y, "bob": bob, "dir": d, "hp": 2, "flash": 0.0, "face": randi() % 2})
 
 # the normal pumpkin flies in somewhere between just below the lowest enemy still alive (or below the boss)
 # and its old height, so it's never hidden behind the formation; clearing the bottom rows lets it fly higher
@@ -2187,26 +2218,43 @@ func mboss(e: Dictionary, dt: float) -> void:
 	else:
 		bx = 160 + sin(e.ph * 0.7) * 112
 		by = 66 + sin(e.ph * 1.9) * 10
-	if e.get("crouch", 0.0) > 0:
-		# BAT CAT's tell: it hangs still and crouches for half a second, then dives
-		e.crouch -= dt
-		by += 6
-		if e.crouch <= 0:
-			e.dz = 1.6
-			sfx("squeak")
 	if e.dz > 0:
 		e.dz -= dt
-		by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
 		if mb == 2:
-			# BAT CAT: swoops at the player it picked (e.vx), and swipes its claws along the floor (45 px each way)
-			bx = lerpf(bx, e.vx, sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)))
-			if e.dz < 0.8 and e.pass == 0:
+			# BAT CAT (Sammie's): slides over the player it picked (e.vx), drops STRAIGHT down, scratches once and
+			# climbs straight back up. The slide over is the tell.
+			var tt := 1.0 - maxf(0.0, e.dz) / 1.6
+			var slide := smoothstep(0.0, 0.35, tt) * (1.0 - smoothstep(0.78, 0.95, tt))
+			var depth := smoothstep(0.45, 0.6, tt) * (1.0 - smoothstep(0.68, 0.9, tt))
+			bx = lerpf(bx, e.vx, slide)
+			by += depth * 80   # stops high enough that the scratch comes out below its belly
+			if tt >= 0.6 and e.pass == 0:
 				e.pass = 1
-				for side in [-1, 1]:
-					G.eb.append({"x": bx + side * 20, "y": 207.0, "vx": side * 150.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.3})
+				G.eb.append({"x": bx, "y": 207.0, "vx": 0.0, "vy": 0.0, "k": "claw", "ph": 0.0, "dead": false, "life": 0.5})
 				sfx("dash")
 			if e.dz <= 0:
 				e.at = 2.6   # a proper rest after landing
+		else:
+			by += sin(PI * (1.0 - maxf(0.0, e.dz) / 1.6)) * 112
+	if e.get("pnc", 0.0) > 0:
+		# SPIDER BEAST's pounce (Sammie's): 0.8 s moving above the target with a warning circle on the floor, a
+		# fast drop on its thread, a short hang at the players' height, then back up
+		e.pnc += dt
+		var pk: float = e.pnc
+		if pk < 0.8:
+			bx = lerpf(e.x, e.pncx, minf(1.0, 8.0 * dt))
+		elif pk < 1.05:
+			bx = e.pncx
+			by = lerpf(by, 196.0, (pk - 0.8) / 0.25)
+		elif pk < 1.4:
+			bx = e.pncx
+			by = 196.0
+		elif pk < 2.2:
+			var r := (pk - 1.4) / 0.8
+			bx = lerpf(e.pncx, bx, r)
+			by = lerpf(196.0, by, r)
+		else:
+			e.pnc = 0.0
 	e.x = bx
 	e.y = by
 	kicked(e)
@@ -2230,7 +2278,7 @@ func mboss(e: Dictionary, dt: float) -> void:
 				bshot(e, sin(a) * 95, cos(a) * 95, K)
 			else:
 				bshot(e, sin(a) * 95, cos(a) * 95, K)
-	if e.dz > 0 or e.sp > 0 or e.get("crouch", 0.0) > 0:
+	if e.dz > 0 or e.sp > 0 or e.get("pnc", 0.0) > 0:
 		return
 	e.at -= dt
 	if e.at > 0:
@@ -2303,8 +2351,11 @@ func mboss(e: Dictionary, dt: float) -> void:
 			e.at = 1.6
 			sfx("deny")
 		elif sty == 0:
-			e.dz = 1.6
-			sfx("dash")
+			# SPIDER BEAST picks a player and pounces; the blinking circle on the floor is the tell
+			var alive_s := live()
+			e.pncx = (pick(alive_s).x if not alive_s.is_empty() else 160.0)
+			e.pnc = 0.001
+			sfx("squeak")
 		elif mb == 1:
 			# THE TWINS: two diagonal lines of bows sweep down from the top corners and cross in an X, four to a
 			# line and 36 px apart so there's a lane between them (all starting within the screen's top margin:
@@ -2318,12 +2369,12 @@ func mboss(e: Dictionary, dt: float) -> void:
 				bshot(e, 0, 95 + randf() * 30, "ndl" if mb == 3 else "c", 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
 		elif mb == 2:
-			# BAT CAT picks its target and crouches first; the dive follows
+			# BAT CAT picks its target and slides over it, then the straight drop
 			var alive_c := live()
 			e.vx = (pick(alive_c).x if not alive_c.is_empty() else 160.0)
 			e.pass = 0
-			e.crouch = 0.5
-			sfx("deny")
+			e.dz = 1.6
+			sfx("squeak")
 	else:
 		e.sp = 1.4
 		e.spt = 0.0
@@ -3160,7 +3211,7 @@ func update(dt: float) -> void:
 				if k.hp <= 0:
 					burst(k.x, k.y, "#ffb84a", 14)
 					G.pks = G.pks.filter(func(o): return not is_same(o, k))
-					G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false})
+					G.drops.append({"x": k.x, "y": k.y, "k": "p", "dead": false, "face": k.get("face", 0)})
 				break
 
 	# enemies
@@ -3536,6 +3587,11 @@ func draw_game() -> void:
 			var by := int(round(e.y)) - 26
 			var rg: bool = e.raged and int(floor(gt * 6)) % 2 == 1
 			ellipse(bx + 30, by + 26, 40, 34, "#ff2244" if rg else "#a13cff", 0.16)
+			if e.bk == 5 and e.get("pnc", 0.0) > 0 and e.pnc < 1.05:
+				# where the SPIDER BEAST will land, and its thread
+				var px := int(round(e.pncx))
+				ellipse(px, 214, 30, 6, "#7dff5a", 0.35 + 0.25 * (int(floor(e.pnc * 10)) % 2))
+				R(px, int(round(e.y)) + 20, 1, maxi(0, 214 - int(round(e.y)) - 20), "#c9b8ee", 0.5)
 			if e.bk >= 5:
 				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS, REAPER][e.bk - 5]
 				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL, REAPERPAL][e.bk - 5]
@@ -3628,7 +3684,10 @@ func draw_game() -> void:
 			spr(SUGAR, SUGARPAL, x - 8, y - 10, 2)
 		elif d.k == "p":
 			ellipse(x, y, 10, 9, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
-			pumpkin(x, y, 6, 5, true, gt * 2, 4)
+			if d.get("face", 0) == 1:
+				jack(x, y, 6, 5, gt * 2, 4, 0)
+			else:
+				pumpkin(x, y, 6, 5, true, gt * 2, 4)
 		else:
 			spr(APPLE, APPLEPAL, x - 5, y - 7, 1)
 		if int(floor(gt * 6)) % 2 == 1:
@@ -3639,7 +3698,10 @@ func draw_game() -> void:
 			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
 			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
 			continue
-		pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
+		if k.get("face", 0) == 1:
+			jack(int(round(k.x)), int(round(k.y)), 8, 6, gt * 2, 3, 0)
+		else:
+			pumpkin(int(round(k.x)), int(round(k.y)), 8, 6, true, gt * 2, 3)
 		if k.flash > 0:
 			ellipse(int(round(k.x)), int(round(k.y)), 8, 6, "#ffffff", 0.6)
 	for b in G.eb:
@@ -3650,7 +3712,7 @@ func draw_game() -> void:
 		elif b.k == "ndl":
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
-			spr(CLAW if b.vx > 0 else CLAWL, CLAWPAL, x - 10, y - 6, 2)
+			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
 		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
 		elif b.k == "web":

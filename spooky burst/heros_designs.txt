@@ -81,7 +81,11 @@ WAVES AND ENEMIES
   THE TWINS' bow walls had no lane. So: the cat crouches for half a second first, claws 45 px, a rest after
   landing, half-rate stream; the Twins' walls are four bows 36 px apart and their streams take turns; the
   SPIDER BEAST's web slows for 1 s and doesn't restart while you're slowed; sets 3-5 are a step harder.
-- ROT CLOUD: 25% slow, each further cloud adds half the last (75, 63, 56, 53%): diminishing returns, no cap. The WITCH QUEEN waits for her last attack's shots to pass the players
+- ROT CLOUD: 25% slow, each further cloud adds half the last (75, 63, 56, 53%): diminishing returns, no cap.
+- Brought in from Sammie's branch: the Grim Reaper's skull-in-a-cloak look, the Spider Beast's pounce (circle on
+  the floor, straight drop on its thread), the Bat Cat's straight drop with one dark scratch (the slide over is
+  the tell; our rest after landing and half-rate stream stay). Her Pumpkin King face goes on the title's centre
+  pumpkin only; in play the power-up pumpkin flips a coin between her face and ours. The WITCH QUEEN waits for her last attack's shots to pass the players
   (an aimed shot excepted, as long as it doesn't home) plus a short random breather before the next one.
   Only the PUMPKIN KING gets a ring of shots. The VAMPIRE LORD stays distant and commanding, so he doesn't
   dive at you himself; he sends bats instead.
