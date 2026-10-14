@@ -4234,6 +4234,14 @@ func glint_pal(p: Dictionary) -> Dictionary:
 		o.g = "#ff8a1f"
 	return o
 
+# a mask's palette on the Little Girl: its eye holes show her eyes, so they glint orange with her when POUNCE is ready
+func mask_pal(M: Dictionary, p: Dictionary) -> Dictionary:
+	if not p.eq.has("swpounce") or p.pcd > 0:
+		return M.pal
+	var o: Dictionary = M.pal.duplicate()
+	o.h = "#ff8a1f"
+	return o
+
 # the palette an enemy is drawn with: during its tell the eyes change (the vampire's blink black three times over
 # his tell, the witch's blinks red once, the spider's green once)
 var tell_pals := {}
@@ -4629,7 +4637,7 @@ func draw_game() -> void:
 			spr(look[fr], glint_pal(p), px - 12, 196 + bob, 2)
 		if p.has("mask"):
 			var M: Dictionary = MASKS[p.mask]
-			spr(M.rows, M.pal, px - 12 + M.left * 2, 196 + bob + M.top * 2, 2)
+			spr(M.rows, mask_pal(M, p), px - 12 + M.left * 2, 196 + bob + M.top * 2, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
 	for i in 5:
