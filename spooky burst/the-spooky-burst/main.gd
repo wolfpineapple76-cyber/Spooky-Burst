@@ -315,6 +315,9 @@ const APPLEPAL := {"R": "#e0213f", "r": "#9c1030", "h": "#ffd0dc", "s": "#c8955a
 	"C": "#d99a3a", "D": "#a8661f", "L": "#f5cf7a"}
 const CAT := ["KK........KK", "KKK......KKK", "KKKKKKKKKKKK", "KKKKKKKKKKKK", "KKyyKKKKyyKK", "KKyoKKKKoyKK", "KKKKKppKKKKK", "KKKKKKKKKKKK",
 	".KKKKKKKKKK.", ".KKKccccKKK.", ".KKKccccKKK.", ".KK.KKKK.KK.", ".KK.KKKK.KK."]
+# FLESH GOLEM: the Zombie taller (16) and a pixel wider each side (14), feet on the same floor
+const GOLEM := ["...dddddddd...", "..dddddddddd..", "..GGGGGGGGGG..", "..GGoGGGGoGG..", "..GGoGGGGGGG..", "..GGGGGGGGGG..", "..GGGmmmmGGG..", "...GGGGGGGG...",
+	"GGSSSSSSSSSSGG", "GGSSSSSSSSSSGG", "GGSSSSSSSSSSGG", "G..SSSSSSSS..G", "...SSSSSSSS...", "..PPPP..PPPP..", "..PPPP..PPPP..", "..PPPP..PPPP.."]
 const ZOMB := ["..dddddddd..", ".dddddddddd.", ".GGGGGGGGGG.", ".GGoGGGGoGG.", ".GGoGGGGGGG.", ".GGGGGGGGGG.", ".GGGmmmmGGG.", "..GGGGGGGG..",
 	"GGSSSSSSSSGG", "GGSSSSSSSSGG", "..SSSSSSSS..", "..PPP..PPP..", "..PPP..PPP.."]
 const SKEL := ["..WWWWWWWW..", ".WWWWWWWWWW.", ".WWkkWWkkWW.", ".WWkkWWkkWW.", ".WWWWkkWWWW.", "..WWWWWWWW..", "..WkWkWkWW..", "....WWWW....",
@@ -628,7 +631,14 @@ func _build_chars() -> void:
 			"tr": {"dmg": 2}, "desc": "POWERFUL AND NOT AFRAID OF DEATH",
 			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["fist", "HEAVY FIST", "DOUBLE DAMAGE, MORE CANDY", "FST"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
-				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]]},
+				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]],
+			"golem": GOLEM, "golem2": _alt(GOLEM, {8: "G.SSSSSSSSSS.G", 11: "...SSSSSSSS...", 15: ".PPPP....PPPP."}),
+			"ups": {
+				"regen": [["rgboss", "READY REGROW", "A LIFE AT THE START OF A BOSS WAVE TOO"], ["rgover", "OVERGROW", "UP TO 6 LIVES"]],
+				"fist": [["fsiron", "IRON FIST", "TRIPLE DAMAGE ON BOSSES"], ["fsgrab", "GRABBY", "FISTS COLLECT THE CANDY THEY PASS"]],
+				"slow": [["rtcorpse", "ROT CORPSE", "ENEMIES MOVE A LITTLE SLOWER TOO"], ["rtfood", "ROT FOOD", "CANDY, BUCKETS AND APPLES FALL SLOWER"]],
+				"longinv": [["skthick", "THICKER SKIN", "SHOTS THAT TOUCH HIM WHILE SAFE DIE"], ["skgolem", "FLESH GOLEM", "TALLER AND A TOUCH WIDER"]],
+				"punch": [["pcweb", "CLEAR WEBS", "DOUBLE DAMAGE TO WEBS"], ["pchard", "HARD PUNCH", "KNOCK BACK LIKE THE CAT'S COIN"]]}},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
 			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
@@ -1325,6 +1335,14 @@ func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
 		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0, "roll": {}, "sroll": {}, "pcd": 0.0}
 
+# OVERGROW: up to 6 lives instead of 5
+func max_lives(p: Dictionary) -> int:
+	return 6 if p.eq.has("rgover") else 5
+
+# FLESH GOLEM: 1 for a taller, wider Zombie (his hit and catch boxes grow with him), else 0
+func gol(p: Dictionary) -> int:
+	return 1 if p.eq.has("skgolem") and chars[p.ch].id == "zombie" else 0
+
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
 
@@ -1435,7 +1453,7 @@ func start_game(pad: int, side := "wasd") -> void:
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "after": "", "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
 		"hpup": 0, "settle": 0.0, "cad": 0.0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
-		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
+		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0, "eslow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to CHARACTERS to buy one
 	if owned_chars(slot).is_empty():
@@ -1467,7 +1485,7 @@ func next_wave() -> void:
 	G.bonus_t = 6.0 + randf() * 6.0 if randf() < 1.0 / 6.0 else -1.0
 	if w > 1 and w % 2 == 1:
 		for p in G.players:
-			if not p.out and p.eq.has("regen") and p.lives < 5:
+			if not p.out and p.eq.has("regen") and p.lives < max_lives(p):
 				p.lives += 1
 	G.webs = []
 	G.sp_q = []
@@ -1481,6 +1499,10 @@ func next_wave() -> void:
 		b.bk = BOSS_ORDER[c / 5 - 1] if c <= YARD_WAVES else MBOSS_ORDER[c / 5 - 6]
 		b.t = 0.0
 		G.en.append(b)
+		# READY REGROW: a life as a boss wave starts
+		for p in G.players:
+			if not p.out and p.eq.has("regen") and p.eq.has("rgboss") and p.lives < max_lives(p):
+				p.lives += 1
 		say(BOSS_NAMES[b.bk], 2.2)
 		sfx("roar")
 		G.shake = 1.0
@@ -1903,6 +1925,8 @@ func award_pow(p: Dictionary) -> bool:
 	for k in pows_held(p):
 		var src: int = POW_SRC[k]
 		for u in ups_of(src).get(k, []):
+			if girl and u[0] == "skgolem":
+				continue   # FLESH GOLEM is the Zombie's body, not hers
 			if not p.eq.has(u[0]) and up_on(p.n, src, u[0]):
 				left.append([u, src, true])
 	if left.is_empty():
@@ -2131,7 +2155,7 @@ func wave_drop() -> void:
 	for p in live():
 		if p.lives <= 2:
 			low = true
-		if p.lives < 5:
+		if p.lives < max_lives(p):
 			hurt_any = true
 	var r := randf()
 	var k := ""
@@ -2148,7 +2172,7 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		award(p)
 		return
 	if d.k == "h":
-		if p.lives < 5:
+		if p.lives < max_lives(p):
 			p.lives += 1
 		say("CANDIED APPLE: +1 LIFE", 1.4)
 		sfx("life")
@@ -2177,7 +2201,7 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		say("TREAT: 300 POINTS", 1.4)
 		sfx("treat")
 	elif r < 0.75:
-		if p.lives < 5:
+		if p.lives < max_lives(p):
 			p.lives += 1
 		say("TREAT: EXTRA LIFE", 1.4)
 		sfx("life")
@@ -2687,7 +2711,10 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 				"solid": p.eq.has("spsolid"), "webs": p.eq.has("spectral") and p.eq.has("spweb"),
 				# the Cat's: SHARPER EYE, SECOND LOOK, STOP SHOT and KNOCK SHOT (coins against enemy shots)
 				"sharp": p.eq.has("home") and p.eq.has("eysharp"), "look": p.eq.has("home") and p.eq.has("eylook"),
-				"stop": p.eq.has("coin") and p.eq.has("ckstop"), "knock": p.eq.has("coin") and p.eq.has("ckknock")}
+				"stop": p.eq.has("coin") and p.eq.has("ckstop"), "knock": p.eq.has("coin") and p.eq.has("ckknock"),
+				# the Zombie's: IRON FIST, GRABBY (fists), CLEAR WEBS, HARD PUNCH (punch through)
+				"iron": p.eq.has("fist") and p.eq.has("fsiron"), "grab": p.eq.has("fist") and p.eq.has("fsgrab"),
+				"cweb": p.eq.has("punch") and p.eq.has("pcweb"), "hard": p.eq.has("punch") and p.eq.has("pchard")}
 			if trick:
 				# TRICK SHOT: a ball doing 1 damage (boosted as usual) with no limit on hits
 				s.dmg = 1.0 if plain else 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
@@ -3026,6 +3053,10 @@ func soul_catch(o: Dictionary):
 		if p.has("sm") and absf(o.x - p.sm.x) < 8 and absf(o.y - HELP_Y) < 7:
 			return p
 	return null
+
+# ROT FOOD: candy, buckets, apples (every drop) fall at 60% while a Zombie with it is in the game
+func food_slow() -> float:
+	return 0.6 if G.players.any(func(p): return not p.out and p.eq.has("slow") and p.eq.has("rtfood")) else 1.0
 
 func boss_up() -> bool:
 	return G.en.any(func(e): return e.ty == "B" and not e.dead)
@@ -3423,6 +3454,8 @@ func update(dt: float) -> void:
 		if not p.out and p.eq.has("slow"):
 			clouds += 1
 	G.slow = 1.0 - 0.5 * (1.0 - pow(0.5, clouds))
+	# ROT CORPSE: the graveyard and mansion enemies move 15% slower (bosses keep their pace)
+	G.eslow = 0.85 if G.players.any(func(p): return not p.out and p.eq.has("slow") and p.eq.has("rtcorpse")) else 1.0
 	if G.bt > 0:
 		G.bt -= dt
 		if G.bt <= 0:
@@ -3531,6 +3564,13 @@ func update(dt: float) -> void:
 		if s.gs:
 			s.ph += WEAVE_F * dt
 			s.x += cos(s.ph) * WEAVE_A * WEAVE_F * dt
+		# GRABBY: a fist collects the candy it passes through, for the Zombie
+		if s.get("grab", false):
+			for k in G.candy:
+				if not k.dead and absf(k.x - s.x) < 8 and absf(k.y - s.y) < 8:
+					var o = player_n(s.o)
+					if o != null and not o.out:
+						got_candy(k, o)
 		# WON'T STOP: off the top, back in through the bottom once, at half the damage it left with
 		if s.y < -6 and s.get("back", false) and not s.get("came_back", false):
 			s.came_back = true
@@ -3628,7 +3668,7 @@ func update(dt: float) -> void:
 		elif e.st == "fly":
 			# witches face the way they're flying, and keep that facing in formation
 			e.face = e.dir
-			e.x += e.dir * 105 * dt
+			e.x += e.dir * 105 * dt * G.eslow
 			e.y += ((e.fy + sin(e.t * 5) * 14) - e.y) * minf(1.0, 4 * dt)
 			e.drop -= dt
 			if e.drop <= 0:
@@ -3642,8 +3682,8 @@ func update(dt: float) -> void:
 		elif e.st == "dive":
 			var tg := nearest(e.x)
 			e.vx = clampf(e.vx + signf(tg.x - e.x) * 220 * dt, -95, 95)
-			e.x += (e.vx + sin(e.t * 6) * 45) * dt
-			e.y += (100 + 140 * lv()) * dt
+			e.x += (e.vx + sin(e.t * 6) * 45) * dt * G.eslow
+			e.y += (100 + 140 * lv()) * dt * G.eslow
 			if e.y > 252:
 				e.y = -14
 				e.x = tx
@@ -3659,7 +3699,7 @@ func update(dt: float) -> void:
 		elif e.st == "drop":
 			# mansion spider: straight down on its thread, a short hang at the players' height, then back up
 			if e.n == 0:
-				e.y += (120 + 110 * lv()) * dt
+				e.y += (120 + 110 * lv()) * dt * G.eslow
 				if e.y >= 200:
 					e.y = 200
 					e.n = 1
@@ -3669,7 +3709,7 @@ func update(dt: float) -> void:
 				if e.spt <= 0:
 					e.n = 2
 			else:
-				e.y -= 80 * dt
+				e.y -= 80 * dt * G.eslow
 				if e.y <= ty + 4:
 					e.st = "return"
 		elif e.st == "preswoop":
@@ -3687,7 +3727,7 @@ func update(dt: float) -> void:
 		elif e.st == "swoop":
 			# mansion doll: a U-shaped swoop that bottoms out above where you were when it started (so a step
 			# aside dodges it, like a Galaga dive) and comes back up on the far side
-			e.spt += dt
+			e.spt += dt * G.eslow
 			var k := minf(1.0, e.spt / 1.6)
 			e.x = lerpf(e.spa, e.tx, k * 2) if k < 0.5 else lerpf(e.tx, e.spa + e.dir * e.dz, (k - 0.5) * 2)
 			e.y = e.fy + (196 - e.fy) * sin(PI * k)
@@ -3713,7 +3753,7 @@ func update(dt: float) -> void:
 					e.bat = false
 					burst(e.x, e.y, "#3a2252", 10)
 			else:
-				var sp := minf(d, e.get("es", 150.0) * dt)
+				var sp := minf(d, e.get("es", 150.0) * dt * G.eslow)
 				e.x += dx / d * sp
 				e.y += dy / d * sp
 				# bats flutter on the way in, witches swoop
@@ -3798,7 +3838,7 @@ func update(dt: float) -> void:
 			continue
 		for wb in G.webs:
 			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and swept(s, wb.y, 5.0):
-				wb.hp -= s.dmg
+				wb.hp -= s.dmg * (2.0 if s.get("cweb", false) else 1.0)   # CLEAR WEBS: double to webs
 				wb.flash = 0.1
 				s.dead = true
 				if wb.hp <= 0:
@@ -3832,6 +3872,12 @@ func update(dt: float) -> void:
 						shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
 					else:
 						dmg *= 2.0
+				# HARD PUNCH: the coin's knock back, half the hits, no double
+				if s.get("hard", false) and randf() < 0.5:
+					shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
+				# IRON FIST: a fist does triple on a boss (half again on top of its double)
+				if s.get("iron", false) and e.ty == "B":
+					dmg *= 1.5
 				e.hp -= dmg
 				s.hit.append(e)
 				e.flash = 0.1
@@ -3857,11 +3903,16 @@ func update(dt: float) -> void:
 
 	# things hitting players
 	for p in G.players:
+		# THICKER SKIN: while he's safe, enemy shots that touch him die instead of passing through
+		if not p.out and p.inv > 0 and mode == "game" and p.eq.has("skthick"):
+			for b in G.eb:
+				if not b.dead and not b.get("knocked", false) and b.k != "web" and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
+					b.dead = true
 		if p.out or p.inv > 0 or mode != "game":
 			continue
 		var was_hit := false
 		for b in G.eb:
-			if not b.dead and not b.get("knocked", false) and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
+			if not b.dead and not b.get("knocked", false) and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
 				b.dead = true
 				# SPIDER BEAST's web sticks to you and slows you down for a moment instead of hurting
 				if b.k == "web":
@@ -3877,11 +3928,11 @@ func update(dt: float) -> void:
 		for e in G.en:
 			if e.dead:
 				continue
-			if e.ty != "B" and (e.st == "dive" or e.st == "drop" or e.st == "swoop") and absf(e.x - p.x) < 14 and absf(e.y - 209) < 13:
+			if e.ty != "B" and (e.st == "dive" or e.st == "drop" or e.st == "swoop") and absf(e.x - p.x) < 14 + gol(p) and absf(e.y - 209) < 13 + 3 * gol(p):
 				kill(e)
 				hurt(p)
 				break
-			if e.ty == "B" and e.laugh <= 0 and absf(e.x - p.x) < 30 and absf(e.y - 209) < 28:
+			if e.ty == "B" and e.laugh <= 0 and absf(e.x - p.x) < 30 + gol(p) and absf(e.y - 209) < 28 + 3 * gol(p):
 				hurt(p)
 				break
 
@@ -3889,14 +3940,14 @@ func update(dt: float) -> void:
 	for k in G.candy:
 		# a GHOST CANDY is tossed up, then falls like the rest
 		if k.has("vy"):
-			k.vy = minf(k.vy + 300.0 * dt, 45.0)
+			k.vy = minf(k.vy + 300.0 * dt, 45.0 * food_slow())
 			k.y += k.vy * dt
 		else:
-			k.y += 45 * dt
+			k.y += 45 * dt * food_slow()
 		food_pull(k, dt, true)
 		var catcher = null
 		for p in live():
-			if absf(k.x - p.x) < 13 and absf(k.y - 209) < 14:
+			if absf(k.x - p.x) < 13 + gol(p) and absf(k.y - 209) < 14 + 3 * gol(p):
 				catcher = p
 		if catcher == null:
 			catcher = soul_catch(k)
@@ -3915,11 +3966,11 @@ func update(dt: float) -> void:
 		p.y += p.vy * dt
 		p.life -= dt
 	for d in G.drops:
-		d.y += (45 if d.k == "p" or d.k == "r" else 80) * dt
+		d.y += (45 if d.k == "p" or d.k == "r" else 80) * dt * food_slow()
 		food_pull(d, dt)
 		var got = null
 		for p in live():
-			if absf(d.x - p.x) < 14 and absf(d.y - 209) < 14:
+			if absf(d.x - p.x) < 14 + gol(p) and absf(d.y - 209) < 14 + 3 * gol(p):
 				got = p
 		if got == null:
 			got = soul_catch(d)
@@ -4270,7 +4321,12 @@ func draw_game() -> void:
 			spr(WEBSHOT, WEBSHOTPAL, px - 9, 203 + bob, 2)
 		var fr := int(floor(gt * 4 + i)) % 2
 		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
-		spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
+		if gol(p) == 1:
+			# FLESH GOLEM: the taller, wider Zombie, feet on the same floor
+			look = [C.golem, C.golem2]
+			spr(look[fr], char_pal(p.ch, p.n), px - 14, 190 + bob, 2)
+		else:
+			spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
 		if p.has("mask"):
 			var M: Dictionary = MASKS[p.mask]
 			spr(M.rows, M.pal, px - 12 + M.left * 2, 196 + bob + M.top * 2, 2)
@@ -4285,7 +4341,8 @@ func draw_game() -> void:
 		var C: Dictionary = chars[p.ch]
 		var lx: Array = LIFE_X[p.n]
 		for i in p.lives:
-			spr(C.spr, char_pal(p.ch, p.n), lx[0] + i * lx[1], 225, 1)
+			# six lives (OVERGROW) sit a little closer so they stay in the player's quarter
+			spr(C.spr, char_pal(p.ch, p.n), lx[0] + i * (lx[1] if p.lives <= 5 else 13), 225, 1)
 	if B != null:
 		R(98, 5, 124, 9, "#ffd92e")
 		R(99, 6, 122, 7, "#1b0f33")

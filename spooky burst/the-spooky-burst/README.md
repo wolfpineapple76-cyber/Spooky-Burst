@@ -249,6 +249,16 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   where he was, then a 5 second cooldown); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
   LONG TAIL (1.5 cat widths beyond him, 48 px); TALL TAIL (grabs from above his head too, 26 px higher, Sugar
   Rush included).
+- The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two
+  waves); OVERGROW (up to 6 lives; six life icons sit a little closer). HEAVY FIST: IRON FIST (a fist does
+  triple a plain orb on a boss); GRABBY (a fist collects candy it passes through, for the Zombie; not buckets,
+  apples or pumpkins). ROT CLOUD: ROT CORPSE (graveyard and mansion enemies move 15% slower in their flights,
+  dives, drops and swoops; bosses keep their pace); ROT FOOD (candy, buckets, apples and every other drop fall
+  at 60%). THICK SKIN: THICKER SKIN (while he's safe after a hit, enemy shots that touch him die instead of
+  passing through); FLESH GOLEM (he's drawn taller and a pixel wider each side, and his hit and catch boxes grow
+  with him, so he shields players beside him and catches from higher; it's the Zombie's body, so the Little
+  Girl never draws it). PUNCH THROUGH: CLEAR WEBS (double damage to web tiles); HARD PUNCH (the Cat's coin
+  knock back on half the hits, no double).
 - Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
 - The Little Girl's present costs her bag the same candy it costs her stash, so catching her own pieces can't
   fill it for her.
