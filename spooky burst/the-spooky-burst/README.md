@@ -224,6 +224,16 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   per LONGER SAFETY step instead of 1). I'M NOT A PINATA: ALL GUMBALLS (every piece is a gumball, so a box
   costs more); JAW BREAKER (the pieces keep hurting all the way down, one hit per enemy, drawn as the rainbow
   jaw breaker ball, and turn back into candy near the ground).
+- The Ghost's SHOP: GHOST SHOT: SPOOKY (the two ghost shots drift toward the nearest enemy, gentler than CAT'S
+  EYE); HAUNT (a ghost shot that hits an enemy that lives clings to it for half a second, then hits once more
+  before passing on, or ending if it can't pierce). RESTLESS SHOT: FAST SHOT (orbs fly at QUICK BONES speed);
+  WON'T STOP (a shot off the top comes back in through the bottom once, at half the damage it left with, fresh
+  hits allowed). SPECTRAL SHOT: SOLID SPIRIT (the first enemy passed doesn't halve it); THROUGH WEBS (a web it
+  breaks is passed, halving once like an enemy; a web that holds still stops it). SOUL MATE: SELF DEFENSE (six
+  volleys back instead of three); GHOST CANDY (when she catches a candy or gumball she tosses up a see-through
+  candy worth 1 for anyone else; she can't catch it, and it costs the player nothing). GHOSTRESS: QUICK STUDY
+  (her copies take your boosts: damage, shot speed and orb size; without it her copies are plain, abilities
+  only); BRING A FRIEND (a second Ghostress trails further back while a boss is up).
 - Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
 - The Little Girl's present costs her bag the same candy it costs her stash, so catching her own pieces can't
   fill it for her.

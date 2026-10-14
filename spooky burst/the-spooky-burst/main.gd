@@ -595,7 +595,13 @@ func _build_chars() -> void:
 			"tr": {"rate": 2}, "desc": "FIRES QUICK AND HAS FRIENDS",
 			"pow": [["ghostshot", "GHOST SHOT", "TWO WAVY GHOST SHOTS", "GST"], ["restless", "RESTLESS SHOT", "SHOOT MUCH FASTER", "RST"],
 				["spectral", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["soulmate", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
-				["ghostress", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]]},
+				["ghostress", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]],
+			"ups": {
+				"ghostshot": [["gsspooky", "SPOOKY", "THE GHOST SHOTS DRIFT TOWARD ENEMIES"], ["gshaunt", "HAUNT", "CLINGS HALF A SECOND, THEN HITS AGAIN"]],
+				"restless": [["rsfast", "FAST SHOT", "ORBS FLY FASTER"], ["rsback", "WON'T STOP", "OFF THE TOP, BACK IN THE BOTTOM AT HALF"]],
+				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "BREAKS A WEB AND PASSES, HALVING ONCE"]],
+				"soulmate": [["smsix", "SELF DEFENSE", "SIX VOLLEYS BACK INSTEAD OF THREE"], ["smcandy", "GHOST CANDY", "SHE TOSSES UP A FREE CANDY FOR OTHERS"]],
+				"ghostress": [["grstudy", "QUICK STUDY", "HER COPIES TAKE YOUR BOOSTS"], ["grfriend", "BRING A FRIEND", "A SECOND GHOSTRESS FOR BOSS FIGHTS"]]}},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
 			# always a black cat; players 2-4 have a tummy (c) in their colour: forest green, royal blue, halloween orange
@@ -2632,7 +2638,9 @@ func orb_dmg(p: Dictionary) -> float:
 
 # one volley of p's orbs from x, y. lean (degrees, + is right) only bends GHOST SHOT.
 # helper is true for SOUL MATE's and GHOSTRESS's volleys.
-func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
+# plain is the GHOSTRESS without QUICK STUDY: her copies take none of the player's boosts (damage, shot speed,
+# orb size), only the abilities
+func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain := false) -> void:
 	var xs := [x]
 	# BONE THROW: every orb comes out as a pair side by side, drawn as the two ends of one bone
 	var bone: bool = p.eq.has("bone")
@@ -2641,7 +2649,7 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 	var gs: bool = p.eq.has("ghostshot")
 	var vxs := vxs_of(p)
 	var col: String = shot_col(p.n, p.ch)
-	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
+	var sp := (360.0 if p.eq.has("fast") or p.eq.has("rsfast") else 230.0) * (1.0 if plain else 1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
 	var jest: bool = chars[p.ch].id == "jester"
 	var trick: bool = p.eq.has("trick")
@@ -2658,12 +2666,16 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 			var sx: float = ox + ((GS_GAP if i == 1 else -GS_GAP) if gs else 0.0)
 			var s := {"x": sx, "y": y, "vx": vxs[i] + lv, "o": p.n, "col": col,
 				"pierce": p.eq.has("spectral") or p.eq.has("punch"), "punch": p.eq.has("punch"), "big": p.eq.has("coin"), "coin": p.eq.has("coin"),
-				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.4 * lvl(p, "size"), "hm": p.eq.has("home"), "dmg": orb_dmg(p),
+				"fist": p.eq.has("fist"), "bone": bone, "grow": 0.0 if plain else 0.4 * lvl(p, "size"), "hm": p.eq.has("home"),
+				"dmg": (4.0 if p.eq.has("fist") else 2.0) if plain else orb_dmg(p),
 				"sp": sp, "hit": [], "dead": false, "h": helper, "gs": gs, "ph": PI * i, "ox": x, "oy": y,
-				"bell": jest and not trick, "tb": trick}
+				"bell": jest and not trick, "tb": trick,
+				# the Ghost's SHOP upgrades: SPOOKY and HAUNT (ghost shots), WON'T STOP, SOLID SPIRIT, THROUGH WEBS
+				"spooky": gs and p.eq.has("gsspooky"), "haunt": gs and p.eq.has("gshaunt"), "back": p.eq.has("rsback"),
+				"solid": p.eq.has("spsolid"), "webs": p.eq.has("spectral") and p.eq.has("spweb")}
 			if trick:
 				# TRICK SHOT: a ball doing 1 damage (boosted as usual) with no limit on hits
-				s.dmg = 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
+				s.dmg = 1.0 if plain else 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
 				s.vy = -sp
 				s.grav = false
 				s.inside = null
@@ -2696,16 +2708,24 @@ func lean(o: Dictionary) -> float:
 # pass you when you stop or turn. SOUL MATE also veers off for falling candy and drops, and fights back:
 # every enemy shot that passes through her and every enemy that touches her adds 3 volleys to fire.
 # She can't be hurt, and enemy shots keep going. An enemy touching her also takes one volley's damage.
+# BRING A FRIEND: a second GHOSTRESS ("gr2"), further back, while a boss is up.
 func helpers(p: Dictionary, dt: float) -> void:
-	for k in ["soulmate", "ghostress"]:
-		var key := "sm" if k == "soulmate" else "gr"
-		if not p.eq.has(k):
+	for key in ["sm", "gr", "gr2"]:
+		var want: bool
+		match key:
+			"sm":
+				want = p.eq.has("soulmate")
+			"gr":
+				want = p.eq.has("ghostress")
+			_:
+				want = p.eq.has("ghostress") and p.eq.has("grfriend") and boss_up()
+		if not want:
 			p.erase(key)
 			continue
 		if not p.has(key):
 			p[key] = {"x": p.x, "v": 0.0, "md": 0, "mv": 0.0, "q": 0, "qt": 0.0}
 		var h: Dictionary = p[key]
-		var tx: float = p.x - p.ld * (14.0 if key == "sm" else 26.0)
+		var tx: float = p.x - p.ld * (14.0 if key == "sm" else (26.0 if key == "gr" else 40.0))
 		if key == "sm":
 			var best = null
 			for o in G.candy + G.drops:
@@ -2717,13 +2737,15 @@ func helpers(p: Dictionary, dt: float) -> void:
 		h.v = clampf(h.v - h.v * (4.0 if key == "sm" else 3.5) * dt, -220, 220)
 		h.x = clampf(h.x + h.v * dt, 6, 314)
 		track_lean(h, h.v, dt)
-		if key == "gr":
+		if key != "sm":
 			continue
+		# SELF DEFENSE: six volleys back instead of three
+		var back := 6 if p.eq.has("smsix") else 3
 		var tag := "s%d" % p.n
 		for b in G.eb:
 			if not b.dead and not b.has(tag) and absf(b.x - h.x) < 6 and absf(b.y - HELP_Y) < 7:
 				b[tag] = true
-				h.q += 3
+				h.q += back
 		for e in G.en:
 			var big: bool = e.ty == "B"
 			var on: bool = not e.dead and e.laugh <= 0 and absf(e.x - h.x) < (30 if big else 10) and absf(e.y - HELP_Y) < (28 if big else 11)
@@ -2731,7 +2753,7 @@ func helpers(p: Dictionary, dt: float) -> void:
 				e.erase(tag)
 			elif not e.has(tag):
 				e[tag] = true
-				h.q += 3
+				h.q += back
 				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("bone") else 1)
 				e.flash = 0.1
 				if e.hp <= 0:
@@ -2978,11 +3000,17 @@ func wiggle(p: Dictionary, dt: float) -> void:
 
 # the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
 # player, so falling things reach a player standing under them first.
+# (she can't catch a GHOST CANDY, so hers can't come back to her)
 func soul_catch(o: Dictionary):
+	if o.get("ghost", false):
+		return null
 	for p in live():
 		if p.has("sm") and absf(o.x - p.sm.x) < 8 and absf(o.y - HELP_Y) < 7:
 			return p
 	return null
+
+func boss_up() -> bool:
+	return G.en.any(func(e): return e.ty == "B" and not e.dead)
 
 # dir is -1 to 1: keys and the d-pad are always full speed, the left stick gives finer speeds
 # Attacks: every enemy in formation has its own small chance to attack each moment, tuned so a row's
@@ -3406,20 +3434,47 @@ func update(dt: float) -> void:
 		#if I.fire and p.cd <= 0 and mine < lim:
 		if I.fire and p.cd <= 0:
 			volley(p, p.x, 194.0, lean(p), false)
-			if p.has("gr"):
-				volley(p, p.gr.x, HELP_Y - 8, lean(p.gr), true)
+			# the GHOSTRESS copies the shot; plain (no boosts) until QUICK STUDY
+			for g in ["gr", "gr2"]:
+				if p.has(g):
+					volley(p, p[g].x, HELP_Y - 8, lean(p[g]), true, not p.eq.has("grstudy"))
 			p.cd = (0.13 if p.eq.has("restless") else 0.26) / (1.0 + 0.05 * lvl(p, "rate"))
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 
 	# orbs
 	for s in G.shots:
-		if s.hm:
+		# HAUNT: a ghost shot clinging to the enemy it hit, for half a second, then one more hit before it passes
+		if s.has("stick"):
+			var e: Dictionary = s.stick
+			s.stick_t -= dt
+			s.x = e.x + s.stick_dx
+			s.y = e.y + 6.0
+			s.py = s.y
+			if e.dead or e.laugh > 0:
+				s.erase("stick")
+			elif s.stick_t <= 0:
+				s.erase("stick")
+				e.hp -= s.dmg
+				e.flash = 0.1
+				if e.hp <= 0:
+					down(e, s.fist)
+				else:
+					sfx("bosshit")
+				s.dmg *= 0.5
+				if not s.pierce or s.dmg < 1.0:
+					s.dead = true
+			continue
+		# CAT'S EYE curves hard toward the nearest enemy above; SPOOKY (ghost shots) only drifts
+		if s.hm or s.get("spooky", false):
 			var best = null
 			for e in G.en:
 				if e.y < s.y and (best == null or absf(e.x - s.x) < absf(best.x - s.x)):
 					best = e
 			if best != null:
-				s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
+				if s.hm:
+					s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
+				else:
+					s.vx = clampf(s.vx + signf(best.x - s.x) * 180 * dt, -70, 70)
 		# where it was last frame, so a fast shot or a slow frame can't skip over a web or an enemy
 		s.py = s.y
 		if s.get("tb", false):
@@ -3430,6 +3485,13 @@ func update(dt: float) -> void:
 		if s.gs:
 			s.ph += WEAVE_F * dt
 			s.x += cos(s.ph) * WEAVE_A * WEAVE_F * dt
+		# WON'T STOP: off the top, back in through the bottom once, at half the damage it left with
+		if s.y < -6 and s.get("back", false) and not s.get("came_back", false):
+			s.came_back = true
+			s.y = 246.0
+			s.py = s.y
+			s.dmg *= 0.5
+			s.hit = []
 		if s.y < -6 or s.x < -6 or s.x > 326:
 			s.dead = true
 
@@ -3633,7 +3695,7 @@ func update(dt: float) -> void:
 		wb.g += dt
 		wb.flash = wb.get("flash", 0.0) - dt
 	for s in G.shots:
-		if s.dead:
+		if s.dead or s.has("stick"):
 			continue
 		# TRICK SHOT balls bounce off webs, damaging them like a hit (one touch is one hit)
 		if s.get("tb", false):
@@ -3657,7 +3719,8 @@ func update(dt: float) -> void:
 				s.dead = true
 				if wb.hp <= 0:
 					burst(web_x(wb, sway), wb.y, "#d8d2e8", 8)
-					if s.punch:
+					# PUNCH THROUGH and THROUGH WEBS carry on through a web they break, halved as if it were an enemy
+					if s.punch or s.get("webs", false):
 						s.dmg *= 0.5
 						s.dead = s.dmg < 1.0
 				break
@@ -3665,7 +3728,7 @@ func update(dt: float) -> void:
 
 	# orbs hitting enemies
 	for s in G.shots:
-		if s.dead:
+		if s.dead or s.has("stick"):
 			continue
 		if s.get("tb", false):
 			trick_hits(s)
@@ -3687,11 +3750,21 @@ func update(dt: float) -> void:
 						dmg *= 2.0
 				e.hp -= dmg
 				s.hit.append(e)
+				e.flash = 0.1
+				# HAUNT: the enemy lived, so the ghost shot clings to it (once per shot) and hits again later
+				if s.get("haunt", false) and e.hp > 0 and not s.get("haunted", false):
+					s.haunted = true
+					s.stick = e
+					s.stick_t = 0.5
+					s.stick_dx = clampf(s.x - e.x, -8.0, 8.0)
+					sfx("bosshit")
+					break
 				# SPECTRAL SHOT and PUNCH THROUGH: each enemy it goes through halves it, and it stops under 1 damage
-				s.dmg *= 0.5
+				# (SOLID SPIRIT: not the first one)
+				if not (s.get("solid", false) and s.hit.size() == 1):
+					s.dmg *= 0.5
 				if not s.pierce or s.dmg < 1.0:
 					s.dead = true
-				e.flash = 0.1
 				if e.hp <= 0:
 					down(e, s.fist)
 				else:
@@ -3730,7 +3803,12 @@ func update(dt: float) -> void:
 
 	# candy
 	for k in G.candy:
-		k.y += 45 * dt
+		# a GHOST CANDY is tossed up, then falls like the rest
+		if k.has("vy"):
+			k.vy = minf(k.vy + 300.0 * dt, 45.0)
+			k.y += k.vy * dt
+		else:
+			k.y += 45 * dt
 		food_pull(k, dt, true)
 		var catcher = null
 		for p in live():
@@ -3738,6 +3816,10 @@ func update(dt: float) -> void:
 				catcher = p
 		if catcher == null:
 			catcher = soul_catch(k)
+			# GHOST CANDY: when SOUL MATE catches a candy she tosses up a see-through one, worth 1, for anyone else
+			# (not her), at no cost
+			if catcher != null and catcher.eq.has("smcandy") and not k.get("ghost", false):
+				G.candy.append({"x": k.x, "y": k.y, "dead": false, "x2": false, "ghost": true, "vy": -150.0})
 		if catcher != null:
 			got_candy(k, catcher)
 		elif wiggle_reach(k):
@@ -3818,10 +3900,11 @@ func draw_game() -> void:
 		if k.get("x2", false):
 			spr(GUMBALL, GUMPAL, x - 3, y - 3, 1)
 			continue
-		R(x - 2, y - 2, 5, 4, "#ff7fb5")
-		R(x - 5, y - 2, 2, 4, "#7df2ff")
-		R(x + 4, y - 2, 2, 4, "#7df2ff")
-		R(x - 1, y - 1, 1, 1, "#ffffff")
+		var a := 0.45 if k.get("ghost", false) else 1.0   # a GHOST CANDY is see-through
+		R(x - 2, y - 2, 5, 4, "#ff7fb5", a)
+		R(x - 5, y - 2, 2, 4, "#7df2ff", a)
+		R(x + 4, y - 2, 2, 4, "#7df2ff", a)
+		R(x - 1, y - 1, 1, 1, "#ffffff", a)
 		if int(floor(gt * 6)) % 2 == 1:
 			R(x + 5, y - 5, 1, 1, "#ffffff")
 	var sw := form_sway()
@@ -4079,7 +4162,7 @@ func draw_game() -> void:
 			continue
 		var C: Dictionary = chars[p.ch]
 		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you
-		for h in [["gr", "grp", ROSE, 6, -2], ["sm", "smp", BOW, 3, -2]]:
+		for h in [["gr2", "grp", ROSE, 6, -2], ["gr", "grp", ROSE, 6, -2], ["sm", "smp", BOW, 3, -2]]:
 			if p.has(h[0]):
 				var hx := int(round(p[h[0]].x)) - 6
 				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
