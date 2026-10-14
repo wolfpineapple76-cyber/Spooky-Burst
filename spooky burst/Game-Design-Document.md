@@ -42,6 +42,10 @@ The final boss's job is to test your skills with all of the enemies and new atta
 
 Keep in mind also the first sets of waves will likely be dealt with by less players who have less power ups due to death. So, hopefully by the 3rd to 4th boss it has let you breathe enough to build back up some.
 
+THE SHOP
+
+Each ability has two upgrades in a SHOP, 250 candy each, bought only once the ability is unlocked and kept through prestige. In a run they come from the pumpkin like abilities do, drawn at random alongside the abilities not yet held, so a full set is about fifteen pumpkins and the small boosts come after. An upgrade adds to what the ability does and never takes away an effect the normal shot or ability already has.
+
 THE LITTLE GIRL
 
 A secret sixth character, rolled 1 in 10 on RANDOM until a slot owns her. She has no SPECIAL stat and no abilities of her own: +1 to two random stats each run (her SUGAR RUSH is random too; prestige is +1 to all, like anyone's), and pumpkins hand her other characters' abilities, only the ones that slot has bought and switched ON, five at a time, each lost slot refilled at random. She wears the mask of the character her first ability came from until she holds none. Unlocked for good by catching 1000 candy as her (her trick or treat bag); prestige makes her a secret again. The design rule she follows: nothing is handed out that the player hasn't earned on the other characters, and her power is a surprise, not a bigger number.

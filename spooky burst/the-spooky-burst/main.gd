@@ -11,6 +11,8 @@ const CHAR_COST := 500
 const POW_COST := 100
 # PRESTIGE: relock a character and all its upgrades for +1 of every boost for it, up to this many times
 const PRESTIGE_MAX := 10
+# the SHOP: two upgrades per ability, each this much, only once the ability is bought. Kept through prestige.
+const UP_COST := 250
 
 # ---------------------------------------------------------------- sprites
 const GHOST := ["...XXXXXX...", "..XXXXXXXX..", ".XXXXXXXXXX.", ".XXoXXXXoXX.", "XXXoXXXXoXXX", "XXbXXXXXXbXX", "XXXXXmmXXXXX",
@@ -301,8 +303,12 @@ const JACK0 := ["..................", "..................", "........SSS......."
 const JACKS := [JACK0]
 const JACKPAL := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffe45c"}
 const JACKPALB := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffc23a"}
-const GUMBALL := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
-const GUMPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
+# a gumball (worth 2): a glossy pink ball. The old rainbow ball is the JAW BREAKER, the Jester's present pieces
+# with that upgrade, which hurt all the way down
+const GUMBALL := ["..RRR..", ".RWWRR.", "RRWRRRR", "RRRRRRd", "RRRRRdd", ".RRddd.", "..ddd.."]
+const GUMPAL := {"R": "#ff6fae", "W": "#ffffff", "d": "#c93d7a"}
+const JAWBREAKER := ["..VVV..", ".VWVVO.", "VVVOOOG", "VOOOGGG", "OOGGGUU", ".GGUUU.", "..UUU.."]
+const JAWPAL := {"V": "#b07cff", "W": "#ffffff", "O": "#ff8a1f", "G": "#8fd66a", "U": "#4f8cff"}
 const APPLE := [".....S.....", ".....s.....", ".RRR.s.RRr.", "RCRRRRRRRRr", "CLhRRRRRRRr", "CLCCRRRRRRr", "CLCCCCCRRRr",
 	"CLCCCCCCCRr", ".CLCCCCCCD.", ".CLCCCCCCD.", "..CLCCCCD..", "...DDDDD...", "......D...."]
 const APPLEPAL := {"R": "#e0213f", "r": "#9c1030", "h": "#ffd0dc", "s": "#c8955a", "S": "#8a5a2e",
@@ -531,6 +537,9 @@ var sfx_players := {}
 var open_cache: Array = [true, false, false, false]
 var open_cache_t := -99.0
 var girl_next := false     # /debug littlegirl: the next RANDOM roll is her
+var sup := false           # CHARACTERS: the SHOP page of a character's upgrades is open
+var POW_SRC := {}          # ability key -> the character it belongs to
+var UP_INFO := {}          # shop upgrade key -> {"ch", "pow", "up": [key, name, what it does]}
 var lcg := 7
 # PLAYER SETUP, only for this session: player slot -> the device that plays it ({"pad", "side"})
 var assign := {}
@@ -624,7 +633,15 @@ func _build_chars() -> void:
 			"tr": {"safe": 2}, "desc": "IT'S JUST A JOKE.",
 			"pow": [["trick", "TRICK SHOT", "BOUNCY BALLS, MANY HITS", "TRK"], ["wicked", "WICKED CLOWN", "AT 1 LIFE, GET ONE BACK", "WKD"],
 				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
-				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]},
+				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]],
+			# ups: the SHOP's two upgrades per ability, [key, name, what it does]. A pumpkin can hand one over once the
+			# ability is held; it's lost with the ability.
+			"ups": {
+				"trick": [["tkany", "BOUNCE OFF ANY PLAYER", "BALLS BOUNCE BACK UP OFF ANY PLAYER"], ["tkwrap", "CROSS SCREEN", "BALLS GO OFF ONE SIDE AND IN THE OTHER"]],
+				"food": [["fdrange", "INCREASE RANGE", "PULLS FOOD FROM HALF AGAIN AS FAR"], ["fdcandy", "PULL CANDY", "PULLS IN CANDY TOO"]],
+				"wicked": [["wkextra", "EXTRA USE", "WICKED CLOWN WORKS TWICE"], ["wksafe", "X2 SAFETY", "THE HIT THAT FIRES IT: SAFE TWICE AS LONG"]],
+				"juggle": [["jgbouncy", "EXTRA BOUNCY", "BALLS BOUNCE HIGHER AND LONGER"], ["jghigh", "EXTRA HIGH", "KICKS 12 PX HIGHER, 2 PX PER SAFETY STEP"]],
+				"pinata": [["pngum", "ALL GUMBALLS", "EVERY PIECE IS A GUMBALL"], ["pnjaw", "JAW BREAKER", "THE PIECES HURT ALL THE WAY DOWN"]]}},
 		# THE LITTLE GIRL: secret, 1 in 10 on RANDOM until her bag is full. No SPECIAL stat and no abilities of her
 		# own: +1 to two random stats each run (prestige is +1 to all, like anyone), and pumpkins hand her other characters'
 		# abilities (the ones that slot has bought and switched ON), 5 at a time
@@ -648,6 +665,13 @@ func _build_chars() -> void:
 		for k in ch.pals[0].keys():
 			sil[k] = "#241b44"
 		ch["sil"] = sil
+	# which character each ability belongs to, and each shop upgrade's character, ability and entry
+	for i in chars.size():
+		for w in chars[i].pow:
+			POW_SRC[w[0]] = i
+		for k in ups_of(i):
+			for u in ups_of(i)[k]:
+				UP_INFO[u[0]] = {"ch": i, "pow": k, "up": u}
 
 func _build_things() -> void:
 	things = [
@@ -851,7 +875,7 @@ func pow_list(ch: int) -> Array:
 func girl_bag(p: Dictionary, c: int) -> void:
 	if not is_girl(p.ch) or has_char(p.n, GIRL_CH):
 		return
-	var bag := int(sv(pkey(p.n, "bag"), 0)) + c
+	var bag := maxi(0, int(sv(pkey(p.n, "bag"), 0)) + c)
 	if bag >= GIRL_BAG:
 		bag = 0
 		var have := lst(pkey(p.n, "chars"))
@@ -889,6 +913,41 @@ func pow_cost(n: int, ch: int) -> int:
 
 func is_on(n: int, ch: int, k: String) -> bool:
 	return owns(n, ch).has(k) and not lst(pkey(n, "off." + chars[ch].id)).has(k)
+
+# the SHOP: a character's upgrade lists (ability key -> its two), what this player has bought of them (saved
+# apart from the abilities, so prestige leaves them alone), and which are ON
+func ups_of(ch: int) -> Dictionary:
+	return chars[ch].get("ups", {})
+
+func owns_up(n: int, ch: int) -> Dictionary:
+	return to_obj(lst(pkey(n, "ups." + chars[ch].id)))
+
+func up_on(n: int, ch: int, k: String) -> bool:
+	return owns_up(n, ch).has(k) and not lst(pkey(n, "upoff." + chars[ch].id)).has(k)
+
+# in a run: the abilities a player holds (their upgrades are in eq too, but aren't abilities)
+func pows_held(p: Dictionary) -> Array:
+	return p.eq.keys().filter(func(k): return POW_SRC.has(k))
+
+# how many of an ability's upgrades a player holds
+func ups_held(p: Dictionary, k: String) -> int:
+	var n := 0
+	for u in ups_of(POW_SRC[k]).get(k, []):
+		if p.eq.has(u[0]):
+			n += 1
+	return n
+
+# an ability is lost (WICKED CLOWN used up): its upgrades go with it
+func drop_pow(p: Dictionary, k: String) -> void:
+	p.eq.erase(k)
+	for u in ups_of(POW_SRC[k]).get(k, []):
+		p.eq.erase(u[0])
+
+func player_n(n: int):
+	for p in G.players:
+		if p.n == n:
+			return p
+	return null
 
 # ---------------------------------------------------------------- drawing helpers
 func R(x, y, w, h, col: String, a := 1.0) -> void:
@@ -1371,6 +1430,7 @@ func start_game(pad: int, side := "wasd") -> void:
 		panel = "shop"
 		stab = slot
 		sch = -1
+		sup = false
 		scur = 0
 		spre = -1
 		smsg = "P%d HAS NO CHARACTERS: BUY ONE TO PLAY." % (slot + 1)
@@ -1783,6 +1843,7 @@ func pause_choose() -> void:
 		m.shop = true
 		stab = who.n if who != null else 0
 		sch = -1
+		sup = false
 		scur = 0
 		spre = -1
 		smsg = ""
@@ -1814,23 +1875,37 @@ func to_menu() -> void:
 # Nothing is unlocked in game. No pop-up: the name shows for a moment instead.
 # The LITTLE GIRL draws from every other character's ON upgrades, up to GIRL_SLOTS at once, and puts on the
 # mask of the character her first one came from.
+# A pumpkin picks at random across everything available: abilities not held, and the SHOP upgrades (bought and
+# ON) of the abilities held. Once all of that is held, a boost.
 func award(p: Dictionary) -> void:
+	if not award_pow(p):
+		give_boost(p)
+
+func award_pow(p: Dictionary) -> bool:
 	var left := []
-	if not is_girl(p.ch) or p.eq.size() < GIRL_SLOTS:
+	var girl := is_girl(p.ch)
+	if not girl or pows_held(p).size() < GIRL_SLOTS:
 		for w in pow_list(p.ch):
 			if not p.eq.has(w[0][0]) and is_on(p.n, w[1], w[0][0]):
-				left.append(w)
+				left.append([w[0], w[1], false])
+	for k in pows_held(p):
+		var src: int = POW_SRC[k]
+		for u in ups_of(src).get(k, []):
+			if not p.eq.has(u[0]) and up_on(p.n, src, u[0]):
+				left.append([u, src, true])
 	if left.is_empty():
-		give_boost(p)
-		return
+		return false
 	var got: Array = pick(left)
 	var pw: Array = got[0]
-	if is_girl(p.ch) and p.eq.is_empty():
+	if girl and not got[2] and pows_held(p).is_empty():
 		p.mask = chars[got[1]].id
 	p.eq[pw[0]] = true
+	if pw[0] == "wicked":
+		p.erase("wk2")
 	G.toast = {"key": pw[0], "title": pw[1], "desc": pw[2], "n": p.n, "t": 2.6}
 	sfx("unlock")
 	wicked(p)
+	return true
 
 # a random boost that isn't maxed yet; once every boost is maxed, points instead
 func give_boost(p: Dictionary) -> void:
@@ -1932,12 +2007,19 @@ func kill(e: Dictionary, fist := false) -> void:
 
 # WICKED CLOWN: the moment he's at 1 life (hit, a joining player taking a life, or catching it while already
 # at 1) he gets one straight back, and it's used up (a pumpkin can give it to him again)
-func wicked(p: Dictionary) -> void:
+# Returns whether it fired. With EXTRA USE the first use keeps it for one more; its upgrades go when it goes.
+func wicked(p: Dictionary) -> bool:
 	if p.lives == 1 and p.eq.has("wicked"):
-		p.eq.erase("wicked")
+		if p.eq.has("wkextra") and not p.get("wk2", false):
+			p.wk2 = true
+		else:
+			drop_pow(p, "wicked")
+			p.erase("wk2")
 		p.lives += 1
 		say("WICKED CLOWN!", 1.4)
 		sfx("life")
+		return true
+	return false
 
 func hurt(p: Dictionary) -> void:
 	if p.eq.has("shield") and p.sh <= 0:
@@ -1949,8 +2031,10 @@ func hurt(p: Dictionary) -> void:
 	p.lives -= 1
 	if p.eq.has("pinata"):
 		pinata(p)
-	wicked(p)
-	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe"))
+	# X2 SAFETY: the hit that fires WICKED CLOWN leaves him safe twice as long (checked before it can be used up)
+	var x2: bool = p.eq.has("wksafe")
+	var fired := wicked(p)
+	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe")) * (2.0 if fired and x2 else 1.0)
 	burst(p.x, 209, "#ffffff", 16)
 	sfx("hurt")
 	G.shake = 0.25
@@ -2059,34 +2143,38 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		say("SUGAR RUSH!", 1.4)
 		sfx("treat")
 		return
-	# the treat bucket: 5 candy 45%, 300 points 20%, an extra life 15%, a TRICK 15%, a POWER TREAT 5%
+	# the treat bucket: 5 candy 40%, 10 candy 10%, 300 points 10%, an extra life 15%, a TRICK 15%, a POWER TREAT 5%
+	# (a small boost), an ability or SHOP upgrade 5% (drawn like a pumpkin; a boost once it's all held)
 	var r := randf()
-	if r < 0.45:
-		add_candy(p.n, 5)
-		girl_bag(p, 5)
-		p.got += 5
-		pts(100)
-		say("TREAT: 5 CANDY", 1.4)
+	if r < 0.5:
+		var c := 5 if r < 0.4 else 10
+		add_candy(p.n, c)
+		girl_bag(p, c)
+		p.got += c
+		pts(20 * c)
+		say("TREAT: %d CANDY" % c, 1.4)
 		sfx("treat")
-	elif r < 0.65:
+	elif r < 0.6:
 		pts(300)
 		say("TREAT: 300 POINTS", 1.4)
 		sfx("treat")
-	elif r < 0.8:
+	elif r < 0.75:
 		if p.lives < 5:
 			p.lives += 1
 		say("TREAT: EXTRA LIFE", 1.4)
 		sfx("life")
-	elif r < 0.95:
+	elif r < 0.9:
 		for i in 3:
 			G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 44, d.x + (i - 1) * 16, d.y - 24, 1, "return"))
 		say("TRICK!", 1.2)
 		sfx("trick")
-	else:
-		# POWER TREAT: one of the pumpkin's small boosts (never a character ability)
+	elif r < 0.95:
 		say("POWER TREAT", 1.4)
 		sfx("treat")
 		give_boost(p)
+	else:
+		say("TREAT!", 1.4)
+		award(p)
 
 func boss(e: Dictionary, dt: float) -> void:
 	if e.st == "enter":
@@ -2700,17 +2788,20 @@ func wiggle_reach(o: Dictionary) -> bool:
 const FOOD_REACH := 48.0
 # NEEDS FOOD BADLY: on his last life he pulls in food from FOOD_REACH away. With more lives he's only a little
 # hungry: full pull within half a character width, fading to nothing by a full one, so he isn't stealing apples.
-func food_pull(d: Dictionary, dt: float) -> void:
-	if d.k != "h" and d.k != "p":
+# candy is true for a piece of candy (only PULL CANDY pulls those), else d is a drop
+func food_pull(d: Dictionary, dt: float, candy := false) -> void:
+	if not candy and d.k != "h" and d.k != "p":
 		return
 	for p in live():
-		if p.eq.has("food"):
+		if p.eq.has("food") and (not candy or p.eq.has("fdcandy")):
 			# a little secret: the blue player (P3) reaches half a character width further and pulls a bit harder
 			var blue: bool = col_blue(p.n)
 			var hungry: bool = p.lives == 1
 			var to := Vector2(p.x - d.x, 209.0 - d.y)
 			var dist := to.length()
 			var reach := (FOOD_REACH + (12.0 if blue else 0.0)) if hungry else 24.0
+			if p.eq.has("fdrange"):
+				reach *= 1.5   # INCREASE RANGE: half again as far
 			if dist < reach:
 				var pull := 161.0 if blue else 140.0
 				if not hungry:
@@ -2744,10 +2835,11 @@ func juggle(p: Dictionary, dt: float) -> void:
 		b.ang += b.vx / 4.5 * dt
 		if b.y < JUG_GROUND - 1.0:
 			b.ang += 6.0 * (signf(b.vx) if b.vx != 0.0 else 1.0) * dt
-		# bounce on the ground, a little less each time, until it settles
+		# bounce on the ground, a little less each time, until it settles (EXTRA BOUNCY: higher and for longer)
 		if b.y >= JUG_GROUND:
 			b.y = JUG_GROUND
-			b.vy = -b.vy * 0.45 if b.vy > 40.0 else 0.0
+			var bouncy: bool = p.eq.has("jgbouncy")
+			b.vy = -b.vy * (0.7 if bouncy else 0.45) if b.vy > (25.0 if bouncy else 40.0) else 0.0
 			b.vx *= 0.6
 			if absf(b.vx) < 4.0:
 				b.vx = 0.0
@@ -2796,9 +2888,11 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	elif b.k == 1:
 		tx = j.x
 	b.k = (b.k + 1) % 3
-	# up to 1 px higher per step of LONGER SAFETY from his SPECIAL, prestige and SUGAR RUSH (not the pumpkins')
-	var extra: float = spec(j, "safe")
-	var h := 30.0 + randf() * (14.0 + extra)
+	# up to 1 px higher per step of LONGER SAFETY from his SPECIAL, prestige and SUGAR RUSH (not the pumpkins');
+	# EXTRA HIGH: 12 px more and 2 px per step
+	var high: bool = j.eq.has("jghigh")
+	var extra: float = spec(j, "safe") * (2.0 if high else 1.0)
+	var h := 30.0 + (12.0 if high else 0.0) + randf() * (14.0 + extra)
 	b.vy = -sqrt(2.0 * JUG_GRAV * h)
 	var flight := 2.0 * absf(b.vy) / JUG_GRAV
 	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
@@ -2816,9 +2910,12 @@ func pinata(p: Dictionary) -> void:
 	var have := candy_of(p.n)
 	var pieces := []
 	var worth := 0
+	var all_gum: bool = p.eq.has("pngum")   # ALL GUMBALLS: every piece is one (so a box costs more)
 	for i in 8:
-		var gum := randf() < 1.0 / 3.0
+		var gum := all_gum or randf() < 1.0 / 3.0
 		if gum and ceili((worth + 2) / 2.0) > have:
+			if all_gum:
+				break
 			gum = false
 		if ceili((worth + 1) / 2.0) > have:
 			break
@@ -2827,7 +2924,9 @@ func pinata(p: Dictionary) -> void:
 	if pieces.is_empty():
 		return
 	add_candy(p.n, -ceili(worth / 2.0))
-	G.gifts.append({"x": p.x, "y": 196.0, "top": 44.0 + 12.0, "pieces": pieces, "n": p.n, "dead": false})
+	# the LITTLE GIRL's bag pays too, so a present she catches back can't fill it for her
+	girl_bag(p, -ceili(worth / 2.0))
+	G.gifts.append({"x": p.x, "y": 196.0, "top": 44.0 + 12.0, "pieces": pieces, "n": p.n, "dead": false, "jaw": p.eq.has("pnjaw")})
 	sfx("treat")
 
 func gifts_and_pieces(dt: float) -> void:
@@ -2847,7 +2946,7 @@ func gifts_and_pieces(dt: float) -> void:
 			for i in n:
 				var a := -PI / 2 + (i - (n - 1) / 2.0) * (PI / 8.0)
 				G.pieces.append({"x": g.x, "y": g.y, "vx": cos(a) * 150.0, "vy": sin(a) * 150.0 - 30.0,
-					"x2": g.pieces[i], "hit": [], "dead": false})
+					"x2": g.pieces[i], "hit": [], "dead": false, "jaw": g.get("jaw", false)})
 	for c in G.pieces:
 		c.vy += 300.0 * dt
 		c.x += c.vx * dt
@@ -2864,8 +2963,9 @@ func gifts_and_pieces(dt: float) -> void:
 				e.flash = 0.1
 				if e.hp <= 0:
 					down(e)
-		# once it starts falling it's just candy, raining down for anyone to catch
-		if c.vy >= 0.0:
+		# once it starts falling it's just candy, raining down for anyone to catch. A JAW BREAKER keeps hurting on
+		# the way down, and is candy again only once it's near the ground
+		if c.vy >= 0.0 and (not c.jaw or c.y >= 180.0):
 			c.dead = true
 			G.candy.append({"x": clampf(c.x, 8.0, 312.0), "y": c.y, "dead": false, "x2": c.x2})
 
@@ -3039,14 +3139,21 @@ func trick_move(s: Dictionary, dt: float) -> void:
 		s.vx += (24.0 + randf() * 24.0) * (1.0 if randf() < 0.5 else -1.0) / off
 	if s.y > -6:
 		s.up = false
-	# coming down onto whoever threw it, it bounces back up off them (not off the floor, not off anyone else)
+	# coming down onto whoever threw it, it bounces back up off them (not off the floor, not off anyone else);
+	# with BOUNCE OFF ANY PLAYER, off anyone
+	var o = player_n(s.o)
+	var any: bool = o != null and o.eq.has("tkany")
 	if s.vy > 0 and s.y > 194:
 		for p in live():
-			if p.n == s.o and absf(s.x - p.x) < 12 and absf(s.y - 209) < 12:
+			if (any or p.n == s.o) and absf(s.x - p.x) < 12 and absf(s.y - 209) < 12:
 				trick_bounce(s, p.x, 209.0, 12.0, 12.0, null)
 				s.y = minf(s.y, 196.0)
 				sfx("trick")
 				break
+	# CROSS SCREEN: off one side and in the other (it still falls through the floor)
+	if o != null and o.eq.has("tkwrap") and (s.x < -6 or s.x > 326):
+		s.x = wrapf(s.x, -6.0, 326.0)
+		s.pxl = s.x
 	if s.x < -6 or s.x > 326 or s.y > 246:
 		s.dead = true
 
@@ -3268,7 +3375,7 @@ func update(dt: float) -> void:
 			continue
 		var I := player_input(p)
 		var ox: float = p.x
-		if p.eq.is_empty():
+		if pows_held(p).is_empty():
 			p.erase("mask")   # the LITTLE GIRL takes her mask off once she holds no ability
 		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a SPIDER BEAST web
 		if p.web > 0:
@@ -3624,6 +3731,7 @@ func update(dt: float) -> void:
 	# candy
 	for k in G.candy:
 		k.y += 45 * dt
+		food_pull(k, dt, true)
 		var catcher = null
 		for p in live():
 			if absf(k.x - p.x) < 13 and absf(k.y - 209) < 14:
@@ -3704,6 +3812,9 @@ func draw_game() -> void:
 	for k in G.candy + G.pieces:
 		var x := int(round(k.x))
 		var y := int(round(k.y))
+		if k.get("jaw", false):
+			spr(JAWBREAKER, JAWPAL, x - 3, y - 3, 1)
+			continue
 		if k.get("x2", false):
 			spr(GUMBALL, GUMPAL, x - 3, y - 3, 1)
 			continue
@@ -4123,7 +4234,8 @@ func draw_hud() -> void:
 		var codes := ""
 		for w in pow_list(p.ch):
 			if p.eq.has(w[0][0]):
-				codes += w[0][3] + " "
+				var nu := ups_held(p, w[0][0])
+				codes += w[0][3] + (str(nu) if nu > 0 else "") + " "
 		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
 		# their prestige level for this character, which counts for every stat, and their SUGAR RUSH count, on
 		# their own line: both are more special than the power-ups
@@ -4188,8 +4300,10 @@ func draw_panel(title: String, rows: Array, footer: String, cursor := -1, note :
 # PLAYER SETUP (your favourite) and at PLAY, not here.
 # Once all its upgrades are bought, a PRESTIGE row shows at the bottom (and stays from then on):
 # confirming relocks the character and its upgrades for +1 of every boost for that character.
-func shop_rows() -> Array:
-	var rows := []
+# Everything on the current CHARACTERS page, top to bottom: {"kind", "row": [name, right, greyed], ...}.
+# kinds: char (the list), buy, pow (an ability), shop (opens the SHOP page), pre, up (a SHOP upgrade), back
+func shop_items() -> Array:
+	var items := []
 	var c := candy_of(stab)
 	if sch < 0:
 		# the LITTLE GIRL is a secret: no row until the slot has unlocked her (she can't be bought)
@@ -4197,31 +4311,52 @@ func shop_rows() -> Array:
 			if is_girl(i) and not has_char(stab, i):
 				continue
 			if not has_char(stab, i):
-				rows.append([chars[i].name, "%d CANDY" % char_cost(stab, i), c < char_cost(stab, i)])
+				items.append({"kind": "char", "i": i, "row": [chars[i].name, "%d CANDY" % char_cost(stab, i), c < char_cost(stab, i)]})
 			else:
-				rows.append([chars[i].name, "OWNED", false])
+				items.append({"kind": "char", "i": i, "row": [chars[i].name, "OWNED", false]})
+	elif sup:
+		# the SHOP page: two upgrades under each ability, greyed until that ability is bought
+		var own := owns(stab, sch)
+		var got := has_char(stab, sch)
+		var oup := owns_up(stab, sch)
+		for w in chars[sch].pow:
+			var have_pow: bool = got and own.has(w[0])
+			for u in ups_of(sch).get(w[0], []):
+				if not oup.has(u[0]):
+					items.append({"kind": "up", "k": u[0], "pow": w, "u": u, "have_pow": have_pow,
+						"row": [u[1], "%d CANDY" % UP_COST, not have_pow or c < UP_COST]})
+				else:
+					var on := up_on(stab, sch, u[0])
+					items.append({"kind": "up", "k": u[0], "pow": w, "u": u, "have_pow": have_pow,
+						"row": [u[1], "ON" if on else "OFF", not have_pow or not on]})
 	else:
 		# switching tabs keeps this page open, so it may show a character this player hasn't bought yet:
 		# then the top row buys it, and its upgrades stay greyed out until it's bought
 		var got := has_char(stab, sch)
 		if not got:
-			rows.append(["BUY " + chars[sch].name, "%d CANDY" % char_cost(stab, sch), c < char_cost(stab, sch)])
+			items.append({"kind": "buy", "row": ["BUY " + chars[sch].name, "%d CANDY" % char_cost(stab, sch), c < char_cost(stab, sch)]})
 		var own := owns(stab, sch)
 		var pc := pow_cost(stab, sch)
 		for w in chars[sch].pow:
 			if not own.has(w[0]):
-				rows.append([w[1], "%d CANDY" % pc, not got or c < pc])
+				items.append({"kind": "pow", "k": w[0], "w": w, "row": [w[1], "%d CANDY" % pc, not got or c < pc]})
 			else:
 				var on := is_on(stab, sch, w[0])
-				rows.append([w[1], "ON" if on else "OFF", not got or not on])
+				items.append({"kind": "pow", "k": w[0], "w": w, "row": [w[1], "ON" if on else "OFF", not got or not on]})
+		if got and not ups_of(sch).is_empty():
+			items.append({"kind": "shop", "row": ["SHOP", "%d OWNED" % owns_up(stab, sch).size(), false]})
 		if pre_shown(stab, sch):
-			rows.append(["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != "" or mode == "pause"])
-	rows.append(["BACK", "", false])
-	return rows
+			items.append({"kind": "pre", "row": ["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != "" or mode == "pause"]})
+	items.append({"kind": "back", "row": ["BACK", "", false]})
+	return items
 
-# rows above the upgrades on a character's page: the BUY row, until it's bought
-func shop_top() -> int:
-	return 0 if has_char(stab, sch) else 1
+func shop_rows() -> Array:
+	return shop_items().map(func(it): return it.row)
+
+# the item the cursor is on
+func shop_cur() -> Dictionary:
+	var items := shop_items()
+	return items[clampi(scur, 0, items.size() - 1)]
 
 func maxed(n: int, ch: int) -> bool:
 	return has_char(n, ch) and owns(n, ch).size() == chars[ch].pow.size()
@@ -4249,30 +4384,42 @@ func pre_why(n: int, ch: int) -> String:
 func shop_note() -> String:
 	if smsg != "":
 		return smsg
-	if sch >= 0 and scur >= shop_top() and scur < shop_top() + chars[sch].pow.size():
-		return chars[sch].pow[scur - shop_top()][2] + "."
-	if sch >= 0 and scur == shop_top() + chars[sch].pow.size() and pre_shown(stab, sch):
-		if mode == "pause":
-			return "PRESTIGE FROM THE MAIN MENU."
-		var why := pre_why(stab, sch)
-		if why == "" and is_girl(sch):
-			return "RELOCK HER FOR A +1 BOOST TO ALL STATS, PERMANENTLY. SHE'S A SECRET AGAIN."
-		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
+	var it := shop_cur()
+	match it.kind:
+		"pow":
+			return it.w[2] + "."
+		"up":
+			if not it.have_pow:
+				return "UNLOCK %s FIRST." % it.pow[1]
+			return it.u[2] + "."
+		"shop":
+			return "UPGRADE THE ABILITIES: %d CANDY EACH, ONCE THE ABILITY IS UNLOCKED. KEPT THROUGH PRESTIGE." % UP_COST
+		"pre":
+			if mode == "pause":
+				return "PRESTIGE FROM THE MAIN MENU."
+			var why := pre_why(stab, sch)
+			if why == "" and is_girl(sch):
+				return "RELOCK HER FOR A +1 BOOST TO ALL STATS, PERMANENTLY. SHE'S A SECRET AGAIN."
+			return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
 	if sch >= 0 and mode == "pause":
 		return "BUY HERE. SWITCH ON OR OFF FROM THE MAIN MENU."
+	if sch >= 0 and sup:
+		return "ON UPGRADES CAN COME FROM THE GLOWING PUMPKIN ONCE THE ABILITY IS HELD."
 	if sch >= 0:
 		return "ON UPGRADES CAN COME FROM THE GLOWING PUMPKIN. OFF ONES NEVER DO."
 	return "LB / RB OR LEFT / RIGHT: SWITCH PLAYER."
 
 func draw_shop() -> void:
 	var rows := shop_rows()
-	var y := 104.0
+	# the SHOP page has ten rows plus BACK, so it starts higher and packs its rows closer
+	var y := 80.0 if sup else 104.0
+	var rs := 22 if sup else 26
 	# a character's page has its description line under the name, so its rows start a bit lower
 	var dy := 10 if sch >= 0 else 0
-	draw_box(y, 116 + dy + rows.size() * 26)
-	T("CHARACTERS", 80, y + 18, 3, "#ff8a1f")
+	draw_box(y, 116 + dy + rows.size() * rs)
+	T("CHARACTERS" if not sup else "SHOP", 80, y + 18, 3, "#ff8a1f")
 	T("LB", 318, y + 26, 1, "#9d8cc4", 1)
 	for i in MAX_PLAYERS:
 		T("P%d" % (i + 1), 356 + i * 46, y + 22, 2, "#ffd92e" if i == stab else "#5a4d80")
@@ -4294,7 +4441,7 @@ func draw_shop() -> void:
 		T(("> " if scur == i else "  ") + r[0], 80, ry, 2, "#9d8cc4" if dim and scur != i else "#f6f1ff")
 		if r[1] != "":
 			T(r[1], 560, ry + 3, 2, "#9d8cc4" if dim else "#ffd92e", 2)
-		ry += 26
+		ry += rs
 	T(shop_note(), 80, ry + 4, 1, "#ff8a1f" if smsg != "" else "#f6f1ff")
 	if spre >= 0:
 		var n := prestige(stab, sch) + 1
@@ -4310,60 +4457,75 @@ func shop_choose() -> void:
 			sfx("back")
 		spre = -1
 		return
-	var rows := shop_rows()
 	smsg = ""
-	if scur == rows.size() - 1:
-		shop_back()
-		return
+	var it := shop_cur()
 	var c := candy_of(stab)
-	if sch < 0:
-		if has_char(stab, scur):
-			sch = scur
+	match it.kind:
+		"back":
+			shop_back()
+		"char":
+			if has_char(stab, it.i):
+				sch = it.i
+				scur = 0
+				sfx("select")
+			else:
+				buy_char(it.i)
+		"buy":
+			buy_char(sch)
+		"shop":
+			sup = true
 			scur = 0
 			sfx("select")
-		else:
-			buy_char(scur)
+		"pre":
+			if pre_why(stab, sch) != "" or mode == "pause":
+				sfx("deny")
+			else:
+				spre = 0
+				sfx("select")
+		"pow":
+			if not has_char(stab, sch):
+				smsg = "BUY %s FIRST." % chars[sch].name
+				sfx("deny")
+			elif not owns(stab, sch).has(it.k):
+				buy_key("own.", it.k, pow_cost(stab, sch), it.w[1] + " UNLOCKED!")
+			else:
+				toggle_key("off.", it.k)
+		"up":
+			if not it.have_pow:
+				smsg = "UNLOCK %s FIRST." % it.pow[1]
+				sfx("deny")
+			elif not owns_up(stab, sch).has(it.k):
+				buy_key("ups.", it.k, UP_COST, it.u[1] + " BOUGHT!")
+			else:
+				toggle_key("upoff.", it.k)
+
+# buy key k into the tab's saved list (own. for abilities, ups. for SHOP upgrades) if the candy is there
+func buy_key(list: String, k: String, cost: int, done: String) -> void:
+	var c := candy_of(stab)
+	if c < cost:
+		smsg = "NEED %d CANDY, P%d HAS %d." % [cost, stab + 1, c]
+		sfx("deny")
 		return
-	if not has_char(stab, sch):
-		if scur == 0:
-			buy_char(sch)
-		else:
-			smsg = "BUY %s FIRST." % chars[sch].name
-			sfx("deny")
-		return
-	if scur == chars[sch].pow.size():
-		if pre_why(stab, sch) != "" or mode == "pause":
-			sfx("deny")
-		else:
-			spre = 0
-			sfx("select")
-		return
-	var k: String = chars[sch].pow[scur][0]
-	var id: String = chars[sch].id
-	if not owns(stab, sch).has(k):
-		var pc := pow_cost(stab, sch)
-		if c >= pc:
-			add_candy(stab, -pc)
-			var own := lst(pkey(stab, "own." + id))
-			own.append(k)
-			sv_set(pkey(stab, "own." + id), own)
-			smsg = chars[sch].pow[scur - 1][1] + " UNLOCKED!"
-			sfx("unlock")
-		else:
-			smsg = "NEED %d CANDY, P%d HAS %d." % [pc, stab + 1, c]
-			sfx("deny")
-		return
+	add_candy(stab, -cost)
+	var have := lst(pkey(stab, list + chars[sch].id))
+	have.append(k)
+	sv_set(pkey(stab, list + chars[sch].id), have)
+	smsg = done
+	sfx("unlock")
+
+# switch key k ON or OFF (off. for abilities, upoff. for SHOP upgrades): main menu only
+func toggle_key(list: String, k: String) -> void:
 	if mode == "pause":
 		# in game you can buy, not switch: a fresh one is ON already
 		smsg = "SWITCH IT ON OR OFF FROM THE MAIN MENU."
 		sfx("deny")
 		return
-	var off := lst(pkey(stab, "off." + id))
+	var off := lst(pkey(stab, list + chars[sch].id))
 	if off.has(k):
 		off.erase(k)
 	else:
 		off.append(k)
-	sv_set(pkey(stab, "off." + id), off)
+	sv_set(pkey(stab, list + chars[sch].id), off)
 	sfx("select")
 
 func buy_char(i: int) -> void:
@@ -4421,6 +4583,14 @@ func shop_back() -> void:
 	smsg = ""
 	if spre >= 0:
 		spre = -1
+	elif sup:
+		# back from the SHOP page to the character's page, on its SHOP row
+		sup = false
+		scur = 0
+		var items := shop_items()
+		for i in items.size():
+			if items[i].kind == "shop":
+				scur = i
 	elif sch >= 0:
 		scur = sch
 		sch = -1
@@ -4509,7 +4679,11 @@ func draw_pows() -> void:
 		var lines := []
 		for w in pow_list(p.ch):
 			if p.eq.has(w[0][0]):
-				lines.append([w[0][3] + " " + w[0][1], "#ffd92e"])
+				var nu := ups_held(p, w[0][0])
+				lines.append([w[0][3] + (str(nu) if nu > 0 else "") + " " + w[0][1], "#ffd92e"])
+				for u in ups_of(w[1]).get(w[0][0], []):
+					if p.eq.has(u[0]):
+						lines.append(["  + " + u[1], "#d9b84a"])
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:
 				lines.append(["%s%d %s" % [b[3], bo(p, b[0]), b[1]], "#7df2ff"])

@@ -145,6 +145,68 @@ MENUS AND CONTROLS
   face, covering some hair: ghost comes down over her shoulders, zombie has his hair, jester has his whole hat
   with the bells.
 
+THE SHOP (character ability upgrades), Hero's idea "that might eventually replace prestige"
+- "above the Prestige button, later perhaps replacing it a Shop button", "about two upgrades per character
+  ability you can only buy them if the ability is unlocked", "interesting and expansive", 250 candy each
+  ("needs to cost a lot to not be overkill and to replace prestige"), both of the pair buyable.
+- "prestige should not wipe the shop, only the ability needing reunlocked its basically 1000+10% per prestige
+  adding another 2500 would be nuts". Shop upgrades can be switched on and off.
+- Pumpkins: "have each pumpkin choose between giving an ability or one of the purchased ability upgrades, it
+  would delay the small power ups and cost like 15 pumpkins to reach all upgraded abilities", "a pumpkin picks
+  at random across everything available, abilities not held plus bought upgrades of held ones". Codes "could
+  just become Rib 1 and Rib 2". Treat bags: "a chance of an ability or upgrade": 5 candy 40%, 10 candy 10%,
+  300 points 10%, a life 15%, a TRICK 15%, a POWER TREAT 5%, an ability or upgrade 5%.
+- "little girl would just get what ever the other character had bought and on".
+- Rule: "none of any of the ones I wrote should be removing effects already present on the normal shots aside
+  from what I said about ghostress".
+- The Little Girl's present costs her bag too ("otherwise it could be used to fill her bag faster").
+- WRITTEN: the frame and the Jester (Plan Q). WAITING: Ghost (R), Cat (S), Zombie (T), Skeleton (U), in Hero's
+  words below, for Sammie to keep, change or drop.
+  Jester: Trick Shot: Bounce off any player / cross screen ("allow it to go from the left to right of the screen
+  but still fall through the floor"). Needs Food Badly: Increase Range / Pull Candy. Wicked Clown: Extra Use /
+  x2 Safety on Activation ("only for the hit that triggered wicked clown not for other loss of life"). Juggling
+  Balls: Extra Bouncy / Extra High ("+12px and doubles the usual +1px per safety"). Pinata: All Gum Balls / Jaw
+  Breaker ("the candy from his present causes damage all the way down, maybe changes the image but deals the
+  same damage based on candy or gumball as before"; the old gumball graphic is the jaw breaker, gumballs got a
+  new pink one).
+  Ghost: GHOST SHOT: Spooky ("slight homing effect") / Haunt ("if the enemy didn't die it sticks to it for half
+  a second dealing one more hit before passing"). RESTLESS SHOT: Fast Shot / Won't Stop ("Shots that hit the top
+  of the screen come back through the bottom once at 50% damage of when they left"). SPECTRAL SHOT: Solid
+  Spirit ("no halving on the first enemy passed") / Through Webs ("passes web tiles but breaks them. Counts
+  toward losing 50% as if passing one enemy"). SOUL MATE: Self Defense ("six volleys back instead of three") /
+  Ghost Candy ("When she catches a candy or gumball, she throws a ghost candy into the air for anyone else to
+  catch. It is worth 1 candy and she cannot catch it. Semi translucent. Costs nothing to the player when she
+  throws."). GHOSTRESS: Quick Study ("her copies take your boosts"; "change ghostress so that she does not get
+  all of your boosts until you buy that ability") / Bring a Friend ("during boss fights only a second Ghostress
+  appears").
+  Cat: LUCKY COIN: Stop Shot ("50% chance to destroy itself and an enemy shot when they collide") / Knock Shot
+  ("50% chance to knock an enemy shot back and destroy itself when they collide"). CAT'S EYE: Sharper Eye
+  ("orbs curve harder") / Second Look ("an orb that misses turns once"). NINE LIVES: Quick Tail ("8 seconds
+  instead of 15") / Hiss ("blocking a hit clears enemy shots near you, within like 1 character length above and
+  around or less", a real cat hiss: "Cat hissing #2" by rickismyname on Freesound, CC0). CAT REFLEXES: Pounce
+  ("the first ever ability with an actual button to activate, maybe a cool down and then hit R or L on
+  controller to teleport that direction", 26 px, "more like 5 second at least"; Q / E for the left keyboard
+  player, comma / period for the arrows player, LB / RB on a controller; a puff where he left) / Zoomies ("can
+  leave the screen on either side entering from the other side"). WIGGLE TAIL: Long Tail ("1.5 cat widths") /
+  Tall Tail ("grabs from above his head too, Sugar Rush included").
+  Zombie: REGROW: Ready Regrow ("the same as always and one on a boss wave") / Overgrow ("up to 6 lives").
+  HEAVY FIST: Iron Fist ("triple damage on bosses") / Grabby ("if the fist passes through candy, not powerups
+  or apples just candy, it is collected for the zombie"). ROT CLOUD: Rot Corpse ("enemies move a little slower
+  too") / Rot Food ("collectable things like candy and bags and apples fall slower"). THICK SKIN: Thicker Skin
+  ("Enemy Shots touching you while safe are removed") / Flesh Golem ("Become taller. this lets him protect other
+  players and grab things easier, could have a slightly bigger graphic but only like a pixel or two wider",
+  draft B: 14 wide, 16 tall). PUNCH THROUGH: Clear webs ("Double damage against webs") / Hard punch ("Knock
+  Back similar to the cats", half the hits like the coin).
+  Skeleton: RIBBED SHOT: Hard Ribs ("his shots collide with and destroy enemy shots, destroying his as well",
+  all three shots) / Baby Back Ribs ("Each shot has a smaller half damage shot right behind it"). BONE THROW:
+  Big Bone ("the knuckles are wider spaced and larger") / Twirl Bone ("The knuckles spin around each other").
+  QUICK BONES: Vengeance ("If hit shoot out 2 volleys instantly") / Re-Vengeance ("The first time hit while safe
+  fire 2 volleys instantly"). GRAVE ROBBER: Riches ("extra candy has a slightly higher chance of being
+  gumballs") / Looter ("If a boss drops sugar rush it will drop one extra sugar rush. If not it drops a trick or
+  treat bucket."). SECOND WIND: Breath of Life ("keep your powerups instead of losing them on second wind") /
+  Throw me a bone ("If another player dies, and you have more than one life lose one and they get it, they lose
+  their abilities if you dont have breath of life and keep them if you do").
+
 CHARACTER LOOKS
 - A character's name sets its look: the Black Cat is always black. Players tell cats apart by a coloured tummy.
 - Don't put colour where it could read as a mouth. The cat uses a black chin with a tummy patch lower down.

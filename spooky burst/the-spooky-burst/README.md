@@ -115,8 +115,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 ## Candy and upgrades
 - Whoever catches candy keeps it (treat buckets and boss candy too). WIGGLE TAIL, GRAVE ROBBER and
   SOUL MATE help you get more of it.
-- The treat bucket gives 5 candy (45%), 300 points (20%), an extra life (15%), a TRICK of three bats (15%)
-  or a POWER TREAT (5%): one of the pumpkin's small boosts, never a character ability.
+- The treat bucket gives 5 candy (40%), 10 candy (10%), 300 points (10%), an extra life (15%), a TRICK of
+  three bats (15%), a POWER TREAT (5%: one of the pumpkin's small boosts) or an ability or SHOP upgrade (5%),
+  drawn the way a pumpkin draws one; a boost once it's all held.
 - Each character has a SPECIAL, its own boost worth 2 steps: the Ghost's fire rate, the Cat's move speed, the
   Zombie's damage, the Skeleton's shot speed, the Jester's safe time after a hit. Its CHARACTERS page names it.
 - SUGAR RUSH: once the PUMPKIN KING has been beaten on this save, when a boss dies it tosses a cotton candy high
@@ -205,6 +206,27 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   or OFF and PRESTIGE wait for the main menu (greyed, with a note). POWER UPS lists each player in the game
   with their icon and what they hold right now, and only that: each ability as its code and name, their
   boosts, prestige, SUGAR RUSH and the Little Girl's random +1s.
+- THE SHOP: a character's page has a SHOP row above PRESTIGE once it's bought (only characters with upgrades
+  written so far show it; the Jester is first). The SHOP page lists two upgrades under each ability, 250 candy
+  each, and you can only buy one once that ability is unlocked. Bought ones can be switched ON or OFF from the
+  main menu (buy only from the pause). They're saved apart from the abilities, so PRESTIGE leaves them bought:
+  they sit dormant until the ability is bought back. In a run, the glowing pumpkin picks at random across
+  everything available: abilities you don't hold, plus the bought, ON upgrades of the abilities you do hold.
+  Boosts start once all of that is held, so it's about fifteen pumpkins to a full set. An upgrade is lost with
+  its ability (death, SECOND WIND, WICKED CLOWN used up). The HUD code gains a count, TRK, TRK1, TRK2, and
+  POWER UPS lists the upgrades under their ability. The Little Girl has no SHOP page: a borrowed ability brings
+  whatever that slot has bought and switched ON for it.
+- The Jester's SHOP: TRICK SHOT: BOUNCE OFF ANY PLAYER (balls bounce back up off any player, not just him);
+  CROSS SCREEN (balls go off one side and in the other, and still fall through the floor). NEEDS FOOD BADLY:
+  INCREASE RANGE (half again as far); PULL CANDY (candy too). WICKED CLOWN: EXTRA USE (works twice before a
+  pumpkin is needed); X2 SAFETY (the hit that fires it leaves him safe twice as long, other hits not). JUGGLING
+  BALLS: EXTRA BOUNCY (balls bounce higher and longer before settling); EXTRA HIGH (kicks 12 px higher and 2 px
+  per LONGER SAFETY step instead of 1). I'M NOT A PINATA: ALL GUMBALLS (every piece is a gumball, so a box
+  costs more); JAW BREAKER (the pieces keep hurting all the way down, one hit per enemy, drawn as the rainbow
+  jaw breaker ball, and turn back into candy near the ground).
+- Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
+- The Little Girl's present costs her bag the same candy it costs her stash, so catching her own pieces can't
+  fill it for her.
 - THE LITTLE GIRL is a secret sixth character: pigtails, a dress in the player's colour, green eyes and her
   trick or treat bucket. While a slot doesn't own her, picking RANDOM (the "?" in the picker, or RANDOM as the
   favourite) rolls her 1 time in 10. She has no SPECIAL stat and no abilities of her own. At the start of a
