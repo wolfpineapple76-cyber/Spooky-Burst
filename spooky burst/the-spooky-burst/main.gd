@@ -550,6 +550,7 @@ var open_cache: Array = [true, false, false, false]
 var open_cache_t := -99.0
 var girl_next := false     # /debug littlegirl: the next RANDOM roll is her
 var sup := false           # CHARACTERS: the SHOP page of a character's upgrades is open
+var scol := 0              # the SHOP page: which of the row's two upgrades the cursor is on
 var POW_SRC := {}          # ability key -> the character it belongs to
 var UP_INFO := {}          # shop upgrade key -> {"ch", "pow", "up": [key, name, what it does]}
 var lcg := 7
@@ -4715,20 +4716,22 @@ func shop_items() -> Array:
 			else:
 				items.append({"kind": "char", "i": i, "row": [chars[i].name, "OWNED", false]})
 	elif sup:
-		# the SHOP page: two upgrades under each ability, greyed until that ability is bought
+		# the SHOP page: one row per ability, its two upgrades side by side (scol picks one), greyed until that
+		# ability is bought. Each cell: [name, its price or ON / OFF, greyed]
 		var own := owns(stab, sch)
 		var got := has_char(stab, sch)
 		var oup := owns_up(stab, sch)
 		for w in chars[sch].pow:
 			var have_pow: bool = got and own.has(w[0])
+			var cells := []
 			for u in ups_of(sch).get(w[0], []):
 				if not oup.has(u[0]):
-					items.append({"kind": "up", "k": u[0], "pow": w, "u": u, "have_pow": have_pow,
-						"row": [u[1], "%d CANDY" % UP_COST, not have_pow or c < UP_COST]})
+					cells.append([u[1], str(UP_COST), not have_pow or c < UP_COST])
 				else:
 					var on := up_on(stab, sch, u[0])
-					items.append({"kind": "up", "k": u[0], "pow": w, "u": u, "have_pow": have_pow,
-						"row": [u[1], "ON" if on else "OFF", not have_pow or not on]})
+					cells.append([u[1], "ON" if on else "OFF", not have_pow or not on])
+			items.append({"kind": "uprow", "pow": w, "ups": ups_of(sch).get(w[0], []), "cells": cells, "have_pow": have_pow,
+				"row": [w[1], "", not have_pow]})
 	else:
 		# switching tabs keeps this page open, so it may show a character this player hasn't bought yet:
 		# then the top row buys it, and its upgrades stay greyed out until it's bought
@@ -4753,10 +4756,14 @@ func shop_items() -> Array:
 func shop_rows() -> Array:
 	return shop_items().map(func(it): return it.row)
 
-# the item the cursor is on
+# the item the cursor is on: on the SHOP page, the one upgrade of the row that scol picks
 func shop_cur() -> Dictionary:
 	var items := shop_items()
-	return items[clampi(scur, 0, items.size() - 1)]
+	var it: Dictionary = items[clampi(scur, 0, items.size() - 1)]
+	if it.kind == "uprow":
+		var u: Array = it.ups[scol]
+		return {"kind": "up", "k": u[0], "pow": it.pow, "u": u, "have_pow": it.have_pow}
+	return it
 
 func maxed(n: int, ch: int) -> bool:
 	return has_char(n, ch) and owns(n, ch).size() == chars[ch].pow.size()
@@ -4813,9 +4820,8 @@ func shop_note() -> String:
 
 func draw_shop() -> void:
 	var rows := shop_rows()
-	# the SHOP page has ten rows plus BACK, so it starts higher and packs its rows closer
-	var y := 80.0 if sup else 104.0
-	var rs := 22 if sup else 26
+	var y := 104.0
+	var rs := 26
 	# a character's page has its description line under the name, so its rows start a bit lower
 	var dy := 10 if sch >= 0 else 0
 	draw_box(y, 116 + dy + rows.size() * rs)
@@ -4835,12 +4841,23 @@ func draw_shop() -> void:
 			T("SPECIAL: %s +%d" % [sp[1], chars[sch].tr[sp[0]]], 560, y + 72, 1, "#9d8cc4", 2)
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
 	var ry := y + 84 + dy
+	var items := shop_items()
 	for i in rows.size():
 		var r: Array = rows[i]
 		var dim: bool = r[2]
 		T(("> " if scur == i else "  ") + r[0], 80, ry, 2, "#9d8cc4" if dim and scur != i else "#f6f1ff")
 		if r[1] != "":
 			T(r[1], 560, ry + 3, 2, "#9d8cc4" if dim else "#ffd92e", 2)
+		# the SHOP page: the ability's two upgrades in two columns, the cursor's one highlighted
+		if items[i].kind == "uprow":
+			for j in items[i].cells.size():
+				var cell: Array = items[i].cells[j]
+				var cx: int = 300 + j * 140
+				var here: bool = scur == i and scol == j
+				if here:
+					R(cx - 4, ry - 2, 136, 22, "#f6f1ff", 0.12)
+				T(cell[0], cx, ry + 1, 1, "#9d8cc4" if cell[2] and not here else "#f6f1ff")
+				T(cell[1], cx, ry + 11, 1, "#9d8cc4" if cell[2] else "#ffd92e")
 		ry += rs
 	T(shop_note(), 80, ry + 4, 1, "#ff8a1f" if smsg != "" else "#f6f1ff")
 	if spre >= 0:
@@ -4875,6 +4892,7 @@ func shop_choose() -> void:
 		"shop":
 			sup = true
 			scur = 0
+			scol = 0
 			sfx("select")
 		"pre":
 			if pre_why(stab, sch) != "" or mode == "pause":
@@ -5244,6 +5262,11 @@ func in_shop() -> bool:
 func menu_side(d: int) -> void:
 	if mode == "menu" and panel == "settings":
 		settings_change(d)
+	elif in_shop() and sup and spre < 0:
+		# the SHOP page: left / right pick the row's upgrade (Q / E and LB / RB still switch player)
+		scol = 1 - scol
+		smsg = ""
+		sfx("move")
 	elif in_shop():
 		shop_tab(d)
 
@@ -5727,9 +5750,13 @@ func on_key(k: int) -> void:
 			menu_move(-1)
 		elif k == KEY_DOWN or k == KEY_S:
 			menu_move(1)
-		elif k in [KEY_LEFT, KEY_A, KEY_Q]:
+		elif k == KEY_LEFT or k == KEY_A:
+			menu_side(-1)
+		elif k == KEY_RIGHT or k == KEY_D:
+			menu_side(1)
+		elif k == KEY_Q:
 			shop_tab(-1)
-		elif k in [KEY_RIGHT, KEY_D, KEY_E]:
+		elif k == KEY_E:
 			shop_tab(1)
 		elif k == KEY_SPACE or k == KEY_ENTER:
 			shop_choose()
@@ -5849,6 +5876,8 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 			menu_move(-1)
 		if hit.call("down"):
 			menu_move(1)
+		if sup and (hit.call("left") or hit.call("right")):
+			menu_side(1)
 		if hit.call("lb"):
 			shop_tab(-1)
 		if hit.call("rb"):
@@ -5892,9 +5921,9 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 			menu_move(1)
 		# on a controller the CHARACTERS tabs use LB / RB, so left / right is left alone there
 		var shop_open: bool = in_shop()
-		if hit.call("left") and not shop_open:
+		if hit.call("left") and (not shop_open or sup):
 			menu_side(-1)
-		if hit.call("right") and not shop_open:
+		if hit.call("right") and (not shop_open or sup):
 			menu_side(1)
 		if shop_open and hit.call("lb"):
 			shop_tab(-1)

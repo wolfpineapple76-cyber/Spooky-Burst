@@ -218,8 +218,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   with their icon and what they hold right now, and only that: each ability as its code and name, their
   boosts, prestige, SUGAR RUSH and the Little Girl's random +1s.
 - THE SHOP: a character's page has a SHOP row above PRESTIGE once it's bought (only characters with upgrades
-  written so far show it; the Jester is first). The SHOP page lists two upgrades under each ability, 250 candy
-  each, and you can only buy one once that ability is unlocked. Bought ones can be switched ON or OFF from the
+  written so far show it). The SHOP page has one row per ability with its two upgrades side by side, each with
+  its price or ON / OFF; up and down move between abilities, left and right between the two, and the line at
+  the bottom describes the one the cursor is on. 250 candy each, and you can only buy one once that ability is
+  unlocked. Bought ones can be switched ON or OFF from the
   main menu (buy only from the pause). They're saved apart from the abilities, so PRESTIGE leaves them bought:
   they sit dormant until the ability is bought back. In a run, the glowing pumpkin picks at random across
   everything available: abilities you don't hold, plus the bought, ON upgrades of the abilities you do hold.
