@@ -68,7 +68,7 @@ const TELL_S := 0.25
 const TELL_B := 0.3
 const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "G": "#8fd66a", "k": "#1b0f33", "B": "#a8743a", "Y": "#ffd92e",
 	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420", "D": "#3a2252", "N": "#4a2f5a",
-	"H": "#e0213f", "L": "#7a5a8e", "Q": "#2a1830"}
+	"H": "#e0213f", "L": "#7a5a8e", "Q": "#2a1830", "x": "#ff3b5c"}
 const WEBPAL := {"w": "#e6e0f5"}
 # the PRIMAL BAT's sound wave shot: three little arcs
 const SOUND := ["..b...b..", "...bbb...", ".a.....a.", "..aaaaa..", "c.......c", ".ccccccc."]
@@ -4172,8 +4172,6 @@ func tell_pal(e: Dictionary) -> Dictionary:
 	var key := ""
 	if e.ty == "v" and int(floor((TELL_V - tl) / (TELL_V / 6.0))) % 2 == 0:
 		key = "v"
-	elif e.ty == "w" and tl > TELL_W * 0.4:
-		key = "w"
 	elif e.ty == "s" and tl > TELL_S * 0.4:
 		key = "s"
 	if key == "":
@@ -4183,12 +4181,21 @@ func tell_pal(e: Dictionary) -> Dictionary:
 		match key:
 			"v":
 				o.r = "#1b0f33"
-			"w":
-				o.k = "#ff3b5c"
 			"s":
 				o.r = "#7dff5a"
 		tell_pals[key] = o
 	return tell_pals[key]
+
+# the witch's sprite: her eye alone goes red during her tell (a palette swap would redden her boot too)
+var witch_tell := {}
+func witch_spr(e: Dictionary) -> Array:
+	var right: bool = e.get("face", 1) > 0
+	var tl: float = e.get("tell", 0.0)
+	if tl <= 0 or tl <= TELL_W * 0.4:
+		return WITCH if right else WITCH_L
+	if witch_tell.is_empty():
+		witch_tell = {true: _alt(WITCH, {5: "...GxGGG...."}), false: _alt(WITCH_L, {5: "....GGGxG..."})}
+	return witch_tell[right]
 
 func draw_game() -> void:
 	var gt: float = G.t
@@ -4310,7 +4317,7 @@ func draw_game() -> void:
 			spr(SPIDER, tell_pal(e), sx - 11, sy - 9, 2, fl)
 		else:
 			if e.ty == "w":
-				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, tell_pal(e), x - 1, int(round(e.y)) - 9, 2, fl)
+				spr(witch_spr(e), tell_pal(e), x - 1, int(round(e.y)) - 9, 2, fl)
 			else:
 				spr(VAMP, tell_pal(e), x, int(round(e.y)) - 8, 2, fl)
 	if G.rot != null:
