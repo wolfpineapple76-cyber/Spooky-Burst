@@ -227,8 +227,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   everything available: abilities you don't hold, plus the bought, ON upgrades of the abilities you do hold.
   Boosts start once all of that is held, so it's about fifteen pumpkins to a full set. An upgrade is lost with
   its ability (death, SECOND WIND, WICKED CLOWN used up). The HUD code gains a count, TRK, TRK1, TRK2, and
-  POWER UPS lists the upgrades under their ability. The Little Girl has no SHOP page: a borrowed ability brings
-  whatever that slot has bought and switched ON for it.
+  POWER UPS lists the upgrades under their ability. The Little Girl has no SHOP page: once she holds a borrowed
+  ability, its SHOP upgrades can drop for her from later pumpkins too, if that slot has bought and switched them ON.
 - The Jester's SHOP: TRICK SHOT: BOUNCE OFF ANY PLAYER (balls bounce back up off any player, not just him);
   CROSS SCREEN (balls go off one side and in the other, and still fall through the floor). NEEDS FOOD BADLY:
   INCREASE RANGE (half again as far); PULL CANDY (candy too). WICKED CLOWN: EXTRA USE (works twice before a
