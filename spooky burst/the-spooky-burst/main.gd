@@ -141,6 +141,9 @@ const TBALL_B := ["...ccc...", "..cWccc..", ".cWccccc.", "cWccccccc", "ccccccccc
 # NINE LIVES: a halo over the head while the shield is ready; the hit takes it, it comes back as it recharges
 const HALO := ["..YYYYYY..", ".Y......Y.", "..YYYYYY.."]
 const HALOPAL := {"Y": "#ffd92e"}
+# WIGGLE TAIL: a tail beside him while no swipe is out, flicking left on one walk frame and right on the other
+const TAIL_L := ["T..", "T..", "TT.", ".TT", "..T"]
+const TAIL_R := ["..T", "..T", ".TT", "TT.", "T.."]
 const JUGBALL := ["..ccccc..", ".ccWlccc.", "cWllccccc", "cWlcccccc", "ccccccccc", "ccccccccc", "cccccccdc", ".cccccdd.", "..ddddd.."]
 # the ball turned by quarter turns, so it rolls
 var jug_rot := {}
@@ -4591,6 +4594,15 @@ func draw_game() -> void:
 		if p.web > 0:
 			spr(WEBSHOT, WEBSHOTPAL, px - 9, 203 + bob, 2)
 		var fr := int(floor(gt * 4 + i)) % 2
+		# WIGGLE TAIL at rest: the tail flicks with his steps, in his colour, behind him
+		if p.eq.has("tail") and p.get("tl") == null:
+			# on the Little Girl it's a cat's tail in the Cat's colour, tucked in to her narrower body
+			var girl: bool = p.ch == GIRL_CH
+			var tc := {"T": chars[1].pals[0].values()[0] if girl else char_pal(p.ch, p.n).values()[0]}
+			if fr == 0:
+				spr(TAIL_L, tc, px - (12 if girl else 16), 210 + bob, 2)
+			else:
+				spr(TAIL_R, tc, px + (8 if girl else 10), 210 + bob, 2)
 		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
 		if gol(p) == 1:
 			# FLESH GOLEM: the taller, wider Zombie, feet on the same floor
