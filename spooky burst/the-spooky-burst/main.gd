@@ -2800,6 +2800,7 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 		for i in made[0].size():
 			var s: Dictionary = made[0][i]
 			var b: Dictionary = s.duplicate()
+			b.ofbone = bone
 			if bone:
 				b.x = (s.x + made[1][i].x) / 2.0
 			b.y = s.y + 8.0
@@ -3738,7 +3739,7 @@ func update(dt: float) -> void:
 		if s.has("stick"):
 			var e: Dictionary = s.stick
 			s.stick_t -= dt
-			s.x = e.x + s.stick_dx
+			s.x = e.x + s.stick_dx + sin(s.stick_t * 40.0) * 3.0   # wiggling side to side while it clings
 			s.y = e.y + 6.0
 			s.py = s.y
 			if e.dead or e.laugh > 0:
@@ -3805,7 +3806,7 @@ func update(dt: float) -> void:
 			var mt: Dictionary = s.mate
 			var mid := Vector2((s.x + mt.x) / 2.0, (s.y + mt.y) / 2.0)
 			var r := 7.0 if s.get("bigb", false) else 4.0
-			s.tw += 7.0 * dt
+			s.tw += TAU * 2.0 * dt
 			s.x = mid.x - cos(s.tw) * r
 			s.y = mid.y - sin(s.tw) * r
 			mt.x = mid.x + cos(s.tw) * r
@@ -4561,18 +4562,22 @@ func draw_game() -> void:
 			spr_mid(fi, fp, x, y, sc)
 			continue
 		if s.get("baby", false):
-			# BABY BACK RIBS: a small dot of the shot colour
-			R(x - 1, y - 1, 3, 3, col)
+			# BABY BACK RIBS: a small dot, bone-coloured behind a bone, the shot colour behind an orb
+			R(x - 1, y - 1, 3, 3, "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false) if s.get("ofbone", false) else col)
 			continue
 		if s.bone:
 			var bp := {"w": "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false)}
 			var m = s.get("mate")
 			var bigk: bool = bg or s.get("bigb", false)   # BIG BONE: the knuckles a size up
-			if m != null and not m.dead and s.get("lead", false):
-				if s.get("twirl", false):
+			if s.get("twirl", false) and m != null and not m.dead:
+				# TWIRL BONE: the shaft (drawn once, from the lead end) and a round knob on each end
+				if s.get("lead", false):
 					pline(s.x, s.y, m.x, m.y, 2 * sc, bp.w)
-				elif s.x < m.x:
-					R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
+				var kb: Array = ORB_B if bigk else ORB
+				spr_mid(kb, {"c": bp.w}, x, y, sc)
+				continue
+			if m != null and not m.dead and s.get("lead", false) and s.x < m.x:
+				R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
 			# each end grows outward from the shaft, so the bone stays joined
 			var left: bool = m == null or s.x < m.x
 			var be: Array = (BONE_LB if bigk else BONE_L) if left else (BONE_RB if bigk else BONE_R)
