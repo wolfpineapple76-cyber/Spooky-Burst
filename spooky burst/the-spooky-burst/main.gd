@@ -482,7 +482,7 @@ const LEAN_TIME := 1.0
 # SOUL MATE and GHOSTRESS: small ghosts that trail you along the ground. HELP_Y is the middle of them.
 const HELP_Y := 212.0
 # SOUL MATE fires 3 volleys back for every enemy shot or enemy that touches her, this far apart
-const SOUL_GAP := 0.07
+const SOUL_GAP := 0.2
 
 # 5x7 pixel font, drawn in code so the project needs no font file.
 const GLYPHS := {
@@ -1470,7 +1470,7 @@ func start_game(pad: int, side := "wasd") -> void:
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "after": "", "clearing": 0.0,
 		"high": int(sv("high", 0)), "pks": [], "pk_t": 5.0, "pk_done": false, "bonus_t": -1.0,
 		"hpup": 0, "settle": 0.0, "cad": 0.0, "webs": [], "sp_q": [], "sp_more": 0, "gap": {"c": 0.0, "v": 0.0}, "arcs": [], "gifts": [], "pieces": [], "slash": null,
-		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0, "eslow": 1.0}
+		"shake": 0.0, "boom": null, "rot": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0, "eslow": 1.0, "fslow": 1.0}
 	var slot := maxi(0, free_slot({"pad": pad, "side": side}))
 	# everyone they had is prestiged and not bought back yet: off to CHARACTERS to buy one
 	if owned_chars(slot).is_empty():
@@ -3153,9 +3153,17 @@ func soul_catch(o: Dictionary):
 			return p
 	return null
 
-# ROT FOOD: candy, buckets, apples (every drop) fall at 60% while a Zombie with it is in the game
+# the ROT curve: 1 with nobody, then 75%, 63%, 56%, 53%... as more live players hold the ability (and the
+# upgrade, if one is named): each further one adds half of what the last did
+func rot_curve(pow_key: String, up_key: String) -> float:
+	var n := 0
+	for p in G.players:
+		if not p.out and p.eq.has(pow_key) and (up_key == "" or p.eq.has(up_key)):
+			n += 1
+	return 1.0 - 0.5 * (1.0 - pow(0.5, n))
+
 func food_slow() -> float:
-	return 0.6 if G.players.any(func(p): return not p.out and p.eq.has("slow") and p.eq.has("rtfood")) else 1.0
+	return G.get("fslow", 1.0)
 
 func boss_up() -> bool:
 	return G.en.any(func(e): return e.ty == "B" and not e.dead)
@@ -3570,15 +3578,12 @@ func update(dt: float) -> void:
 		if o.t <= 0:
 			G.boom = null
 	G.t += dt
-	# ROT CLOUD: the first slows enemy shots by 25%, each further one by half the last (75%, 63%, 56%, 53%...)
-	G.slow = 1.0
-	var clouds := 0
-	for p in G.players:
-		if not p.out and p.eq.has("slow"):
-			clouds += 1
-	G.slow = 1.0 - 0.5 * (1.0 - pow(0.5, clouds))
-	# ROT CORPSE: the graveyard and mansion enemies move 15% slower (bosses keep their pace)
-	G.eslow = 0.85 if G.players.any(func(p): return not p.out and p.eq.has("slow") and p.eq.has("rtcorpse")) else 1.0
+	# ROT CLOUD: the first slows enemy shots by 25%, each further one by half the last (75%, 63%, 56%, 53%...).
+	# ROT CORPSE (the graveyard and mansion enemies' movement; bosses keep their pace) and ROT FOOD (falling candy
+	# and drops) sit on the same curve, counted by the Zombies holding each
+	G.slow = rot_curve("slow", "")
+	G.eslow = rot_curve("slow", "rtcorpse")
+	G.fslow = rot_curve("slow", "rtfood")
 	if G.bt > 0:
 		G.bt -= dt
 		if G.bt <= 0:
