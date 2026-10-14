@@ -160,6 +160,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - This version saves to a new file (spooky_burst_v2.cfg), so everyone starts fresh. Reset Save erases one player
   (their candy, characters, upgrades and prestige) or everything.
 
+## Sounds
+- Most sounds are tiny generated blips. The hiss (audio/hiss.wav) is "Cat hissing #2" by rickismyname on
+  Freesound, CC0 (public domain), cut to one hiss and converted to mono 22 kHz.
+
 ## Characters
 - The Black Cat is black for every player; players 2-4 have a coloured tummy matching their orbs.
 - NINE LIVES shows as the cat's tail curled up over his head while the shield is ready.
@@ -234,6 +238,17 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   candy worth 1 for anyone else; she can't catch it, and it costs the player nothing). GHOSTRESS: QUICK STUDY
   (her copies take your boosts: damage, shot speed and orb size; without it her copies are plain, abilities
   only); BRING A FRIEND (a second Ghostress trails further back while a boss is up).
+- The Cat's SHOP: LUCKY COIN: STOP SHOT (half the time a coin that meets an enemy shot destroys it and
+  itself); KNOCK SHOT (half the time a coin knocks an enemy shot straight back up, where it hits the first
+  enemy it meets for the coin's damage, and the coin is spent; webs and claws can't be knocked). CAT'S EYE:
+  SHARPER EYE (orbs curve harder); SECOND LOOK (an orb that leaves the top turns back down once and can hit on
+  the way, dying off the bottom). NINE LIVES: QUICK TAIL (recharges in 8 seconds instead of 15); HISS (the
+  block clears enemy shots within a cat width around him and above his head, with a real cat hiss). CAT
+  REFLEXES: POUNCE (the first ability on a button: Q and E for the left keyboard player, comma and period for
+  the arrows player, LB and RB on a controller; he jumps 26 px that way through anything in between, a puff
+  where he was, then a 5 second cooldown); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
+  LONG TAIL (1.5 cat widths beyond him, 48 px); TALL TAIL (grabs from above his head too, 26 px higher, Sugar
+  Rush included).
 - Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
 - The Little Girl's present costs her bag the same candy it costs her stash, so catching her own pieces can't
   fill it for her.

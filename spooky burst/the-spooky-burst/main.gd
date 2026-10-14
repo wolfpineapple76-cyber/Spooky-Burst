@@ -612,7 +612,13 @@ func _build_chars() -> void:
 			"tr": {"move": 2}, "desc": "AGILE AND DOESN'T LIKE BEING ATTACKED",
 			"pow": [["coin", "LUCKY COIN", "HALF KNOCK BACK, HALF HIT X2", "LCK"], ["home", "CAT'S EYE", "ORBS CURVE TOWARD ENEMIES", "EYE"],
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
-				["tail", "WIGGLE TAIL", "TAIL SNATCHES NEARBY CANDY", "WIG"]]},
+				["tail", "WIGGLE TAIL", "TAIL SNATCHES NEARBY CANDY", "WIG"]],
+			"ups": {
+				"coin": [["ckstop", "STOP SHOT", "HALF THE TIME A COIN AND A SHOT CANCEL OUT"], ["ckknock", "KNOCK SHOT", "HALF THE TIME A COIN KNOCKS A SHOT BACK"]],
+				"home": [["eysharp", "SHARPER EYE", "ORBS CURVE HARDER"], ["eylook", "SECOND LOOK", "AN ORB THAT MISSES TURNS BACK ONCE"]],
+				"shield": [["nlquick", "QUICK TAIL", "RECHARGES IN 8 SECONDS, NOT 15"], ["nlhiss", "HISS", "A BLOCK CLEARS THE SHOTS AROUND HIM"]],
+				"swift": [["swpounce", "POUNCE", "Q E, < > OR LB RB: JUMP 26 PX, 5 S COOLDOWN"], ["swzoom", "ZOOMIES", "RUN OFF ONE SIDE AND IN THE OTHER"]],
+				"tail": [["tllong", "LONG TAIL", "REACHES 1.5 CAT WIDTHS"], ["tltall", "TALL TAIL", "GRABS FROM ABOVE HIS HEAD TOO"]]}},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
 			"spr2": _alt(ZOMB, {7: "G.GGGGGGGG.G", 9: "..SSSSSSSS..", 12: ".PPP....PPP."}),
 			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#3a3450", "P": "#6a5a8a"},
@@ -715,7 +721,7 @@ func _build_audio() -> void:
 			st.loop_end = int(st.get_length() * st.mix_rate)
 		tracks.append(st)
 	for n in ["move", "select", "back", "deny", "shoot0", "shoot1", "pop", "bosshit", "hurt", "shield", "roar", "clear", "unlock",
-			"life", "treat", "candy", "gameover", "cackle", "squeak", "trick", "join", "boom", "spread", "dash", "ring", "laugh"]:
+			"life", "treat", "candy", "gameover", "cackle", "squeak", "trick", "join", "boom", "spread", "dash", "ring", "laugh", "hiss"]:
 		var p := AudioStreamPlayer.new()
 		p.stream = load("res://audio/%s.wav" % n)
 		p.max_polyphony = 4
@@ -1317,7 +1323,7 @@ func say(s: String, dur: float) -> void:
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
-		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0, "roll": {}, "sroll": {}}
+		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0, "roll": {}, "sroll": {}, "pcd": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -2029,10 +2035,16 @@ func wicked(p: Dictionary) -> bool:
 
 func hurt(p: Dictionary) -> void:
 	if p.eq.has("shield") and p.sh <= 0:
-		p.sh = 15.0
+		p.sh = 8.0 if p.eq.has("nlquick") else 15.0   # QUICK TAIL recharges faster
 		p.inv = 1.0
 		burst(p.x, 209, "#7df2ff", 14)
 		sfx("shield")
+		# HISS: the block clears enemy shots within a cat width around him and above his head
+		if p.eq.has("nlhiss"):
+			for b in G.eb:
+				if not b.dead and absf(b.x - p.x) < 24 and b.y > 209 - 26 and b.y < 209 + 14:
+					b.dead = true
+			sfx("hiss")
 		return
 	p.lives -= 1
 	if p.eq.has("pinata"):
@@ -2672,7 +2684,10 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 				"bell": jest and not trick, "tb": trick,
 				# the Ghost's SHOP upgrades: SPOOKY and HAUNT (ghost shots), WON'T STOP, SOLID SPIRIT, THROUGH WEBS
 				"spooky": gs and p.eq.has("gsspooky"), "haunt": gs and p.eq.has("gshaunt"), "back": p.eq.has("rsback"),
-				"solid": p.eq.has("spsolid"), "webs": p.eq.has("spectral") and p.eq.has("spweb")}
+				"solid": p.eq.has("spsolid"), "webs": p.eq.has("spectral") and p.eq.has("spweb"),
+				# the Cat's: SHARPER EYE, SECOND LOOK, STOP SHOT and KNOCK SHOT (coins against enemy shots)
+				"sharp": p.eq.has("home") and p.eq.has("eysharp"), "look": p.eq.has("home") and p.eq.has("eylook"),
+				"stop": p.eq.has("coin") and p.eq.has("ckstop"), "knock": p.eq.has("coin") and p.eq.has("ckknock")}
 			if trick:
 				# TRICK SHOT: a ball doing 1 damage (boosted as usual) with no limit on hits
 				s.dmg = 1.0 if plain else 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
@@ -2785,20 +2800,23 @@ func got_candy(k: Dictionary, p: Dictionary) -> void:
 const TAIL_OUT := 0.1
 const TAIL_BACK := 0.4
 const TAIL_EARLY := 8.0
+# LONG TAIL reaches 1.5 cat widths beyond him; TALL TAIL also grabs from above his head (26 px higher)
 func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
 		if not p.eq.has("tail"):
 			continue
 		var dx := absf(o.x - p.x)
-		if dx < 36.0 + TAIL_EARLY and o.y > 188.0 - TAIL_EARLY and o.y < 224:
+		var reach := 12.0 + (36.0 if p.eq.has("tllong") else 24.0)
+		var top := 188.0 - (26.0 if p.eq.has("tltall") else 0.0)
+		if dx < reach + TAIL_EARLY and o.y > top - TAIL_EARLY and o.y < 224:
 			if p.get("tl") == null:
 				# the swipe always goes the full reach on that side, at its height
-				var rx := 36.0 if o.x >= p.x else -36.0
+				var rx := reach if o.x >= p.x else -reach
 				# with NINE LIVES the curl wags instead, and the wag to the left takes longer (see draw_tail)
 				var wag: bool = p.eq.has("shield") and p.sh <= 0
-				p.tl = {"t": 0.0, "rx": rx, "ty": maxf(o.y, 188.0), "wag": wag,
+				p.tl = {"t": 0.0, "rx": rx, "ty": maxf(o.y, top), "wag": wag,
 					"end": WAG_LEFT[-1][0] if wag and rx < 0 else TAIL_OUT + TAIL_BACK}
-			if dx < 36.0 and o.y > 188:
+			if dx < reach and o.y > top:
 				if o.has("k"):
 					catch_drop(o, p)
 				else:
@@ -3344,6 +3362,26 @@ func web_wall(x: float) -> void:
 		if G.webs.filter(func(wb): return absf(web_x(wb, form_sway()) - wx) < 14 and absf(wb.y - 116) < 6).is_empty():
 			G.webs.append({"hx": wx, "y": 116.0, "hp": WEB_HP, "own": null, "fixed": true, "g": 0.0})
 
+# POUNCE: the first ability on a button. Q / E for the left keyboard player, comma / period for the arrows
+# player, LB / RB on a controller: the Cat jumps 26 px that way (through anything in between), then a 5 second
+# cooldown. A puff where he left.
+const POUNCE_PX := 26.0
+const POUNCE_CD := 5.0
+func pounce(p, d: int) -> void:
+	if p == null or p.out or mode != "game" or not p.eq.has("swpounce") or p.pcd > 0:
+		return
+	burst(p.x, 209, "#cbbcff", 10)
+	p.x = clampf(p.x + POUNCE_PX * d, 14, 306)
+	p.pcd = POUNCE_CD
+	sfx("dash")
+
+# the keyboard player a pounce key belongs to: Q / E the left (wasd) side, comma / period the right (arrows)
+func kb_player(side: String):
+	for p in G.players:
+		if p.kb == side or p.kb == "both":
+			return p
+	return null
+
 func player_input(p: Dictionary) -> Dictionary:
 	var dir := 0.0
 	var fire := false
@@ -3411,6 +3449,12 @@ func update(dt: float) -> void:
 		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * lvl(p, "move")) * stuck * dt
 		if p.sh > 0:
 			p.sh -= dt
+		p.pcd = maxf(0.0, p.pcd - dt)
+		# ZOOMIES: running into a side comes out the other
+		if p.eq.has("swzoom") and p.x < 14 and I.dir < 0:
+			p.x = 306.0
+		elif p.eq.has("swzoom") and p.x > 306 and I.dir > 0:
+			p.x = 14.0
 		p.x = clampf(p.x, 14, 306)
 		track_lean(p, (p.x - ox) / dt if dt > 0 else 0.0, dt)
 		if I.dir != 0:
@@ -3471,7 +3515,9 @@ func update(dt: float) -> void:
 				if e.y < s.y and (best == null or absf(e.x - s.x) < absf(best.x - s.x)):
 					best = e
 			if best != null:
-				if s.hm:
+				if s.hm and s.get("sharp", false):
+					s.vx = clampf(s.vx + signf(best.x - s.x) * 900 * dt, -200, 200)
+				elif s.hm:
 					s.vx = clampf(s.vx + signf(best.x - s.x) * 500 * dt, -130, 130)
 				else:
 					s.vx = clampf(s.vx + signf(best.x - s.x) * 180 * dt, -70, 70)
@@ -3492,8 +3538,34 @@ func update(dt: float) -> void:
 			s.py = s.y
 			s.dmg *= 0.5
 			s.hit = []
-		if s.y < -6 or s.x < -6 or s.x > 326:
+		# SECOND LOOK: an orb that leaves the top turns back down once (and dies off the bottom)
+		if s.y < -6 and s.get("look", false) and not s.get("looked", false):
+			s.looked = true
+			s.sp = -s.sp
+			s.y = -5.0
+			s.py = s.y
+		if s.y < -6 or s.x < -6 or s.x > 326 or s.y > 246:
 			s.dead = true
+		# STOP SHOT and KNOCK SHOT: a coin meeting an enemy shot: half the time they cancel out, or half the time it
+		# knocks the shot back up at the enemies and is spent
+		if (s.get("stop", false) or s.get("knock", false)) and not s.dead:
+			for b in G.eb:
+				if b.dead or b.k == "web" or b.k == "claw" or b.get("knocked", false) or absf(b.x - s.x) > 8 or absf(b.y - s.y) > 8:
+					continue
+				if s.get("stop", false) and randf() < 0.5:
+					b.dead = true
+					s.dead = true
+					burst(s.x, s.y, "#ffe45c", 8)
+					sfx("pop")
+					break
+				if s.get("knock", false) and randf() < 0.5:
+					b.knocked = true
+					b.kdmg = s.dmg
+					b.vx = 0.0
+					b.vy = -200.0
+					s.dead = true
+					sfx("pop")
+					break
 
 	# the glowing pumpkins that carry a power-up: one each wave, plus a rare bonus one up high
 	if not G.pk_done:
@@ -3683,6 +3755,18 @@ func update(dt: float) -> void:
 			b.vy = minf(b.vy + 120 * dt, 170)
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
+		# KNOCK SHOT sent it back up: it hits the first enemy it meets for the coin's damage
+		if b.get("knocked", false):
+			for e in G.en:
+				if not e.dead and e.laugh <= 0 and absf(b.x - e.x) < (27 if e.ty == "B" else 11) and absf(b.y - e.y) < (20 if e.ty == "B" else 9):
+					e.hp -= b.kdmg
+					e.flash = 0.1
+					b.dead = true
+					if e.hp <= 0:
+						down(e)
+					else:
+						sfx("bosshit")
+					break
 		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
 			b.x = b.x0 + signf(b.x - b.x0) * 24.0
 			b.vx = 0.0
@@ -3777,7 +3861,7 @@ func update(dt: float) -> void:
 			continue
 		var was_hit := false
 		for b in G.eb:
-			if not b.dead and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
+			if not b.dead and not b.get("knocked", false) and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
 				b.dead = true
 				# SPIDER BEAST's web sticks to you and slows you down for a moment instead of hurting
 				if b.k == "web":
@@ -5453,6 +5537,10 @@ func on_key(k: int) -> void:
 			menu_key({"pad": -1, "side": "wasd"})
 		elif k == KEY_BACKSPACE:
 			menu_key({"pad": -1, "side": "arrows"})
+		elif k == KEY_Q or k == KEY_E:
+			pounce(kb_player("wasd"), -1 if k == KEY_Q else 1)
+		elif k == KEY_COMMA or k == KEY_PERIOD:
+			pounce(kb_player("arrows"), -1 if k == KEY_COMMA else 1)
 		return
 	if k == KEY_UP or k == KEY_W:
 		menu_move(-1)
@@ -5560,6 +5648,8 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 				pick_cancel(kp)
 		elif hit.call("start"):
 			menu_key(dev)
+		elif hit.call("lb") or hit.call("rb"):
+			pounce(dev_player(dev), -1 if hit.call("lb") else 1)
 	else:
 		if hit.call("up"):
 			menu_move(-1)
