@@ -4585,12 +4585,13 @@ func draw_game() -> void:
 		if p.out or mode == "over":
 			continue
 		var C: Dictionary = chars[p.ch]
-		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you
+		# SOUL MATE and GHOSTRESS can't be hurt, so they don't blink with you. They're ghosts whoever has them
+		# (the Little Girl can), so they're drawn with the Ghost's sprite
 		for h in [["gr2", "grp", ROSE, 6, -2], ["gr", "grp", ROSE, 6, -2], ["sm", "smp", BOW, 3, -2]]:
 			if p.has(h[0]):
 				var hx := int(round(p[h[0]].x)) - 6
 				var hb := 206 + int(round(sin(gt * 5 + i + h[3]) * 1))
-				spr(C.spr, helper_pal(p.n, h[1]), hx, hb, 1)
+				spr(chars[0].spr, helper_pal(p.n, h[1]), hx, hb, 1)
 				spr(h[2], ACCPAL, hx + h[3], hb + h[4], 1)
 		# JUGGLING BALLS don't blink when he does
 		for b in p.get("jb", []):
