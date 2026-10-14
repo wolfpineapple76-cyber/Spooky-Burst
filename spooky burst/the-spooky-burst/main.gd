@@ -574,6 +574,11 @@ var pal_cache := {}
 var mansion_tex: Texture2D
 
 # ---------------------------------------------------------------- setup
+# closing the window mid-game keeps the score so far
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and (mode == "game" or mode == "pause"):
+		save_scores(G.players)
+
 func _ready() -> void:
 	randomize()
 	cfg.load(SAVE_PATH)
@@ -1497,6 +1502,7 @@ func start_game(pad: int, side := "wasd") -> void:
 	open_picker({"pad": pad, "side": side})
 
 func next_wave() -> void:
+	save_scores(G.players)
 	G.wave += 1
 	var w: int = G.wave
 	G.pk_t = 4.0 + randf() * 4.0
@@ -1832,6 +1838,7 @@ func pick_ok(k: Dictionary) -> void:
 	sfx("join")
 
 func leave(p: Dictionary) -> void:
+	save_scores([p])   # they keep the best they were there for
 	G.players = G.players.filter(func(q): return not is_same(q, p))
 	G.shots = G.shots.filter(func(s): return s.o != p.n)
 	if not p.out:
@@ -1922,6 +1929,7 @@ func pause_choose() -> void:
 		leave(dev_player(m.dev))
 	else:
 		sfx("back")
+		save_scores(G.players)   # MAIN MENU keeps the score so far
 		to_menu()
 
 func to_menu() -> void:
@@ -2168,10 +2176,17 @@ func game_over() -> void:
 	mode = "over"
 	banner = ""
 	sfx("gameover")
-	sv_set("high", maxi(G.high, G.score))
+	save_scores(G.players)
+
+# The team's high score and best wave, and each given player's best (the team's score and wave, if it beats
+# theirs), saved to disk. Done at the start of every wave, at game over, going to MAIN MENU, closing the window, and
+# for a player who QUITs, so a crash loses at most the wave being played.
+func save_scores(ps: Array) -> void:
+	if G.is_empty():
+		return
+	sv_set("high", maxi(int(sv("high", 0)), G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
-	# each player in the game keeps the team's score and wave as their own best, if it beats it
-	for p in G.players:
+	for p in ps:
 		sv_set(pkey(p.n, "best"), maxi(int(sv(pkey(p.n, "best"), 0)), G.score))
 		sv_set(pkey(p.n, "bestw"), maxi(int(sv(pkey(p.n, "bestw"), 0)), G.wave))
 
