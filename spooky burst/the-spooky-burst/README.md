@@ -199,6 +199,12 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   side, or 12 px short of the top row's height, then bursts; the pieces hit enemies on the way out (1 damage,
   gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can
   pay for, with none nothing.
+- The pause menu (Esc, P or Start in a game) has CHARACTERS and POWER UPS next to PLAYER SETUP. CHARACTERS
+  is the real shop over the paused game, on the tab of whoever paused: buy characters and upgrades with the
+  candy you have, and a new character is in the JOIN picker straight away. A fresh upgrade is ON; switching ON
+  or OFF and PRESTIGE wait for the main menu (greyed, with a note). POWER UPS lists each player in the game
+  with their icon and what they hold right now, and only that: each ability as its code and name, their
+  boosts, prestige, SUGAR RUSH and the Little Girl's random +1s.
 - THE LITTLE GIRL is a secret sixth character: pigtails, a dress in the player's colour, green eyes and her
   trick or treat bucket. While a slot doesn't own her, picking RANDOM (the "?" in the picker, or RANDOM as the
   favourite) rolls her 1 time in 10. She has no SPECIAL stat and no abilities of her own. At the start of a

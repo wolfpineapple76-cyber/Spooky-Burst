@@ -107,6 +107,12 @@ MENUS AND CONTROLS
   size; the cut's back rim curves up behind him in pale flesh and the top of his collar just shows over the front.
 - Settings: full screen and windowed are separate from window size. Window sizes are clean multiples
   of the game size, and real 16:9 can come later.
+- Pause menu: "In game pause menu should give you access to the Characters screen so you can spend candy to
+  unlock characters and abilities without going back to the main menu but it should not let you choose to set
+  them as off or on from in game, if you buy one it defaults as on." PRESTIGE also waits for the main menu
+  (relocking a character mid-run is a mess). "it should also have a power ups menu that shows each player in
+  and what their power ups are", "only ones they have not any they dont have": icon, P number, abilities with
+  code and name, boosts, PRE / SUG / the girl's rolls.
 - Debug console for testing: ~ opens a command line along the bottom, Enter runs it, ~ or Esc closes it.
   The game pauses while it's open and every key goes to it. Commands start with "/".
     /debug stage 1 or /debug stage 2   start that stage at wave 1, with the HP boost it would have

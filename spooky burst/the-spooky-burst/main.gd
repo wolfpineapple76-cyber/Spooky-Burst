@@ -1759,8 +1759,8 @@ func close_menu() -> void:
 
 func pause_rows() -> Array:
 	var dev: Dictionary = G.menu.dev
-	return [["RESUME", "", false], ["JOIN", "", join_block(dev) != ""], ["PLAYER SETUP", "", false], ["QUIT", "", dev_player(dev) == null],
-		["MAIN MENU", "", false]]
+	return [["RESUME", "", false], ["JOIN", "", join_block(dev) != ""], ["PLAYER SETUP", "", false], ["CHARACTERS", "", false],
+		["POWER UPS", "", false], ["QUIT", "", dev_player(dev) == null], ["MAIN MENU", "", false]]
 
 func pause_move(d: int) -> void:
 	G.menu.sel = posmod(G.menu.sel + d, pause_rows().size())
@@ -1776,13 +1776,29 @@ func pause_choose() -> void:
 		setup_sel = 0
 		sfx("select")
 		return
+	if m.sel == 3:
+		# CHARACTERS from the pause: the real shop, on the tab of whoever paused. Buying works; ON / OFF and
+		# PRESTIGE wait for the main menu
+		var who = dev_player(m.dev)
+		m.shop = true
+		stab = who.n if who != null else 0
+		sch = -1
+		scur = 0
+		spre = -1
+		smsg = ""
+		sfx("select")
+		return
+	if m.sel == 4:
+		m.pows = true
+		sfx("select")
+		return
 	G.menu = null
 	mode = "game"
 	if m.sel == 0:
 		sfx("select")
 	elif m.sel == 1:
 		open_picker(m.dev)
-	elif m.sel == 3:
+	elif m.sel == 5:
 		leave(dev_player(m.dev))
 	else:
 		sfx("back")
@@ -4199,7 +4215,7 @@ func shop_rows() -> Array:
 				var on := is_on(stab, sch, w[0])
 				rows.append([w[1], "ON" if on else "OFF", not got or not on])
 		if pre_shown(stab, sch):
-			rows.append(["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != ""])
+			rows.append(["PRESTIGE %d/%d" % [prestige(stab, sch), PRESTIGE_MAX], "", pre_why(stab, sch) != "" or mode == "pause"])
 	rows.append(["BACK", "", false])
 	return rows
 
@@ -4236,12 +4252,16 @@ func shop_note() -> String:
 	if sch >= 0 and scur >= shop_top() and scur < shop_top() + chars[sch].pow.size():
 		return chars[sch].pow[scur - shop_top()][2] + "."
 	if sch >= 0 and scur == shop_top() + chars[sch].pow.size() and pre_shown(stab, sch):
+		if mode == "pause":
+			return "PRESTIGE FROM THE MAIN MENU."
 		var why := pre_why(stab, sch)
 		if why == "" and is_girl(sch):
 			return "RELOCK HER FOR A +1 BOOST TO ALL STATS, PERMANENTLY. SHE'S A SECRET AGAIN."
 		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
+	if sch >= 0 and mode == "pause":
+		return "BUY HERE. SWITCH ON OR OFF FROM THE MAIN MENU."
 	if sch >= 0:
 		return "ON UPGRADES CAN COME FROM THE GLOWING PUMPKIN. OFF ONES NEVER DO."
 	return "LB / RB OR LEFT / RIGHT: SWITCH PLAYER."
@@ -4312,7 +4332,7 @@ func shop_choose() -> void:
 			sfx("deny")
 		return
 	if scur == chars[sch].pow.size():
-		if pre_why(stab, sch) != "":
+		if pre_why(stab, sch) != "" or mode == "pause":
 			sfx("deny")
 		else:
 			spre = 0
@@ -4332,6 +4352,11 @@ func shop_choose() -> void:
 		else:
 			smsg = "NEED %d CANDY, P%d HAS %d." % [pc, stab + 1, c]
 			sfx("deny")
+		return
+	if mode == "pause":
+		# in game you can buy, not switch: a fresh one is ON already
+		smsg = "SWITCH IT ON OR OFF FROM THE MAIN MENU."
+		sfx("deny")
 		return
 	var off := lst(pkey(stab, "off." + id))
 	if off.has(k):
@@ -4399,6 +4424,8 @@ func shop_back() -> void:
 	elif sch >= 0:
 		scur = sch
 		sch = -1
+	elif mode == "pause":
+		G.menu.shop = false
 	else:
 		panel = ""
 	sfx("back")
@@ -4457,6 +4484,10 @@ func draw_ui() -> void:
 	if mode == "pause" and G.menu != null:
 		if G.menu.get("setup", false):
 			draw_setup()
+		elif G.menu.get("shop", false):
+			draw_shop()
+		elif G.menu.get("pows", false):
+			draw_pows()
 		else:
 			draw_pause()
 	elif mode == "over":
@@ -4467,12 +4498,58 @@ func draw_ui() -> void:
 			rows.append(["P%d CANDY" % (p.n + 1), "+%d" % p.got])
 		draw_panel("GAME OVER", rows, "PRESS SPACE FOR MENU")
 
+# POWER UPS, from the pause: each player in the game, what they hold this run and nothing they don't:
+# abilities (code and name), boosts, and the prestige / SUGAR RUSH / random-roll line
+func draw_pows() -> void:
+	var ps: Array = G.players.duplicate()
+	ps.sort_custom(func(a, b): return a.n < b.n)
+	var cols := []
+	var most := 1
+	for p in ps:
+		var lines := []
+		for w in pow_list(p.ch):
+			if p.eq.has(w[0][0]):
+				lines.append([w[0][3] + " " + w[0][1], "#ffd92e"])
+		for b in BOOSTS:
+			if bo(p, b[0]) > 0:
+				lines.append(["%s%d %s" % [b[3], bo(p, b[0]), b[1]], "#7df2ff"])
+		var pr := prestige(p.n, p.ch)
+		if pr > 0:
+			lines.append(["PRE %d PRESTIGE" % pr, "#c9a8ff"])
+		if int(p.get("sugar", 0)) > 0:
+			lines.append(["SUG %d SUGAR RUSH" % p.sugar, "#c9a8ff"])
+		for b in BOOSTS:
+			var r: int = int(p.get("roll", {}).get(b[0], 0)) + int(p.get("sroll", {}).get(b[0], 0))
+			if r > 0:
+				lines.append(["%s+%d %s" % [b[3], r, b[1]], "#c9a8ff"])
+		if lines.is_empty():
+			lines.append(["NOTHING YET", "#9d8cc4"])
+		cols.append(lines)
+		most = maxi(most, lines.size())
+	# the box is as tall as the longest list needs
+	var y := 100.0
+	var h := 120.0 + most * 12
+	draw_box(y, h)
+	T("POWER UPS", 80, y + 18, 3, "#ff8a1f")
+	for i in ps.size():
+		var p: Dictionary = ps[i]
+		var x := 72.0 + i * 126.0
+		var ry := y + 50.0
+		draw_texture_rect(tex(chars[p.ch].spr, char_pal(p.ch, p.n)), Rect2(x, ry, 24, 26), false)
+		T("P%d" % (p.n + 1), x + 30, ry + 2, 2, "#ffd92e")
+		T(chars[p.ch].name + (" (OUT)" if p.out else ""), x + 30, ry + 18, 1, "#9d8cc4")
+		ry += 36
+		for l in cols[i]:
+			T(l[0], x, ry, 1, l[1])
+			ry += 12
+	T("BACK: ESC, BACKSPACE, SPACE OR B", 320, y + h - 18, 1, "#9d8cc4", 1)
+
 func draw_pause() -> void:
 	var m: Dictionary = G.menu
 	var rows := pause_rows()
 	var who = dev_player(m.dev)
 	var y := 110.0
-	draw_box(y, 236)
+	draw_box(y, 312)
 	T("PAUSED", 80, y + 18, 3, "#ff8a1f")
 	var tag := ""
 	if who != null:
@@ -4488,7 +4565,7 @@ func draw_pause() -> void:
 	var why := ""
 	if m.sel == 1:
 		why = join_block(m.dev)
-	elif m.sel == 3 and who == null:
+	elif m.sel == 5 and who == null:
 		why = "YOU ARE NOT PLAYING"
 	if why != "":
 		T(why, 300, y + 58 + m.sel * 26, 1, "#ff8a1f")
@@ -4583,24 +4660,28 @@ func settings_change(d: int) -> void:
 		return
 	sfx("select")
 
+# CHARACTERS is open: from the main menu, or as a page of the pause menu
+func in_shop() -> bool:
+	return (mode == "menu" and panel == "shop") or (mode == "pause" and G.menu != null and G.menu.get("shop", false))
+
 # left / right in the menus: settings rows, and the player tabs in CHARACTERS
 func menu_side(d: int) -> void:
 	if mode == "menu" and panel == "settings":
 		settings_change(d)
-	elif mode == "menu" and panel == "shop":
+	elif in_shop():
 		shop_tab(d)
 
 func menu_move(d: int) -> void:
-	if mode != "menu":
+	if mode != "menu" and not in_shop():
 		return
 	sfx("move")
-	if panel == "":
-		sel = posmod(sel + d, MENU.size())
-	elif panel == "shop" and spre >= 0:
+	if in_shop() and spre >= 0:
 		spre = 1 - spre
-	elif panel == "shop":
+	elif in_shop():
 		scur = posmod(scur + d, shop_rows().size())
 		smsg = ""
+	elif panel == "":
+		sel = posmod(sel + d, MENU.size())
 	elif panel == "reset":
 		rsel = posmod(rsel + d, 6)
 	elif panel == "quit":
@@ -5058,6 +5139,27 @@ func on_key(k: int) -> void:
 	if (mode == "pause" and G.menu.get("setup", false)) or (mode == "menu" and panel == "setup"):
 		setup_key(k)
 		return
+	if mode == "pause" and G.menu.get("pows", false):
+		if G.menu.dev.pad < 0 and k in [KEY_ESCAPE, KEY_BACKSPACE, KEY_SPACE, KEY_ENTER, KEY_P]:
+			G.menu.pows = false
+			sfx("back")
+		return
+	if mode == "pause" and G.menu.get("shop", false):
+		if G.menu.dev.pad >= 0:
+			return
+		if k == KEY_UP or k == KEY_W:
+			menu_move(-1)
+		elif k == KEY_DOWN or k == KEY_S:
+			menu_move(1)
+		elif k in [KEY_LEFT, KEY_A, KEY_Q]:
+			shop_tab(-1)
+		elif k in [KEY_RIGHT, KEY_D, KEY_E]:
+			shop_tab(1)
+		elif k == KEY_SPACE or k == KEY_ENTER:
+			shop_choose()
+		elif k == KEY_ESCAPE or k == KEY_BACKSPACE:
+			shop_back()
+		return
 	if mode == "pause":
 		if G.menu.dev.pad >= 0:
 			return
@@ -5103,7 +5205,7 @@ func on_key(k: int) -> void:
 		menu_side(-1)
 	elif k == KEY_RIGHT or k == KEY_D:
 		menu_side(1)
-	elif (k == KEY_Q or k == KEY_E) and mode == "menu" and panel == "shop":
+	elif (k == KEY_Q or k == KEY_E) and in_shop():
 		shop_tab(-1 if k == KEY_Q else 1)
 	elif k == KEY_SPACE or k == KEY_ENTER:
 		menu_choose(-1, "wasd" if k == KEY_SPACE else "arrows")
@@ -5155,6 +5257,27 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 	if (mode == "pause" and G.menu.get("setup", false)) or (mode == "menu" and panel == "setup"):
 		setup_pad(d, hit)
 		return
+	if mode == "pause" and (G.menu.get("shop", false) or G.menu.get("pows", false)):
+		if G.menu.dev.pad != d:
+			return
+		if G.menu.get("pows", false):
+			if hit.call("sel") or hit.call("b") or hit.call("start") or hit.call("back"):
+				G.menu.pows = false
+				sfx("back")
+			return
+		if hit.call("up"):
+			menu_move(-1)
+		if hit.call("down"):
+			menu_move(1)
+		if hit.call("lb"):
+			shop_tab(-1)
+		if hit.call("rb"):
+			shop_tab(1)
+		if hit.call("sel"):
+			shop_choose()
+		elif hit.call("b") or hit.call("start") or hit.call("back"):
+			shop_back()
+		return
 	if mode == "pause":
 		if G.menu.dev.pad != d:
 			return
@@ -5186,14 +5309,14 @@ func pad_buttons(d: int, now: Dictionary, pv: Dictionary) -> void:
 		if hit.call("down"):
 			menu_move(1)
 		# on a controller the CHARACTERS tabs use LB / RB, so left / right is left alone there
-		var in_shop: bool = mode == "menu" and panel == "shop"
-		if hit.call("left") and not in_shop:
+		var shop_open: bool = in_shop()
+		if hit.call("left") and not shop_open:
 			menu_side(-1)
-		if hit.call("right") and not in_shop:
+		if hit.call("right") and not shop_open:
 			menu_side(1)
-		if in_shop and hit.call("lb"):
+		if shop_open and hit.call("lb"):
 			shop_tab(-1)
-		if in_shop and hit.call("rb"):
+		if shop_open and hit.call("rb"):
 			shop_tab(1)
 		if hit.call("sel"):
 			menu_choose(d)
