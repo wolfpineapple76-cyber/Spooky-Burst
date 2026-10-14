@@ -2170,6 +2170,10 @@ func game_over() -> void:
 	sfx("gameover")
 	sv_set("high", maxi(G.high, G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
+	# each player in the game keeps the team's score and wave as their own best, if it beats it
+	for p in G.players:
+		sv_set(pkey(p.n, "best"), maxi(int(sv(pkey(p.n, "best"), 0)), G.score))
+		sv_set(pkey(p.n, "bestw"), maxi(int(sv(pkey(p.n, "bestw"), 0)), G.wave))
 
 func launch_pk(y: float, bob: float) -> void:
 	var d := 1 if randf() < 0.5 else -1
@@ -5113,8 +5117,7 @@ func draw_ui() -> void:
 			T("ARROWS OR D-PAD: MOVE   SPACE OR A: SELECT   ESC OR START: QUIT   M: MUSIC", 320, 466, 1, "#9d8cc4", 1)
 			T("V. " + VERSION, 634, 466, 1, "#5a4d80", 2)
 		elif panel == "score":
-			draw_panel("HIGH SCORE", [["HIGH SCORE", "%06d" % int(sv("high", 0))], ["BEST WAVE", wave_text(int(sv("wave", 0))) if int(sv("wave", 0)) > 0 else "-"],
-				], "PRESS SPACE TO GO BACK")
+			draw_panel("HIGH SCORE", score_rows(), "PRESS SPACE TO GO BACK")
 		elif panel == "shop":
 			draw_shop()
 		elif panel == "setup":
@@ -5141,7 +5144,7 @@ func draw_ui() -> void:
 			rr.append(["ERASE ALL", ""])
 			var note := "ERASE ONE PLAYER, OR EVERYTHING?"
 			if rsel >= 1 and rsel <= MAX_PLAYERS:
-				note = "ERASE P%d'S CANDY, CHARACTERS, UPGRADES AND PRESTIGE?" % rsel
+				note = "ERASE P%d'S CANDY, CHARACTERS, UPGRADES, PRESTIGE AND BEST?" % rsel
 			elif rsel == 5:
 				note = "ERASE EVERY PLAYER, THE HIGH SCORE AND THE SETTINGS?"
 			draw_panel("RESET SAVE", rr, "", rsel, note)
@@ -5165,6 +5168,16 @@ func draw_ui() -> void:
 		for p in ps:
 			rows.append(["P%d CANDY" % (p.n + 1), "+%d" % p.got])
 		draw_panel("GAME OVER", rows, "PRESS SPACE FOR MENU")
+
+# the HIGH SCORE screen: the team's best, then each player who has played: the best team score and wave they were
+# there for
+func score_rows() -> Array:
+	var rows := [["HIGH SCORE", "%06d" % int(sv("high", 0))], ["BEST WAVE", wave_text(int(sv("wave", 0))) if int(sv("wave", 0)) > 0 else "-"]]
+	for n in MAX_PLAYERS:
+		var bw := int(sv(pkey(n, "bestw"), 0))
+		if bw > 0:
+			rows.append(["P%d BEST" % (n + 1), "%06d  S%d W%d" % [int(sv(pkey(n, "best"), 0)), stage_of(bw), shown_wave(bw)]])
+	return rows
 
 # break a line at spaces so each piece fits in w px at the small size; pieces after the first are indented
 func wrap_text(line: String, w: int) -> Array:
@@ -5432,7 +5445,7 @@ func menu_choose(pad: int, side := "wasd") -> void:
 		else:
 			settings_change(1)
 	elif panel == "reset":
-		# 1-4 erase that player's candy, characters, upgrades and prestige; 5 erases everything
+		# 1-4 erase that player's candy, characters, upgrades, prestige and best score; 5 erases everything
 		if rsel == 5:
 			cfg = ConfigFile.new()
 			cfg.save(SAVE_PATH)
