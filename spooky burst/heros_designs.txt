@@ -200,7 +200,10 @@ THE SHOP (character ability upgrades), Hero's idea "that might eventually replac
   all of your boosts until you buy that ability") / Bring a Friend ("during boss fights only a second Ghostress
   appears").
   Cat: LUCKY COIN: Stop Shot ("50% chance to destroy itself and an enemy shot when they collide") / Knock Shot
-  ("50% chance to knock an enemy shot back and destroy itself when they collide"). CAT'S EYE: Sharper Eye
+  ("50% chance to knock an enemy shot back and destroy itself when they collide"; later: "the cats knock back
+  shot should be a little more smooth but also I think not destroy the cats shot, the stop shot can but
+  knocking it back just a little in exchange for your shot vanishing instead of passing through is better for
+  the enemy not the player"). CAT'S EYE: Sharper Eye
   ("orbs curve harder") / Second Look ("an orb that misses turns once"). NINE LIVES: Quick Tail ("8 seconds
   instead of 15") / Hiss ("blocking a hit clears enemy shots near you, within like 1 character length above and
   around or less", a real cat hiss: "Cat hissing #2" by rickismyname on Freesound, CC0). CAT REFLEXES: Pounce

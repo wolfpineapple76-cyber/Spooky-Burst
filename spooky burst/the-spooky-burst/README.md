@@ -259,9 +259,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   (her copies take your boosts: damage, shot speed and orb size; without it her copies are plain, abilities
   only); BRING A FRIEND (a second Ghostress trails further back while a boss is up).
 - The Cat's SHOP: LUCKY COIN: STOP SHOT (half the time a coin that meets an enemy shot destroys it and
-  itself); KNOCK SHOT (half the time a coin shoves an enemy shot back up a little, 4 px per point of the coin's
-  damage like its knock on an enemy, and the coin is spent; the shot then carries on; webs and claws can't be
-  knocked). CAT'S EYE:
+  itself); KNOCK SHOT (half the time a coin knocks an enemy shot back up a little, sliding 4 px per point of the
+  coin's damage over a fifth of a second like its knock on an enemy; the coin carries on and the shot then
+  falls again; webs and claws can't be knocked). A coin flips once for each enemy shot it meets. CAT'S EYE:
   SHARPER EYE (orbs curve harder); SECOND LOOK (an orb that leaves the top turns back down once and can hit on
   the way, dying off the bottom). NINE LIVES: QUICK TAIL (recharges in 8 seconds instead of 15); HISS (the
   block clears enemy shots within a cat width around him and above his head, with a real cat hiss). CAT

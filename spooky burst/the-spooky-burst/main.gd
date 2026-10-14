@@ -3622,6 +3622,7 @@ func web_wall(x: float) -> void:
 # POUNCE: the first ability on a button. Q / E for the left keyboard player, comma / period for the arrows
 # player, LB / RB on a controller: the Cat jumps 50 px that way (through anything in between), then a 5 second
 # cooldown. A puff where he left.
+const KNOCK_TIME := 0.2
 const POUNCE_PX := 50.0
 const POUNCE_CD := 5.0
 func pounce(p, d: int) -> void:
@@ -3823,12 +3824,15 @@ func update(dt: float) -> void:
 					burst(s.x, s.y, "#f3efe0", 8)
 					sfx("pop")
 					break
-		# STOP SHOT and KNOCK SHOT: a coin meeting an enemy shot: half the time they cancel out, or half the time it
-		# knocks the shot back up at the enemies and is spent
+		# STOP SHOT and KNOCK SHOT: a coin meeting an enemy shot flips once for that shot: STOP SHOT, half the time
+		# both are destroyed; KNOCK SHOT, half the time the shot slides back up and the coin carries on
 		if (s.get("stop", false) or s.get("knock", false)) and not s.dead:
 			for b in G.eb:
 				if b.dead or b.k == "web" or b.k == "claw" or absf(b.x - s.x) > 8 or absf(b.y - s.y) > 8:
 					continue
+				if s.get("met", []).any(func(o): return is_same(o, b)):
+					continue
+				s.met = s.get("met", []) + [b]
 				if s.get("stop", false) and randf() < 0.5:
 					b.dead = true
 					s.dead = true
@@ -3836,11 +3840,11 @@ func update(dt: float) -> void:
 					sfx("pop")
 					break
 				if s.get("knock", false) and randf() < 0.5:
-					# shoved back up the way the coin shoves an enemy: 4 px per point of damage, then it carries on
-					b.y -= 4.0 * s.dmg
-					s.dead = true
+					# it slides back up 4 px per point of the coin's damage (like the coin's knock on an enemy) over
+					# KNOCK_TIME, then carries on falling
+					b.kup = 4.0 * s.dmg
+					b.krate = b.kup / KNOCK_TIME
 					sfx("pop")
-					break
 	# TWIRL BONE: the two knuckles spin around the bone's middle as it flies. Done once both have moved this
 	# frame, so the middle is the true middle and the bone keeps its length
 	for s in G.shots:
@@ -4052,6 +4056,11 @@ func update(dt: float) -> void:
 			b.vy = minf(b.vy + 120 * dt, 170)
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
+		# KNOCK SHOT: sliding back up
+		if b.get("kup", 0.0) > 0.0:
+			var up := minf(b.kup, b.krate * dt)
+			b.y -= up
+			b.kup -= up
 		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
 			b.x = b.x0 + signf(b.x - b.x0) * 24.0
 			b.vx = 0.0
