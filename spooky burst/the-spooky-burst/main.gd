@@ -2793,22 +2793,25 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 			made[1][i].mate = made[0][i]
 			made[0][i].lead = true
 			made[0][i].tw = 0.0
-	# BABY BACK RIBS: a small shot at half damage right behind each shot (not behind trick balls)
+	# BABY BACK RIBS: a small shot at half damage right behind each shot (one under a bone's middle; not behind
+	# trick balls)
 	if p.eq.has("ribs") and p.eq.has("rbbaby") and not trick:
 		var babies := []
-		for row in made:
-			for s in row:
-				var b: Dictionary = s.duplicate()
-				b.y = s.y + 8.0
-				b.dmg = s.dmg * 0.5
-				b.baby = true
-				b.bone = false
-				b.gs = false
-				b.grow = 0.0
-				b.hit = []
-				b.erase("mate")
-				b.erase("lead")
-				babies.append(b)
+		for i in made[0].size():
+			var s: Dictionary = made[0][i]
+			var b: Dictionary = s.duplicate()
+			if bone:
+				b.x = (s.x + made[1][i].x) / 2.0
+			b.y = s.y + 8.0
+			b.dmg = s.dmg * 0.5
+			b.baby = true
+			b.bone = false
+			b.gs = false
+			b.grow = 0.0
+			b.hit = []
+			b.erase("mate")
+			b.erase("lead")
+			babies.append(b)
 		G.shots.append_array(babies)
 	# RIBBED SHOT: a faint white rib arcs between the two side shots as they leave, fading by 24 px up
 	if p.eq.has("ribs"):
@@ -2996,11 +2999,12 @@ func juggle(p: Dictionary, dt: float) -> void:
 			var kh: float = b.get("kh", 0.0)
 			if b.vy > 15.0 and n < lst.size() and kh > 0.0:
 				b.vy = -sqrt(2.0 * JUG_GRAV * kh * lst[n] / 100.0)
+				# the sideways speed follows the same share of the kick's, keeping the way it's going (a wall may
+				# have turned it)
+				b.vx = (signf(b.vx) if b.vx != 0.0 else 1.0) * absf(b.get("kvx", b.vx)) * lst[n] / 100.0
 				b.bn = n + 1
 			else:
 				b.vy = 0.0
-			b.vx *= 0.6
-			if absf(b.vx) < 4.0:
 				b.vx = 0.0
 		if b.x < 6.0 or b.x > 314.0:
 			b.x = clampf(b.x, 6.0, 314.0)
@@ -3057,7 +3061,8 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
 	b.cd = 0.3
 	b.bn = 0
-	b.kh = h   # the kick's height: each bounce is a share of it
+	b.kh = h   # the kick's height and sideways speed: each bounce is a share of them
+	b.kvx = b.vx
 	b.y = minf(b.y, JUG_GROUND - 1.0)
 	sfx("shoot0")
 

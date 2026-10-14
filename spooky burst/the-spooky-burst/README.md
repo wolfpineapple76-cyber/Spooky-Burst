@@ -234,7 +234,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   INCREASE RANGE (half again as far); PULL CANDY (candy too). WICKED CLOWN: EXTRA USE (works twice before a
   pumpkin is needed); X2 SAFETY (the hit that fires it leaves him safe twice as long, other hits not). JUGGLING
   BALLS: EXTRA BOUNCY (after a kick a ball bounces to 90, 80, 70, 60, 50, 40, 30, 20 and 10% of the kick's height,
-  nine bounces, where a normal ball goes to 80, 60, 40 and 20%, four); EXTRA HIGH (kicks 12 px higher and 2 px
+  nine bounces, where a normal ball goes to 80, 60, 40 and 20%, four; the sideways speed follows the same shares,
+  so it hops shorter as it bounces lower, and a wall still turns it); EXTRA HIGH (kicks 12 px higher and 2 px
   per LONGER SAFETY step instead of 1). I'M NOT A PINATA: ALL GUMBALLS (every piece is a gumball, so a box
   costs more); JAW BREAKER (the pieces keep hurting all the way down, one hit per enemy, drawn as the rainbow
   jaw breaker ball, and turn back into candy near the ground).
@@ -271,7 +272,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   knock back on half the hits, no double).
 - The Skeleton's SHOP: RIBBED SHOT: HARD RIBS (all three of his shots destroy an enemy shot they meet, and
   themselves, every time; webs and claws excepted); BABY BACK RIBS (a small dot at half damage trails right
-  behind each shot, not behind trick balls). BONE THROW: BIG BONE (the knuckles 14 apart instead of 8, drawn a
+  behind each shot, one under a bone's middle, not behind trick balls). BONE THROW: BIG BONE (the knuckles 14 apart instead of 8, drawn a
   size up and hitting a little wider); TWIRL BONE (the two knuckles spin around the bone's middle as it flies,
   the shaft drawn between them). QUICK BONES: VENGEANCE (two volleys the instant he's hit); RE-VENGEANCE (the
   first enemy shot to touch him while he's safe draws two volleys, once per safe spell; the shot still passes
