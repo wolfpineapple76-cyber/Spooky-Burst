@@ -4948,7 +4948,8 @@ func draw_swatch() -> void:
 #   /debug gc p1-p4 N     give that player slot N candy
 #   /debug sugarrush      say whether SUGAR RUSH is LOCKED or UNLOCKED; "on" / "off" sets it
 #   /debug littlegirl     the next RANDOM roll is the LITTLE GIRL; "unlock" / "lock" p1-p4 (p1 if none)
-#                         puts her in that slot's CHARACTERS as if her bag were full, or hides her again
+#                         puts her in that slot's CHARACTERS as if her bag were full, or hides her again;
+#                         "reset" p1-p4 empties that slot's trick or treat bag (back to 1000 to go)
 func con_key(event: InputEventKey) -> void:
 	var k := event.keycode
 	if k == KEY_ESCAPE or k == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
@@ -4972,10 +4973,14 @@ func con_run(cmd: String) -> void:
 			sv_set("pk_beaten", w[2] == "on")
 		msg = "SUGAR RUSH: " + ("UNLOCKED" if sv("pk_beaten", false) else "LOCKED")
 	elif w.size() >= 2 and w[0] == "debug" and w[1] == "littlegirl" and w.size() <= 4 \
-			and (w.size() == 2 or w[2] in ["unlock", "lock"]) and (w.size() < 4 or w[3] in ["p1", "p2", "p3", "p4"]):
+			and (w.size() == 2 or w[2] in ["unlock", "lock", "reset"]) and (w.size() < 4 or w[3] in ["p1", "p2", "p3", "p4"]):
 		if w.size() == 2:
 			girl_next = true
 			msg = "NEXT RANDOM: LITTLE GIRL"
+		elif w[2] == "reset":
+			var n := int(w[3].substr(1)) - 1 if w.size() == 4 else 0
+			sv_set(pkey(n, "bag"), 0)
+			msg = "P%d LITTLE GIRL BAG: %d TO GO" % [n + 1, GIRL_BAG]
 		else:
 			var n := int(w[3].substr(1)) - 1 if w.size() == 4 else 0
 			var have := lst(pkey(n, "chars"))

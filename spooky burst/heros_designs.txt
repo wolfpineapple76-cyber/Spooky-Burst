@@ -115,6 +115,7 @@ MENUS AND CONTROLS
     /debug littlegirl                  the next RANDOM roll is the LITTLE GIRL
     /debug littlegirl unlock|lock [p1-p4]   put her in that slot's CHARACTERS as if her bag were full, or hide
                                        her again (p1 if no player is given)
+    /debug littlegirl reset [p1-p4]    empty that slot's trick or treat bag, back to 1000 to go
 - Jester: juggling balls take his DAMAGE UP and ORB SIZE; each LONGER SAFETY step from his SPECIAL, prestige
   and SUGAR RUSH (not pumpkins) lets a kick go 1 px higher. The present rises until 12 px from an enemy or
   12 px short of the top row, then bursts, so it's not wasted down low.
