@@ -3776,16 +3776,6 @@ func update(dt: float) -> void:
 			s.py = s.y
 		if s.y < -6 or s.x < -6 or s.x > 326 or s.y > 246:
 			s.dead = true
-		# TWIRL BONE: the two knuckles spin around the bone's middle as it flies
-		if s.get("twirl", false) and s.get("lead", false) and s.has("mate") and not s.mate.dead:
-			var mt: Dictionary = s.mate
-			var mid := Vector2((s.x + mt.x) / 2.0, (s.y + mt.y) / 2.0)
-			var r := 7.0 if s.get("bigb", false) else 4.0
-			s.tw += TAU * 2.0 * dt
-			s.x = mid.x - cos(s.tw) * r
-			s.y = mid.y - sin(s.tw) * r
-			mt.x = mid.x + cos(s.tw) * r
-			mt.y = mid.y + sin(s.tw) * r
 		# HARD RIBS: his shots and enemy shots destroy each other
 		if s.get("hardr", false) and not s.dead:
 			for b in G.eb:
@@ -3813,6 +3803,18 @@ func update(dt: float) -> void:
 					s.dead = true
 					sfx("pop")
 					break
+	# TWIRL BONE: the two knuckles spin around the bone's middle as it flies. Done once both have moved this
+	# frame, so the middle is the true middle and the bone keeps its length
+	for s in G.shots:
+		if s.get("twirl", false) and s.get("lead", false) and s.has("mate") and not s.mate.dead and not s.dead:
+			var mt: Dictionary = s.mate
+			var mid := Vector2((s.x + mt.x) / 2.0, (s.y + mt.y) / 2.0)
+			var r := 7.0 if s.get("bigb", false) else 4.0
+			s.tw += TAU * 2.0 * dt
+			s.x = mid.x - cos(s.tw) * r
+			s.y = mid.y - sin(s.tw) * r
+			mt.x = mid.x + cos(s.tw) * r
+			mt.y = mid.y + sin(s.tw) * r
 
 	# the glowing pumpkins that carry a power-up: one each wave, plus a rare bonus one up high
 	if not G.pk_done:
