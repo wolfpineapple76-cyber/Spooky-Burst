@@ -123,7 +123,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - SUGAR RUSH: once the PUMPKIN KING has been beaten on this save, when a boss dies it tosses a cotton candy high
   into the air (two if 3 or 4 players are alive at that moment). It falls beside the boss's candy, never through it, so you choose which to go for. Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
   SUG 1 to SUG 10 on the prestige line under your power-up codes. It's lost with your power-ups and boosts when
-  you're out of lives.
+  you're out of lives. One caught at SUG 10 pays 500 points instead.
+- The title screen shows the version in its bottom right corner (V. 0.1; VERSION in main.gd).
 - Once the Jester is bought he pops out of the pumpkin on the right of the title screen, bobbing like a
   jack-in-the-box with the pumpkin's top on his head. While he's locked he isn't there at all: no silhouette.
 - The pumpkin the centre ghost holds on the title screen has the PUMPKIN KING's face (Sammie's). In play, each
@@ -156,7 +157,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   (so the Black Cat with LUCKY COIN has the biggest shots):
   DM damage +5% each, FR fire rate +5%, SS shot speed +4%, MS move speed +4%, OS orb size, LS longer safe time +6%.
   ORB SIZE shows every 5: first a bigger look, then the normal look a size up, then the bigger one a size up.
-  Your boosts show in blue above your upgrades. When all six are maxed, pumpkins give 300 points.
+  Your boosts show in blue above your upgrades. When all six are maxed, pumpkins give 500 points.
 - This version saves to a new file (spooky_burst_v2.cfg), so everyone starts fresh. Reset Save erases one player
   (their candy, characters, upgrades and prestige) or everything.
 

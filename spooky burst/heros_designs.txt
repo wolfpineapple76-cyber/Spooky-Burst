@@ -113,6 +113,9 @@ MENUS AND CONTROLS
   (relocking a character mid-run is a mess). "it should also have a power ups menu that shows each player in
   and what their power ups are", "only ones they have not any they dont have": icon, P number, abilities with
   code and name, boosts, PRE / SUG / the girl's rolls.
+- "If you get a sugar rush but you're at max sugar rush it should say 500 points also the max pumpkin point bonus
+  should be increased to 500", "the bottom corner of the title screen should have a version number like V. xxx"
+  (V. 0.1 to start, one constant).
 - Debug console for testing: ~ opens a command line along the bottom, Enter runs it, ~ or Esc closes it.
   The game pauses while it's open and every key goes to it. Commands start with "/".
     /debug stage 1 or /debug stage 2   start that stage at wave 1, with the HP boost it would have

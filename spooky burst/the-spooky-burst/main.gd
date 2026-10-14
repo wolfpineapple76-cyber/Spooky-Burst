@@ -4,6 +4,8 @@ extends Node2D
 # and text/menus are drawn on top at the full 640x480 resolution.
 
 # a new save file for the candy shop version, so everyone starts fresh (the old spooky_burst.cfg is left alone)
+# shown in the title screen's corner
+const VERSION := "0.1"
 const SAVE_PATH := "user://spooky_burst_v2.cfg"
 # what things cost in the CHARACTERS menu, before PRESTIGE: each prestige level of a character
 # adds 10% of these to its price and its upgrades' prices
@@ -1909,6 +1911,7 @@ func to_menu() -> void:
 	mode = "menu"
 	panel = ""
 	banner = ""
+	sup = false
 
 # Shooting the glowing pumpkin drops a power-up. Whoever catches it gets one they don't have yet
 # this run, picked from the upgrades they've bought and switched ON in the CHARACTERS menu.
@@ -1953,8 +1956,8 @@ func award_pow(p: Dictionary) -> bool:
 func give_boost(p: Dictionary) -> void:
 	var opts := BOOSTS.filter(func(b): return bo(p, b[0]) < BOOST_MAX)
 	if opts.is_empty():
-		pts(300)
-		say("BONUS 300", 1.2)
+		pts(500)
+		say("BONUS 500", 1.2)
 		return
 	var b: Array = pick(opts)
 	p.bo[b[0]] = bo(p, b[0]) + 1
@@ -2218,10 +2221,16 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		sfx("life")
 		return
 	if d.k == "r":
-		# SUGAR RUSH: +1 to the catcher's SPECIAL, up to SUGAR_MAX, lost with the power-ups and boosts
-		if is_girl(p.ch) and int(p.get("sugar", 0)) < SUGAR_MAX:
+		# SUGAR RUSH: +1 to the catcher's SPECIAL, up to SUGAR_MAX, lost with the power-ups and boosts; at the most
+		# already, 500 points instead
+		if int(p.get("sugar", 0)) >= SUGAR_MAX:
+			pts(500)
+			say("SUGAR RUSH: BONUS 500", 1.4)
+			sfx("treat")
+			return
+		if is_girl(p.ch):
 			girl_roll(p, "sroll")   # hers goes to a random stat
-		p.sugar = mini(SUGAR_MAX, int(p.get("sugar", 0)) + 1)
+		p.sugar = int(p.get("sugar", 0)) + 1
 		say("SUGAR RUSH!", 1.4)
 		sfx("treat")
 		return
@@ -4916,6 +4925,7 @@ func shop_back() -> void:
 	elif sch >= 0:
 		scur = sch
 		sch = -1
+		sup = false
 	elif mode == "pause":
 		G.menu.shop = false
 	else:
@@ -4936,6 +4946,7 @@ func draw_ui() -> void:
 					else:
 						draw_texture_rect(tex(chars[cur].spr, chars[cur].pals[0]), Rect2(238, y - 4 + bob, 24, 26), false)
 			T("ARROWS OR D-PAD: MOVE   SPACE OR A: SELECT   ESC OR START: QUIT   M: MUSIC", 320, 466, 1, "#9d8cc4", 1)
+			T("V. " + VERSION, 634, 466, 1, "#5a4d80", 2)
 		elif panel == "score":
 			draw_panel("HIGH SCORE", [["HIGH SCORE", "%06d" % int(sv("high", 0))], ["BEST WAVE", wave_text(int(sv("wave", 0))) if int(sv("wave", 0)) > 0 else "-"],
 				], "PRESS SPACE TO GO BACK")
