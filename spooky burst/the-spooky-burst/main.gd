@@ -97,6 +97,29 @@ const BUCKETPAL := {"K": "#c9b8ee", "O": "#ff8a1f", "y": "#ffe45c"}
 const JESTER := [".BBB....BBB.", "BB.BB..BB.BB", "o..BBBBBB..e", "..BBBBBBBB..", "..SSSSSSSS..", "..SkWSSWkS..",
 	"..pkkSSkkp..", "...SSmmSS...", ".WBWBWBWBWB.", ".BDBBDBBDBB.", ".DBDDBDDBDD.", "..BB....oo..", ".BBB....ooo."]
 const JESTER_EYES := {-1: "..SWkSSWkS..", 0: "..SkWSSWkS..", 1: "..SkWSSkWS.."}
+# THE LITTLE GIRL (secret): pigtails, a dress in the player's colour (D), green eyes (g) and her trick or treat
+# bucket. The walking frame bobs her pigtails and swings her legs.
+const GIRL := ["....hhhh....", "...hhhhhh...", "hh.hhhhhh.hh", "hhhhSSSShhhh", "hh.SgSSgS.hh", "...SSSSSS...", "...SSmmSS...",
+	"....DDDD....", "..SDDDDDDS..", "..SDDDDDDSKK", "...DDDDDD.OO", "...SS..SS.OO", "...ss..ss..."]
+const GIRLPAL := {"h": "#5a3a1e", "S": "#f6d2b8", "g": "#3dd68c", "m": "#b0405a", "D": "#d63a7a", "K": "#c9b8ee", "O": "#ff8a1f", "s": "#2c2638"}
+# her masks: each other character's face cut from its own sprite, tied on over hers. Drawn at (left, top) on her
+# 12x13 sprite; h is an eye hole, her green eye shows through. She wears the mask of whichever character her
+# first ability this run came from, until she holds none.
+const MASKS := {
+	"ghost": {"left": 2, "top": 1, "pal": {"X": "#f6f1ff", "b": "#ff9ec2", "m": "#1b0f33", "h": "#3dd68c"},
+		"rows": ["XXXXXXXX", "XXXXXXXX", "XhXXXXhX", "XhXXXXhX", "bXXXXXXb", "XXXmmXXX", "XXXXXXXX", ".XXX.XXX"]},
+	"cat": {"left": 2, "top": 1, "pal": {"K": "#4a4170", "y": "#ffe45c", "p": "#ff9ec2", "h": "#3dd68c"},
+		"rows": ["K......K", "KKKKKKKK", "KKKKKKKK", "yyKKKKyy", "yhKKKKhy", "KKKppKKK"]},
+	"zombie": {"left": 2, "top": 0, "pal": {"d": "#5a4a3a", "G": "#8fd66a", "m": "#3a1420", "h": "#3dd68c"},
+		"rows": ["dddddddd", "dddddddd", "GGGGGGGG", "GhGGGGhG", "GhGGGGGG", "GGGGGGGG", "GGmmmmGG", "GGGGGGGG"]},
+	"skeleton": {"left": 2, "top": 1, "pal": {"W": "#f3efe0", "k": "#1b0f33", "h": "#3dd68c"},
+		"rows": ["WWWWWWWW", "WkkWWkkW", "WkhWWhkW", "WWWkkWWW", "WWWWWWWW", "WkWkWkWW"]},
+	"jester": {"left": 0, "top": 0, "pal": {"B": "#2c2638", "S": "#f6d2b8", "W": "#f6f1ff", "p": "#ff9ec2", "m": "#b0405a", "o": "#f6f1ff", "h": "#3dd68c"},
+		"rows": [".BBB....BBB.", "BB.BB..BB.BB", "o..BBBBBB..o", "..BBBBBBBB..", "..SSSSSSSS..", "..ShWSSWhS..", "..phhSShhp..", "...SSmmSS..."]}}
+# her index in chars, how many abilities she can hold at once, and the candy that fills her bag
+const GIRL_CH := 5
+const GIRL_SLOTS := 5
+const GIRL_BAG := 1000
 # his basic shot is a jingle bell, and TRICK SHOT's ball (P1's is dark grey): the normal image (the size of a plain
 # orb with its glow) and the bigger one
 const JBELL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "ccccccc", "ckkkkkc", "...c..."]
@@ -507,6 +530,7 @@ var track := -1
 var sfx_players := {}
 var open_cache: Array = [true, false, false, false]
 var open_cache_t := -99.0
+var girl_next := false     # /debug littlegirl: the next RANDOM roll is her
 var lcg := 7
 # PLAYER SETUP, only for this session: player slot -> the device that plays it ({"pad", "side"})
 var assign := {}
@@ -545,6 +569,12 @@ func _alt(base: Array, m: Dictionary) -> Array:
 	for i in base.size():
 		out.append(m[i] if m.has(i) else base[i])
 	return out
+
+# her palette with the dress in a colour
+func _dress(hx: String) -> Dictionary:
+	var o: Dictionary = GIRLPAL.duplicate()
+	o.D = hx
+	return o
 
 func _build_chars() -> void:
 	chars = [
@@ -594,7 +624,14 @@ func _build_chars() -> void:
 			"tr": {"safe": 2}, "desc": "IT'S JUST A JOKE.",
 			"pow": [["trick", "TRICK SHOT", "BOUNCY BALLS, MANY HITS", "TRK"], ["wicked", "WICKED CLOWN", "AT 1 LIFE, GET ONE BACK", "WKD"],
 				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
-				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]}]
+				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]},
+		# THE LITTLE GIRL: secret, 1 in 10 on RANDOM until her bag is full. No SPECIAL stat and no abilities of her
+		# own: +1 to two random stats each run (one more per prestige), and pumpkins hand her other characters'
+		# abilities (the ones that slot has bought and switched ON), 5 at a time
+		{"id": "girl", "name": "LITTLE GIRL", "spr": GIRL, "orb": "#ff9ec2",
+			"spr2": _alt(GIRL, {2: "...hhhhhh...", 3: "hhhhSSSShhhh", 4: "hh.SgSSgS.hh", 5: "hh.SSSSSS.hh", 11: "..SS...SS.OO", 12: "..ss...ss..."}),
+			"pals": [GIRLPAL, _dress(SWATCH[6][2]), _dress(SWATCH[1][2]), _dress(SWATCH[4][2])],
+			"tr": {}, "desc": "NO COSTUME. SHE'LL BORROW ONE.", "pow": []}]
 	# SOUL MATE is each player's ghost colour blended slightly pink, GHOSTRESS slightly purple
 	for tint in [["smp", "#ff9ec2"], ["grp", "#b07cff"]]:
 		chars[0][tint[0]] = chars[0].pals.map(func(pal):
@@ -745,6 +782,8 @@ func char_pal(ch: int, n: int) -> Dictionary:
 		"jester":
 			o.D = hx
 			o.o = hx
+		"girl":
+			o.D = hx
 	pal_cache[key] = o
 	return o
 
@@ -783,7 +822,49 @@ func char_pref(n: int) -> int:
 # the character they actually play this time (RANDOM picks one of theirs)
 func pick_char(n: int) -> int:
 	var i := char_pref(n)
-	return pick(owned_chars(n)) if i < 0 else i
+	return roll_char(n) if i < 0 else i
+
+# RANDOM: one of the slot's characters, or, while the slot doesn't own her, the LITTLE GIRL 1 time in 10
+# (every time after /debug littlegirl)
+func roll_char(n: int) -> int:
+	if not has_char(n, GIRL_CH) and (girl_next or randf() < 0.1):
+		girl_next = false
+		return GIRL_CH
+	return pick(owned_chars(n))
+
+func is_girl(ch: int) -> bool:
+	return chars[ch].id == "girl"
+
+# the abilities a pumpkin can hand this character, as [upgrade, character]: its own, or for the LITTLE GIRL
+# every other character's
+func pow_list(ch: int) -> Array:
+	if not is_girl(ch):
+		return chars[ch].pow.map(func(w): return [w, ch])
+	var out := []
+	for i in chars.size():
+		if i != ch:
+			for w in chars[i].pow:
+				out.append([w, i])
+	return out
+
+# the LITTLE GIRL's bag: candy caught while playing her (until the slot owns her), GIRL_BAG unlocks her for that slot
+func girl_bag(p: Dictionary, c: int) -> void:
+	if not is_girl(p.ch) or has_char(p.n, GIRL_CH):
+		return
+	var bag := int(sv(pkey(p.n, "bag"), 0)) + c
+	if bag >= GIRL_BAG:
+		bag = 0
+		var have := lst(pkey(p.n, "chars"))
+		have.append("girl")
+		sv_set(pkey(p.n, "chars"), have)
+		say("LITTLE GIRL UNLOCKED!", 2.0)
+		sfx("unlock")
+	sv_set(pkey(p.n, "bag"), bag)
+
+# +1 to a random stat: her SPECIAL (two at the start of a run, one more per prestige) and her SUGAR RUSH
+func girl_roll(p: Dictionary, key: String) -> void:
+	var b: Array = pick(BOOSTS)
+	p[key][b[0]] = int(p[key].get(b[0], 0)) + 1
 
 # what the join picker cycles through: their characters, then "?" for random
 func pick_opts(n: int) -> Array:
@@ -1171,7 +1252,7 @@ func say(s: String, dur: float) -> void:
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
 		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
-		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0}
+		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0, "roll": {}, "sroll": {}}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -1181,11 +1262,19 @@ func bo(p: Dictionary, k: String) -> int:
 # a stat's level: boosts caught this run, the character's SPECIAL (its own boost, plus every SUGAR RUSH caught
 # this run), and prestige
 func lvl(p: Dictionary, k: String) -> int:
-	var tr: Dictionary = chars[p.ch].tr
-	return bo(p, k) + (int(tr[k]) + int(p.get("sugar", 0)) if tr.has(k) else 0) + prestige(p.n, p.ch)
+	return bo(p, k) + spec(p, k)
 
-# the key and name of a character's SPECIAL, its own boost
+# a stat's level without this run's pumpkin boosts: the character's SPECIAL (its own boost, plus every SUGAR
+# RUSH caught this run), the LITTLE GIRL's random rolls (roll: her start, sroll: her SUGAR RUSHes), and prestige
+func spec(p: Dictionary, k: String) -> int:
+	var tr: Dictionary = chars[p.ch].tr
+	var v := int(p.get("roll", {}).get(k, 0)) + int(p.get("sroll", {}).get(k, 0)) + prestige(p.n, p.ch)
+	return v + (int(tr[k]) + int(p.get("sugar", 0)) if tr.has(k) else 0)
+
+# the key and name of a character's SPECIAL, its own boost ("" and RANDOM for the LITTLE GIRL)
 func special_of(ch: int) -> Array:
+	if chars[ch].tr.is_empty():
+		return ["", "RANDOM"]
 	var k: String = chars[ch].tr.keys()[0]
 	for b in BOOSTS:
 		if b[0] == k:
@@ -1194,6 +1283,10 @@ func special_of(ch: int) -> Array:
 
 func add_player(x: float, pad: int, kb: String, ch: int, slot: int) -> Dictionary:
 	var np := mk_player(x, slot, kb, pad, ch)
+	# the LITTLE GIRL's SPECIAL: +1 to two random stats, one more per prestige
+	if is_girl(ch):
+		for i in 2 + prestige(slot, ch):
+			girl_roll(np, "roll")
 	G.players.append(np)
 	return np
 
@@ -1578,7 +1671,7 @@ func pick_ok(k: Dictionary) -> void:
 	if G.get("prestart", false):
 		# the first player of the game: no lives to share yet, wave 1 starts now
 		G.prestart = false
-		var ch0: int = k.ch if k.ch >= 0 else pick(owned_chars(k.slot))
+		var ch0: int = k.ch if k.ch >= 0 else roll_char(k.slot)
 		add_player(160, k.dev.pad, "" if k.dev.pad >= 0 else "both", ch0, k.slot)
 		sfx("join")
 		next_wave()
@@ -1591,7 +1684,7 @@ func pick_ok(k: Dictionary) -> void:
 		for q in G.players:
 			if q.kb == "both":
 				q.kb = "wasd"
-	var ch: int = k.ch if k.ch >= 0 else pick(owned_chars(k.slot))
+	var ch: int = k.ch if k.ch >= 0 else roll_char(k.slot)
 	var np: Dictionary
 	if k.rejoin != null:
 		np = k.rejoin
@@ -1600,6 +1693,12 @@ func pick_ok(k: Dictionary) -> void:
 			np.own = owns(np.n, np.ch)
 			np.eq = {}
 			np.sugar = 0
+			np.sroll = {}
+			np.roll = {}
+			np.erase("mask")
+			if is_girl(ch):
+				for i in 2 + prestige(np.n, ch):
+					girl_roll(np, "roll")
 		np.x = open_x()
 		np.out = false
 	else:
@@ -1697,15 +1796,21 @@ func to_menu() -> void:
 # Shooting the glowing pumpkin drops a power-up. Whoever catches it gets one they don't have yet
 # this run, picked from the upgrades they've bought and switched ON in the CHARACTERS menu.
 # Nothing is unlocked in game. No pop-up: the name shows for a moment instead.
+# The LITTLE GIRL draws from every other character's ON upgrades, up to GIRL_SLOTS at once, and puts on the
+# mask of the character her first one came from.
 func award(p: Dictionary) -> void:
 	var left := []
-	for w in chars[p.ch].pow:
-		if not p.eq.has(w[0]) and is_on(p.n, p.ch, w[0]):
-			left.append(w)
+	if not is_girl(p.ch) or p.eq.size() < GIRL_SLOTS:
+		for w in pow_list(p.ch):
+			if not p.eq.has(w[0][0]) and is_on(p.n, w[1], w[0][0]):
+				left.append(w)
 	if left.is_empty():
 		give_boost(p)
 		return
-	var pw: Array = pick(left)
+	var got: Array = pick(left)
+	var pw: Array = got[0]
+	if is_girl(p.ch) and p.eq.is_empty():
+		p.mask = chars[got[1]].id
 	p.eq[pw[0]] = true
 	G.toast = {"key": pw[0], "title": pw[1], "desc": pw[2], "n": p.n, "t": 2.6}
 	sfx("unlock")
@@ -1839,6 +1944,7 @@ func hurt(p: Dictionary) -> void:
 			p.eq = {}
 			p.bo = {}
 			p.sugar = 0
+			p.sroll = {}
 			p.sh = 0.0
 			p.revived = true
 			p.lives = 2
@@ -1850,6 +1956,7 @@ func hurt(p: Dictionary) -> void:
 			p.eq = {}
 			p.bo = {}
 			p.sugar = 0
+			p.sroll = {}
 			p.sh = 0.0
 			p.revived = false
 	if live().is_empty():
@@ -1930,6 +2037,8 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 		return
 	if d.k == "r":
 		# SUGAR RUSH: +1 to the catcher's SPECIAL, up to SUGAR_MAX, lost with the power-ups and boosts
+		if is_girl(p.ch) and int(p.get("sugar", 0)) < SUGAR_MAX:
+			girl_roll(p, "sroll")   # hers goes to a random stat
 		p.sugar = mini(SUGAR_MAX, int(p.get("sugar", 0)) + 1)
 		say("SUGAR RUSH!", 1.4)
 		sfx("treat")
@@ -1938,6 +2047,7 @@ func catch_drop(d: Dictionary, p: Dictionary) -> void:
 	var r := randf()
 	if r < 0.45:
 		add_candy(p.n, 5)
+		girl_bag(p, 5)
 		p.got += 5
 		pts(100)
 		say("TREAT: 5 CANDY", 1.4)
@@ -2429,13 +2539,13 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool) -> void:
 	var col: String = shot_col(p.n, p.ch)
 	var sp := (360.0 if p.eq.has("fast") else 230.0) * (1.0 + 0.04 * lvl(p, "shot"))
 	var lv := sp * tan(deg_to_rad(ln)) if gs else 0.0
-	# THE JESTER shoots 30 degrees the way he's moving (straight up when still), 45 once he's kept going that
-	# way for half a second
 	var jest: bool = chars[p.ch].id == "jester"
-	if jest:
+	var trick: bool = p.eq.has("trick")
+	# TRICK SHOT shoots 30 degrees the way you're moving (straight up when still), 45 once you've kept going
+	# that way for half a second, so the balls catch the sides of enemies
+	if trick:
 		var ang := JEST_ANGLE_RUN if p.mv >= JEST_RUN_TIME else JEST_ANGLE
 		lv = sp * tan(deg_to_rad(ang)) * p.md
-	var trick: bool = p.eq.has("trick")
 	var made := []
 	for ox in xs:
 		var row := []
@@ -2536,6 +2646,7 @@ func got_candy(k: Dictionary, p: Dictionary) -> void:
 	k.dead = true
 	var n := 2 if k.get("x2", false) else 1
 	add_candy(p.n, n)
+	girl_bag(p, n)
 	p.got += n
 	pts(10 * n)
 	sfx("candy")
@@ -2670,7 +2781,7 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 		tx = j.x
 	b.k = (b.k + 1) % 3
 	# up to 1 px higher per step of LONGER SAFETY from his SPECIAL, prestige and SUGAR RUSH (not the pumpkins')
-	var extra: float = chars[j.ch].tr.get("safe", 0) + prestige(j.n, j.ch) + int(j.get("sugar", 0))
+	var extra: float = spec(j, "safe")
 	var h := 30.0 + randf() * (14.0 + extra)
 	b.vy = -sqrt(2.0 * JUG_GRAV * h)
 	var flight := 2.0 * absf(b.vy) / JUG_GRAV
@@ -2912,10 +3023,10 @@ func trick_move(s: Dictionary, dt: float) -> void:
 		s.vx += (24.0 + randf() * 24.0) * (1.0 if randf() < 0.5 else -1.0) / off
 	if s.y > -6:
 		s.up = false
-	# coming down onto the Jester who threw it, it bounces back up off him (not off the floor, not off anyone else)
+	# coming down onto whoever threw it, it bounces back up off them (not off the floor, not off anyone else)
 	if s.vy > 0 and s.y > 194:
 		for p in live():
-			if p.n == s.o and chars[p.ch].id == "jester" and absf(s.x - p.x) < 12 and absf(s.y - 209) < 12:
+			if p.n == s.o and absf(s.x - p.x) < 12 and absf(s.y - 209) < 12:
 				trick_bounce(s, p.x, 209.0, 12.0, 12.0, null)
 				s.y = minf(s.y, 196.0)
 				sfx("trick")
@@ -3141,6 +3252,8 @@ func update(dt: float) -> void:
 			continue
 		var I := player_input(p)
 		var ox: float = p.x
+		if p.eq.is_empty():
+			p.erase("mask")   # the LITTLE GIRL takes her mask off once she holds no ability
 		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a SPIDER BEAST web
 		if p.web > 0:
 			p.web -= dt
@@ -3864,6 +3977,9 @@ func draw_game() -> void:
 		var fr := int(floor(gt * 4 + i)) % 2
 		var look: Array = C.looks[p.md] if C.has("looks") else [C.spr, C.spr2]
 		spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
+		if p.has("mask"):
+			var M: Dictionary = MASKS[p.mask]
+			spr(M.rows, M.pal, px - 12 + M.left * 2, 196 + bob + M.top * 2, 2)
 	for p in G.parts:
 		R(int(round(p.x)), int(round(p.y)), 2, 2, p.col, minf(1.0, p.life * 3))
 	for i in 5:
@@ -3976,15 +4092,22 @@ func draw_hud() -> void:
 	else:
 		for i in ps.size():
 			T("P%d CANDY: %d" % [ps[i].n + 1, candy_of(ps[i].n)], 40, 30 + i * 11, 1, "#f6f1ff")
+	# the LITTLE GIRL's trick or treat bag: how much candy until the slot owns her, a small bucket beside it
+	var by := 56 if ps.size() == 1 else 30 + ps.size() * 11 + 2
+	for p in ps:
+		if is_girl(p.ch) and not has_char(p.n, GIRL_CH):
+			draw_texture_rect(tex(BUCKET, BUCKETPAL), Rect2(40, by, 10, 9), false)
+			T("P%d BAG %d" % [p.n + 1, GIRL_BAG - int(sv(pkey(p.n, "bag"), 0))], 54, by, 1, "#ff9ec2")
+			by += 11
 	T("SCORE %06d" % G.score, 627, 12, 2, "#ffd92e", 2)
 	T("HIGH %06d" % maxi(G.high, G.score), 627, 30, 2, "#ffd92e", 2)
 	if not G.get("prestart", false):
 		T("WAVE %d" % shown_wave(G.wave), 627, 48, 2, "#ffd92e", 2)
 	for p in G.players:
 		var codes := ""
-		for w in chars[p.ch].pow:
-			if p.eq.has(w[0]):
-				codes += w[3] + " "
+		for w in pow_list(p.ch):
+			if p.eq.has(w[0][0]):
+				codes += w[0][3] + " "
 		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
 		# their prestige level for this character, which counts for every stat, and their SUGAR RUSH count, on
 		# their own line: both are more special than the power-ups
@@ -3993,7 +4116,12 @@ func draw_hud() -> void:
 		if pr > 0:
 			sp += "PRE %d " % pr
 		if int(p.get("sugar", 0)) > 0:
-			sp += "SUG %d" % p.sugar
+			sp += "SUG %d " % p.sugar
+		# the LITTLE GIRL's random +1s, start and SUGAR RUSH together
+		for b in BOOSTS:
+			var r: int = int(p.get("roll", {}).get(b[0], 0)) + int(p.get("sroll", {}).get(b[0], 0))
+			if r > 0:
+				sp += "%s+%d " % [b[3], r]
 		if sp != "":
 			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
 		var boosts := ""
@@ -4048,7 +4176,10 @@ func shop_rows() -> Array:
 	var rows := []
 	var c := candy_of(stab)
 	if sch < 0:
+		# the LITTLE GIRL is a secret: no row until the slot has unlocked her (she can't be bought)
 		for i in chars.size():
+			if is_girl(i) and not has_char(stab, i):
+				continue
 			if not has_char(stab, i):
 				rows.append([chars[i].name, "%d CANDY" % char_cost(stab, i), c < char_cost(stab, i)])
 			else:
@@ -4093,7 +4224,7 @@ func pre_why(n: int, ch: int) -> String:
 	if owned_chars(n).size() <= 1:
 		var cheapest := CHAR_COST + CHAR_COST / 10 * (prestige(n, ch) + 1)
 		for i in chars.size():
-			if i != ch:
+			if i != ch and not is_girl(i):
 				cheapest = mini(cheapest, char_cost(n, i))
 		if candy_of(n) < cheapest:
 			return "YOUR ONLY CHARACTER: SAVE %d CANDY TO BUY ONE BACK FIRST." % cheapest
@@ -4106,6 +4237,8 @@ func shop_note() -> String:
 		return chars[sch].pow[scur - shop_top()][2] + "."
 	if sch >= 0 and scur == shop_top() + chars[sch].pow.size() and pre_shown(stab, sch):
 		var why := pre_why(stab, sch)
+		if why == "" and is_girl(sch):
+			return "RELOCK HER FOR +1 BOOST TO ALL STATS AND ONE MORE RANDOM +1 ON START. SHE'S A SECRET AGAIN."
 		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
@@ -4129,7 +4262,10 @@ func draw_shop() -> void:
 		T(chars[sch].name, 80, y + 52, 2, "#f6f1ff")
 		T(chars[sch].desc, 80, y + 72, 1, "#9d8cc4")
 		var sp := special_of(sch)
-		T("SPECIAL: %s +%d" % [sp[1], chars[sch].tr[sp[0]]], 560, y + 72, 1, "#9d8cc4", 2)
+		if is_girl(sch):
+			T("SPECIAL: +1 TO %d RANDOM STATS" % (2 + prestige(stab, sch)), 560, y + 72, 1, "#9d8cc4", 2)
+		else:
+			T("SPECIAL: %s +%d" % [sp[1], chars[sch].tr[sp[0]]], 560, y + 72, 1, "#9d8cc4", 2)
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
 	var ry := y + 84 + dy
 	for i in rows.size():
@@ -4143,6 +4279,7 @@ func draw_shop() -> void:
 	if spre >= 0:
 		var n := prestige(stab, sch) + 1
 		draw_panel("PRESTIGE", [["NO, KEEP IT", ""], ["YES, PRESTIGE", "%d/%d" % [n, PRESTIGE_MAX]]], "", spre,
+			"RELOCK HER FOR +1 TO ALL STATS AND ONE MORE RANDOM +1 ON START? HER BAG STARTS OVER." if is_girl(sch) else
 			"RELOCK %s AND ALL %d UPGRADES FOR A +1 BOOST TO ALL STATS? PRICES GO UP 10%%." % [chars[sch].name, chars[sch].pow.size()])
 
 func shop_choose() -> void:
@@ -4235,6 +4372,10 @@ func do_prestige(n: int, ch: int) -> void:
 		sv_set(pkey(n, "chars"), have)
 	sv_set(pkey(n, "own." + id), [])
 	sv_set(pkey(n, "off." + id), [])
+	if is_girl(ch):
+		# a secret again: her bag starts over, and her page is gone
+		sv_set(pkey(n, "bag"), 0)
+		sch = -1
 	if n == 0:
 		cur = char_pref(0)
 	scur = 0
@@ -4568,7 +4709,7 @@ func setup_side(d: int) -> void:
 # the favourite drop-down: every character with its icon, unowned ones greyed, RANDOM at the bottom once the
 # slot owns 2 or more. Picking saves it as the slot's usual character.
 func fav_opts() -> Array:
-	var o := range(chars.size())
+	var o := range(chars.size()).filter(func(i): return not is_girl(i) or has_char(setup_sel, i))
 	if owned_chars(setup_sel).size() >= 2:
 		o.append(-1)
 	return o
@@ -4806,6 +4947,8 @@ func draw_swatch() -> void:
 #   /debug stage 1 or 2   start that stage at wave 1, with the HP boost it would have
 #   /debug gc p1-p4 N     give that player slot N candy
 #   /debug sugarrush      say whether SUGAR RUSH is LOCKED or UNLOCKED; "on" / "off" sets it
+#   /debug littlegirl     the next RANDOM roll is the LITTLE GIRL; "unlock" / "lock" p1-p4 (p1 if none)
+#                         puts her in that slot's CHARACTERS as if her bag were full, or hides her again
 func con_key(event: InputEventKey) -> void:
 	var k := event.keycode
 	if k == KEY_ESCAPE or k == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
@@ -4828,6 +4971,20 @@ func con_run(cmd: String) -> void:
 		if w.size() == 3:
 			sv_set("pk_beaten", w[2] == "on")
 		msg = "SUGAR RUSH: " + ("UNLOCKED" if sv("pk_beaten", false) else "LOCKED")
+	elif w.size() >= 2 and w[0] == "debug" and w[1] == "littlegirl" and w.size() <= 4 \
+			and (w.size() == 2 or w[2] in ["unlock", "lock"]) and (w.size() < 4 or w[3] in ["p1", "p2", "p3", "p4"]):
+		if w.size() == 2:
+			girl_next = true
+			msg = "NEXT RANDOM: LITTLE GIRL"
+		else:
+			var n := int(w[3].substr(1)) - 1 if w.size() == 4 else 0
+			var have := lst(pkey(n, "chars"))
+			have.erase("girl")
+			if w[2] == "unlock":
+				have.append("girl")
+			sv_set(pkey(n, "chars"), have)
+			sv_set(pkey(n, "bag"), 0)
+			msg = "P%d LITTLE GIRL: %s" % [n + 1, "UNLOCKED" if w[2] == "unlock" else "LOCKED"]
 	elif w.size() == 4 and w[0] == "debug" and w[1] == "gc" and w[2] in ["p1", "p2", "p3", "p4"] and w[3].is_valid_int():
 		var n := int(w[2].substr(1)) - 1
 		add_candy(n, maxi(int(w[3]), -candy_of(n)))

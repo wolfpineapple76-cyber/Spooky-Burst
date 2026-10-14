@@ -41,3 +41,7 @@ The fourth set of waves and fourth boss continues this pattern but by the fifth 
 The final boss's job is to test your skills with all of the enemies and new attack types of this stage it can fairly put into the fight and its second form is to check if you have mastered this stage and are ready to move on.
 
 Keep in mind also the first sets of waves will likely be dealt with by less players who have less power ups due to death. So, hopefully by the 3rd to 4th boss it has let you breathe enough to build back up some.
+
+THE LITTLE GIRL
+
+A secret sixth character, rolled 1 in 10 on RANDOM until a slot owns her. She has no SPECIAL stat and no abilities of her own: +1 to two random stats each run (one more per prestige, her SUGAR RUSH is random too), and pumpkins hand her other characters' abilities, only the ones that slot has bought and switched ON, five at a time, each lost slot refilled at random. She wears the mask of the character her first ability came from until she holds none. Unlocked for good by catching 1000 candy as her (her trick or treat bag); prestige makes her a secret again. The design rule she follows: nothing is handed out that the player hasn't earned on the other characters, and her power is a surprise, not a bigger number.

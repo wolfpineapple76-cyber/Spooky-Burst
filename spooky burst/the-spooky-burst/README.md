@@ -175,13 +175,14 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - BONE THROW joins the Skeleton's pair of orbs into one bone; if one end hits something, the other flies on alone.
   RIBBED SHOT shows a faint rib between the two side shots as they leave.
 - The Jester is black and white; players 2-4 have their colour on his left bell, his diamonds and his right leg.
-  The glint in his eyes looks the way he's moving. He shoots jingle bells, angled 30 degrees the way he's moving,
-  45 degrees once he's kept going that way for half a second.
-- TRICK SHOT turns his shots into balls that do 1 damage and can hit any number of times. They bounce off
-  enemies and webs (damaging the webs too), leaning a little toward the next enemy, but not off the sides or
-  the floor. Each time one goes off the top it falls back down, speeding up as it falls and drifting
-  1-2 character widths left or right at random. A ball that comes down onto the Jester who threw it bounces
-  back up off him (not off other players), so he can keep one in the air by staying under it.
+  The glint in his eyes looks the way he's moving. He shoots jingle bells, straight up.
+- TRICK SHOT turns the shots into balls that do 1 damage and can hit any number of times, angled 30 degrees the
+  way you're moving (straight up when still), 45 degrees once you've kept going that way for half a second, so
+  they catch the sides of enemies. They bounce off enemies and webs (damaging the webs too), leaning a little
+  toward the next enemy, but not off the sides or the floor. Each time one goes off the top it falls back down,
+  speeding up as it falls and drifting 1-2 character widths left or right at random. A ball that comes down onto
+  whoever threw it bounces back up off them (not off other players), so you can keep one in the air by staying
+  under it.
 - WICKED CLOWN gives him a life back the moment he's down to 1 (even if he catches it while already on 1),
   then it's used up until a pumpkin gives it again. NEEDS FOOD BADLY pulls nearby candied apples and power-ups to
   him while he's on 1 life; with more lives it only pulls what's within half a character width, fading out by a
@@ -198,6 +199,20 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   side, or 12 px short of the top row's height, then bursts; the pieces hit enemies on the way out (1 damage,
   gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can
   pay for, with none nothing.
+- THE LITTLE GIRL is a secret sixth character: pigtails, a dress in the player's colour, green eyes and her
+  trick or treat bucket. While a slot doesn't own her, picking RANDOM (the "?" in the picker, or RANDOM as the
+  favourite) rolls her 1 time in 10. She has no SPECIAL stat and no abilities of her own. At the start of a
+  run she gets +1 to two stats picked at random (one more per prestige), and every SUGAR RUSH she catches is
+  +1 to a random stat; the HUD shows them as DM+1, LS+1 and so on on her prestige line. The glowing pumpkin
+  hands her an ability from any other character, drawn from the ones that slot has bought and switched ON, up
+  to five at a time; after that, boosts as usual. A slot she loses (death, SECOND WIND, WICKED CLOWN firing) is
+  open again, and the next pumpkin fills it with another random draw. She puts on a mask of whichever character
+  her first ability came from (each mask is that character's face, her green eyes showing through the holes)
+  and takes it off once she holds nothing. Candy caught while playing her fills her trick or treat bag, shown
+  under the candy total with a small bucket, counting down from 1000; full, the slot owns her for good and she
+  shows in CHARACTERS, the picker and the favourite list like anyone. Her CHARACTERS page has nothing to buy,
+  just PRESTIGE: it relocks her (a secret again, bag back to 1000) for +1 to all stats and one more random +1 on
+  start. Her sprite is Hero's; a mask is drawn over her face the way hats are drawn on the title ghosts.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.
