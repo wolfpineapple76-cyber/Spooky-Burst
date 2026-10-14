@@ -2912,27 +2912,113 @@ const TAIL_OUT := 0.1
 const TAIL_BACK := 0.4
 const TAIL_EARLY := 8.0
 # LONG TAIL reaches 1.5 cat widths beyond him; TALL TAIL also grabs from above his head (26 px higher)
+# The tail itself does the catching: a thing that comes within reach starts the swipe (or, with NINE LIVES, the
+# curl's wag) toward it, the swipe follows it as it falls, and it's collected the moment the drawn tip touches
+# it. Nothing else collects it, so what you see grab is what grabs. LONG TAIL reaches 1.5 cat widths out; TALL
+# TAIL reaches TAIL_HIGH px higher, and with NINE LIVES the curl is drawn that much taller.
+const TAIL_HIGH := 12.0
+const TAIL_TOUCH := 7.0   # how close to the drawn tail's line a thing is caught (a candy is 11 wide, the tail 2)
+const TAIL_DIP := 16.0    # how far the curl's wag can dip toward a thing below head height
+const TAIL_HOLD := 0.3    # how long a swipe waits out at full reach for its target to fall onto it
+func tail_reach_px(p: Dictionary) -> float:
+	return 48.0 if p.eq.has("tllong") else 36.0
+
+func tail_top(p: Dictionary) -> float:
+	return 188.0 - (TAIL_HIGH if p.eq.has("tltall") else 0.0)
+
+func tail_wag(p: Dictionary) -> bool:
+	return p.eq.has("shield") and p.sh <= 0
+
+# the curl's points as offsets from (px, 196): resting or in its wag, stretched sideways for LONG TAIL and
+# raised TAIL_HIGH for TALL TAIL (the base two points stay on him)
+func wag_points(p: Dictionary, tl) -> Array:
+	var pts: Array
+	if tl != null and tl.get("wag", false):
+		pts = wag_pose(WAG_RIGHT if tl.rx > 0 else WAG_LEFT, tl.t)
+	else:
+		pts = TAIL_REST.duplicate()
+	var sx := tail_reach_px(p) / 36.0
+	var up := TAIL_HIGH if p.eq.has("tltall") else 0.0
+	# wagging at something below head height, the curl dips toward it (up to TAIL_DIP)
+	var dip := 0.0
+	if tl != null and tl.get("wag", false):
+		dip = clampf(tl.ty - 192.0, 0.0, TAIL_DIP)
+	var out := []
+	for j in pts.size():
+		out.append(Vector2(pts[j].x * sx, pts[j].y - (up if j >= 2 else 0.0) + (dip if j >= 2 else 0.0)))
+	return out
+
+# the swoop's curve from its base to its tip (offsets from (px, by)), k being how far out it is
+func swoop_points(tl: Dictionary, k: float) -> Array:
+	var base := Vector2(0, 19)
+	var tip := base.lerp(Vector2(tl.rx, tl.ty - 196.0), k)
+	var c1 := Vector2(base.x, -4 * k)
+	var c2 := Vector2(tip.x, tip.y - 12 * k)
+	var pts := []
+	for i in 9:
+		var u := i / 8.0
+		var a1 := base.lerp(c1, u)
+		var a2 := c1.lerp(c2, u)
+		var a3 := c2.lerp(tip, u)
+		pts.append(a1.lerp(a2, u).lerp(a2.lerp(a3, u), u))
+	return pts
+
+# the drawn tail right now, as points in game space: the curl (resting or wagging) with NINE LIVES, the
+# swoop during a swipe, nothing otherwise
+func tail_points(p: Dictionary) -> Array:
+	var at := Vector2(p.x, 196.0)
+	var pts: Array
+	if tail_wag(p):
+		pts = wag_points(p, p.get("tl"))
+	elif p.get("tl") != null:
+		pts = swoop_points(p.tl, tail_reach(p.tl))
+	else:
+		return []
+	return pts.map(func(v): return v + at)
+
+# how far a point is from the drawn tail (far if there's none)
+func tail_dist(p: Dictionary, v: Vector2) -> float:
+	var pts := tail_points(p)
+	if pts.is_empty():
+		return 9999.0
+	var best := 9999.0
+	for i in pts.size() - 1:
+		best = minf(best, v.distance_to(Geometry2D.get_closest_point_to_segment(v, pts[i], pts[i + 1])))
+	return best
+
 func wiggle_reach(o: Dictionary) -> bool:
 	for p in live():
 		if not p.eq.has("tail"):
 			continue
-		var dx := absf(o.x - p.x)
-		var reach := 12.0 + (36.0 if p.eq.has("tllong") else 24.0)
-		var top := 188.0 - (26.0 if p.eq.has("tltall") else 0.0)
-		if dx < reach + TAIL_EARLY and o.y > top - TAIL_EARLY and o.y < 224:
-			if p.get("tl") == null:
-				# the swipe always goes the full reach on that side, at its height
-				var rx := reach if o.x >= p.x else -reach
-				# with NINE LIVES the curl wags instead, and the wag to the left takes longer (see draw_tail)
-				var wag: bool = p.eq.has("shield") and p.sh <= 0
-				p.tl = {"t": 0.0, "rx": rx, "ty": maxf(o.y, top), "wag": wag,
-					"end": WAG_LEFT[-1][0] if wag and rx < 0 else TAIL_OUT + TAIL_BACK}
-			if dx < reach and o.y > top:
-				if o.has("k"):
-					catch_drop(o, p)
-				else:
-					got_candy(o, p)
-				return true
+		var reach := tail_reach_px(p)
+		var top := tail_top(p)
+		var near: bool = absf(o.x - p.x) < reach + TAIL_EARLY and o.y > top - TAIL_EARLY and o.y < 224
+		var tl = p.get("tl")
+		# a thing coming near starts the swipe toward it, or re-aims one that has done its job and is coming back
+		if near and (tl == null or (tl.get("done", false) and tl.t >= TAIL_OUT)):
+			var wag := tail_wag(p)
+			var rx := clampf(o.x - p.x, -reach, reach)
+			p.tl = {"t": 0.0, "rx": rx, "ty": clampf(o.y, top, 224.0), "wag": wag, "obj": o, "done": false,
+				"end": (WAG_LEFT[-1][0] if rx < 0 else WAG_RIGHT[-1][0]) if wag else TAIL_OUT + TAIL_BACK}
+			tl = p.tl
+		if tl == null:
+			continue
+		# the swipe follows what it's after until it has it, holding out at full reach a moment if the thing is
+		# still falling toward it
+		if not tl.done and is_same(tl.get("obj"), o):
+			tl.rx = clampf(o.x - p.x, -reach, reach)
+			tl.ty = clampf(o.y, top, 224.0)
+			if not tl.wag and tl.t > TAIL_OUT and tl.get("held", 0.0) < TAIL_HOLD:
+				tl.held = tl.get("held", 0.0) + (tl.t - TAIL_OUT)
+				tl.t = TAIL_OUT
+		# the drawn tail touching it is the catch
+		if tail_dist(p, Vector2(o.x, o.y)) < TAIL_TOUCH:
+			tl.done = true
+			if o.has("k"):
+				catch_drop(o, p)
+			else:
+				got_candy(o, p)
+			return true
 	return false
 
 # NEEDS FOOD BADLY: while he's on 1 life, candied apples and power-up pumpkins within FOOD_REACH px drift to him
@@ -3525,9 +3611,9 @@ func web_wall(x: float) -> void:
 			G.webs.append({"hx": wx, "y": 116.0, "hp": WEB_HP, "own": null, "fixed": true, "g": 0.0})
 
 # POUNCE: the first ability on a button. Q / E for the left keyboard player, comma / period for the arrows
-# player, LB / RB on a controller: the Cat jumps 26 px that way (through anything in between), then a 5 second
+# player, LB / RB on a controller: the Cat jumps 50 px that way (through anything in between), then a 5 second
 # cooldown. A puff where he left.
-const POUNCE_PX := 26.0
+const POUNCE_PX := 50.0
 const POUNCE_CD := 5.0
 func pounce(p, d: int) -> void:
 	if p == null or p.out or mode != "game" or not p.eq.has("swpounce") or p.pcd > 0:
@@ -3727,7 +3813,7 @@ func update(dt: float) -> void:
 		# HARD RIBS: his shots and enemy shots destroy each other
 		if s.get("hardr", false) and not s.dead:
 			for b in G.eb:
-				if not b.dead and b.k != "web" and b.k != "claw" and not b.get("knocked", false) and absf(b.x - s.x) < 8 and absf(b.y - s.y) < 8:
+				if not b.dead and b.k != "web" and b.k != "claw" and absf(b.x - s.x) < 8 and absf(b.y - s.y) < 8:
 					b.dead = true
 					s.dead = true
 					burst(s.x, s.y, "#f3efe0", 8)
@@ -3737,7 +3823,7 @@ func update(dt: float) -> void:
 		# knocks the shot back up at the enemies and is spent
 		if (s.get("stop", false) or s.get("knock", false)) and not s.dead:
 			for b in G.eb:
-				if b.dead or b.k == "web" or b.k == "claw" or b.get("knocked", false) or absf(b.x - s.x) > 8 or absf(b.y - s.y) > 8:
+				if b.dead or b.k == "web" or b.k == "claw" or absf(b.x - s.x) > 8 or absf(b.y - s.y) > 8:
 					continue
 				if s.get("stop", false) and randf() < 0.5:
 					b.dead = true
@@ -3746,10 +3832,8 @@ func update(dt: float) -> void:
 					sfx("pop")
 					break
 				if s.get("knock", false) and randf() < 0.5:
-					b.knocked = true
-					b.kdmg = s.dmg
-					b.vx = 0.0
-					b.vy = -200.0
+					# shoved back up the way the coin shoves an enemy: 4 px per point of damage, then it carries on
+					b.y -= 4.0 * s.dmg
 					s.dead = true
 					sfx("pop")
 					break
@@ -3952,18 +4036,6 @@ func update(dt: float) -> void:
 			b.vy = minf(b.vy + 120 * dt, 170)
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
-		# KNOCK SHOT sent it back up: it hits the first enemy it meets for the coin's damage
-		if b.get("knocked", false):
-			for e in G.en:
-				if not e.dead and e.laugh <= 0 and absf(b.x - e.x) < (27 if e.ty == "B" else 11) and absf(b.y - e.y) < (20 if e.ty == "B" else 9):
-					e.hp -= b.kdmg
-					e.flash = 0.1
-					b.dead = true
-					if e.hp <= 0:
-						down(e)
-					else:
-						sfx("bosshit")
-					break
 		if b.get("cap", false) and b.vx != 0.0 and absf(b.x - b.x0) >= 24.0:
 			b.x = b.x0 + signf(b.x - b.x0) * 24.0
 			b.vx = 0.0
@@ -4064,7 +4136,7 @@ func update(dt: float) -> void:
 		# RE-VENGEANCE answers the first one that touches him with two volleys
 		if not p.out and p.inv > 0 and mode == "game" and (p.eq.has("skthick") or p.eq.has("qkreveng")):
 			for b in G.eb:
-				if not b.dead and not b.get("knocked", false) and b.k != "web" and not b.has("rv%d" % p.n) and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
+				if not b.dead and b.k != "web" and not b.has("rv%d" % p.n) and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
 					b["rv%d" % p.n] = true
 					if p.eq.has("skthick"):
 						b.dead = true
@@ -4077,7 +4149,7 @@ func update(dt: float) -> void:
 			continue
 		var was_hit := false
 		for b in G.eb:
-			if not b.dead and not b.get("knocked", false) and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
+			if not b.dead and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
 				b.dead = true
 				# SPIDER BEAST's web sticks to you and slows you down for a moment instead of hurting
 				if b.k == "web":
@@ -4533,7 +4605,7 @@ func draw_game() -> void:
 		var px := int(round(p.x))
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.eq.has("shield") and p.sh <= 0:
-			draw_tail(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.get("tl"))
+			draw_tail(p, px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt)
 		elif p.get("tl") != null:
 			draw_swoop(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.tl)
 		# stuck in a SPIDER BEAST web
@@ -4586,18 +4658,18 @@ const TAIL_UP := [Vector2(0, 20), Vector2(0, 12.2), Vector2(0, 3), Vector2(0, -5
 # goes straight up behind him, the whole cat flips (the tail is straight so it doesn't show), the same wag plays
 # mirrored, and it goes back up behind him and flips home. [time, pose, mirrored]
 # Out fast, back slowly, like the swipe.
-const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.12, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
-const WAG_LEFT := [[0.0, TAIL_REST, false], [0.05, TAIL_UP, false], [0.1, TAIL_REST, true], [0.2, TAIL_FLIP, true],
+const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.06, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
+const WAG_LEFT := [[0.0, TAIL_REST, false], [0.03, TAIL_UP, false], [0.06, TAIL_REST, true], [0.12, TAIL_FLIP, true],
 	[0.45, TAIL_REST, true], [0.55, TAIL_UP, false], [0.65, TAIL_REST, false]]
-func draw_tail(px: int, by: int, col: String, gt: float, tl = null) -> void:
-	var pts := []
-	if tl != null and tl.get("wag", false):
-		pts = wag_pose(WAG_RIGHT if tl.rx > 0 else WAG_LEFT, tl.t)
-	else:
+func draw_tail(p: Dictionary, px: int, by: int, col: String, gt: float) -> void:
+	var tl = p.get("tl")
+	var pts := wag_points(p, tl)
+	if tl == null or not tl.get("wag", false):
 		# resting, with a slow sway at the tip
 		var sw := int(round(sin(gt * 3) * 1))
-		for j in TAIL_REST.size():
-			pts.append(TAIL_REST[j] + Vector2(sw if j >= 4 else 0, 0))
+		for j in pts.size():
+			if j >= 4:
+				pts[j] += Vector2(sw, 0)
 	for j in pts.size():
 		pts[j] += Vector2(px, by)
 	smooth_line(pts, col, 4)
@@ -4638,17 +4710,10 @@ func tail_reach(tl: Dictionary) -> float:
 # WIGGLE TAIL without NINE LIVES: the tail flicks up over his back in a soft arc toward what he collected and back
 func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> void:
 	var k := tail_reach(tl)
-	var base := Vector2(px, by + 19)
-	var tip := base.lerp(Vector2(px + tl.rx, tl.ty), k)
-	var c1 := Vector2(base.x, by - 4 * k)
-	var c2 := Vector2(tip.x, tip.y - 12 * k)
-	var pts := []
-	for i in 9:
+	var pts := swoop_points(tl, k)
+	for i in pts.size():
 		var u := i / 8.0
-		var a1 := base.lerp(c1, u)
-		var a2 := c1.lerp(c2, u)
-		var a3 := c2.lerp(tip, u)
-		pts.append(a1.lerp(a2, u).lerp(a2.lerp(a3, u), u) + Vector2(0, sin(u * 6 + gt * 20) * k * u))
+		pts[i] += Vector2(px, by) + Vector2(0, sin(u * 6 + gt * 20) * k * u)
 	smooth_line(pts, col, 5)
 
 func draw_hud() -> void:

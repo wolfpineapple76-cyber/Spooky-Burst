@@ -178,8 +178,11 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   enemy away from you (4 px per point of damage), the other half it does double damage. Knocks add up and the
   enemy drifts back slowly, so keeping at one drives it up or off to the side, never off the screen. It keeps
   moving and attacking. Bosses can be knocked too.
-- WIGGLE TAIL collects candy, power-ups, buckets and apples up to one cat width beyond him, as high as his head.
-  His tail swipes the full reach up over his back on that side, or with NINE LIVES the curled tail leans over and back.
+- WIGGLE TAIL: his tail does the collecting. A candy, power-up, bucket or apple that comes within a cat width
+  beyond him, as high as his head, starts the swipe out toward it; the swipe follows it as it falls, waits out
+  at full reach a moment for it, and it's taken the instant the drawn tail touches it, nothing else takes it.
+  With NINE LIVES the curled tail wags out instead, dipping a little toward things below head height, and only
+  what the curl itself touches is taken.
 - HEAVY FIST makes the Zombie's shots little fists that do double damage, and enemies they finish off drop
   candy more often. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
   and through a web tile they break (halving the same way). ROT CLOUD slows every enemy shot to 75%; each
@@ -251,17 +254,18 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   (her copies take your boosts: damage, shot speed and orb size; without it her copies are plain, abilities
   only); BRING A FRIEND (a second Ghostress trails further back while a boss is up).
 - The Cat's SHOP: LUCKY COIN: STOP SHOT (half the time a coin that meets an enemy shot destroys it and
-  itself); KNOCK SHOT (half the time a coin knocks an enemy shot straight back up, where it hits the first
-  enemy it meets for the coin's damage, and the coin is spent; webs and claws can't be knocked). CAT'S EYE:
+  itself); KNOCK SHOT (half the time a coin shoves an enemy shot back up a little, 4 px per point of the coin's
+  damage like its knock on an enemy, and the coin is spent; the shot then carries on; webs and claws can't be
+  knocked). CAT'S EYE:
   SHARPER EYE (orbs curve harder); SECOND LOOK (an orb that leaves the top turns back down once and can hit on
   the way, dying off the bottom). NINE LIVES: QUICK TAIL (recharges in 8 seconds instead of 15); HISS (the
   block clears enemy shots within a cat width around him and above his head, with a real cat hiss). CAT
   REFLEXES: POUNCE (the first ability on a button: Q and E for the left keyboard player, comma and period for
-  the arrows player, LB and RB on a controller; he jumps 26 px that way through anything in between, a puff
+  the arrows player, LB and RB on a controller; he jumps 50 px that way through anything in between, a puff
   where he was, then a 5 second cooldown; his eyes glint orange while it's ready, and the pause menu's control
   lines name the keys); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
-  LONG TAIL (1.5 cat widths beyond him, 48 px); TALL TAIL (grabs from above his head too, 26 px higher, Sugar
-  Rush included).
+  LONG TAIL (the tail reaches 1.5 cat widths beyond him, 48 px, and the curl stretches to match); TALL TAIL (the
+  tail reaches 12 px higher, and with NINE LIVES the curl is drawn 12 px taller, Sugar Rush included).
 - The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two
   waves); OVERGROW (up to 6 lives; six life icons sit a little closer). HEAVY FIST: IRON FIST (a fist does
   triple a plain orb on a boss); GRABBY (a fist collects candy it passes through, for the Zombie; not buckets,
