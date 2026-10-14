@@ -3250,6 +3250,9 @@ func wiggle(p: Dictionary, dt: float) -> void:
 	if p.tl.t >= p.tl.end:
 		p.tl = null
 
+# GHOST CANDY's toss: against the candy's 300 px/s/s it peaks about 72 px above where she caught the candy
+const GHOST_TOSS := 208.0
+
 # the player whose SOUL MATE is under falling candy or a drop o, if any. She sits lower than a
 # player, so falling things reach a player standing under them first.
 # (she can't catch a GHOST CANDY, so hers can't come back to her)
@@ -4245,7 +4248,7 @@ func update(dt: float) -> void:
 			# GHOST CANDY: when SOUL MATE catches a candy she tosses up a see-through one, worth 1, for anyone else
 			# (not her), at no cost
 			if catcher != null and catcher.eq.has("smcandy") and not k.get("ghost", false):
-				G.candy.append({"x": k.x, "y": k.y, "dead": false, "x2": false, "ghost": true, "vy": -150.0})
+				G.candy.append({"x": k.x, "y": k.y, "dead": false, "x2": false, "ghost": true, "vy": -GHOST_TOSS})
 		if catcher != null:
 			got_candy(k, catcher)
 		elif wiggle_reach(k):
