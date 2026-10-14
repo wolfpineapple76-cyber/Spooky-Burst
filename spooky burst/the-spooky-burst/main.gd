@@ -611,10 +611,10 @@ func _build_chars() -> void:
 				["spectral", "SPECTRAL SHOT", "ORBS PASS THROUGH ENEMIES", "SPC"], ["soulmate", "SOUL MATE", "CATCHES CANDY AND FIGHTS BACK", "SOL"],
 				["ghostress", "GHOSTRESS", "SHE FOLLOWS AND COPIES SHOTS", "GHS"]],
 			"ups": {
-				"ghostshot": [["gsspooky", "SPOOKY", "THE GHOST SHOTS DRIFT TOWARD ENEMIES"], ["gshaunt", "HAUNT", "CLINGS HALF A SECOND, THEN HITS AGAIN"]],
-				"restless": [["rsfast", "FAST SHOT", "ORBS FLY FASTER"], ["rsback", "WON'T STOP", "OFF THE TOP, BACK IN THE BOTTOM AT HALF"]],
-				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "BREAKS A WEB AND PASSES, HALVING ONCE"]],
-				"soulmate": [["smsix", "SELF DEFENSE", "SIX VOLLEYS BACK INSTEAD OF THREE"], ["smcandy", "GHOST CANDY", "SHE TOSSES UP A FREE CANDY FOR OTHERS"]],
+				"ghostshot": [["gsspooky", "SPOOKY", "THE GHOST SHOTS DRIFT TOWARD ENEMIES"], ["gshaunt", "HAUNT", "CLINGS TO AN ENEMY AND HITS AGAIN"]],
+				"restless": [["rsfast", "FAST SHOT", "ORBS FLY FASTER"], ["rsback", "WON'T STOP", "OFF THE TOP AND BACK IN FROM THE BOTTOM"]],
+				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "BREAKS A WEB AND KEEPS GOING"]],
+				"soulmate": [["smsix", "SELF DEFENSE", "SHE FIRES BACK TWICE AS HARD"], ["smcandy", "GHOST CANDY", "SHE TOSSES UP A FREE CANDY FOR OTHERS"]],
 				"ghostress": [["grstudy", "QUICK STUDY", "HER COPIES TAKE YOUR BOOSTS"], ["grfriend", "BRING A FRIEND", "A SECOND GHOSTRESS FOR BOSS FIGHTS"]]}},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
@@ -628,11 +628,11 @@ func _build_chars() -> void:
 				["shield", "NINE LIVES", "BLOCKS ONE HIT, THEN RECHARGES", "9LV"], ["swift", "CAT REFLEXES", "MOVE MUCH FASTER", "SWF"],
 				["tail", "WIGGLE TAIL", "TAIL SNATCHES NEARBY CANDY", "WIG"]],
 			"ups": {
-				"coin": [["ckstop", "STOP SHOT", "HALF THE TIME A COIN AND A SHOT CANCEL OUT"], ["ckknock", "KNOCK SHOT", "HALF THE TIME A COIN KNOCKS A SHOT BACK"]],
+				"coin": [["ckstop", "STOP SHOT", "A COIN CAN CANCEL AN ENEMY SHOT"], ["ckknock", "KNOCK SHOT", "A COIN CAN KNOCK BACK A SHOT"]],
 				"home": [["eysharp", "SHARPER EYE", "ORBS CURVE HARDER"], ["eylook", "SECOND LOOK", "AN ORB THAT MISSES TURNS BACK ONCE"]],
-				"shield": [["nlquick", "QUICK TAIL", "RECHARGES IN 8 SECONDS, NOT 15"], ["nlhiss", "HISS", "A BLOCK CLEARS THE SHOTS AROUND HIM"]],
-				"swift": [["swpounce", "POUNCE", "Q E, < > OR LB RB: JUMP 26 PX, 5 S COOLDOWN"], ["swzoom", "ZOOMIES", "RUN OFF ONE SIDE AND IN THE OTHER"]],
-				"tail": [["tllong", "LONG TAIL", "REACHES 1.5 CAT WIDTHS"], ["tltall", "TALL TAIL", "GRABS FROM ABOVE HIS HEAD TOO"]]}},
+				"shield": [["nlquick", "QUICK TAIL", "HIS TAIL CURLS BACK UP MUCH SOONER"], ["nlhiss", "HISS", "A BLOCK CLEARS THE SHOTS AROUND HIM"]],
+				"swift": [["swpounce", "POUNCE", "A QUICK HOP SIDEWAYS, RIGHT THROUGH SHOTS"], ["swzoom", "ZOOMIES", "RUN OFF ONE SIDE AND IN THE OTHER"]],
+				"tail": [["tllong", "LONG TAIL", "HIS TAIL REACHES FURTHER OUT"], ["tltall", "TALL TAIL", "GRABS FROM ABOVE HIS HEAD TOO"]]}},
 		{"id": "zombie", "name": "ZOMBIE", "spr": ZOMB, "orb": "#b6ff7a",
 			"spr2": _alt(ZOMB, {7: "G.GGGGGGGG.G", 9: "..SSSSSSSS..", 12: ".PPP....PPP."}),
 			"pals": [{"d": "#5a4a3a", "G": "#8fd66a", "o": "#1b0f33", "m": "#3a1420", "S": "#3a3450", "P": "#6a5a8a"},
@@ -645,11 +645,11 @@ func _build_chars() -> void:
 				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]],
 			"golem": GOLEM, "golem2": _alt(GOLEM, {8: "G.SSSSSSSSSS.G", 11: "...SSSSSSSS...", 15: ".PPPP....PPPP."}),
 			"ups": {
-				"regen": [["rgboss", "READY REGROW", "A LIFE AT THE START OF A BOSS WAVE TOO"], ["rgover", "OVERGROW", "UP TO 6 LIVES"]],
-				"fist": [["fsiron", "IRON FIST", "TRIPLE DAMAGE ON BOSSES"], ["fsgrab", "GRABBY", "FISTS COLLECT THE CANDY THEY PASS"]],
+				"regen": [["rgboss", "READY REGROW", "A LIFE AT THE START OF A BOSS WAVE TOO"], ["rgover", "OVERGROW", "ROOM FOR ONE MORE LIFE"]],
+				"fist": [["fsiron", "IRON FIST", "FISTS HIT BOSSES MUCH HARDER"], ["fsgrab", "GRABBY", "FISTS COLLECT THE CANDY THEY PASS"]],
 				"slow": [["rtcorpse", "ROT CORPSE", "ENEMIES MOVE A LITTLE SLOWER TOO"], ["rtfood", "ROT FOOD", "CANDY, BUCKETS AND APPLES FALL SLOWER"]],
 				"longinv": [["skthick", "THICKER SKIN", "SHOTS THAT TOUCH HIM WHILE SAFE DIE"], ["skgolem", "FLESH GOLEM", "TALLER AND A TOUCH WIDER"]],
-				"punch": [["pcweb", "CLEAR WEBS", "DOUBLE DAMAGE TO WEBS"], ["pchard", "HARD PUNCH", "KNOCK BACK LIKE THE CAT'S COIN"]]}},
+				"punch": [["pcweb", "CLEAR WEBS", "PUNCHES TEAR WEBS APART"], ["pchard", "HARD PUNCH", "KNOCK BACK LIKE THE CAT'S COIN"]]}},
 		{"id": "skeleton", "name": "SKELETON", "spr": SKEL, "orb": "#f3efe0",
 			"spr2": _alt(SKEL, {7: "W...WWWW...W", 9: "...kWWWWk...", 10: "..WWWWWWWW..", 12: "..WW....WW.."}),
 			"pals": [{"W": "#f3efe0", "k": "#1b0f33"}, {"W": "#b8e8b0", "k": "#1b0f33"}, {"W": "#b8c8ff", "k": "#1b0f33"}, {"W": "#ffcf9e", "k": "#1b0f33"}],
@@ -658,9 +658,9 @@ func _build_chars() -> void:
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ALL ENEMIES DROP MORE CANDY", "ROB"],
 				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]],
 			"ups": {
-				"ribs": [["rbhard", "HARD RIBS", "HIS SHOTS AND ENEMY SHOTS DESTROY EACH OTHER"], ["rbbaby", "BABY BACK RIBS", "A SMALL HALF-DAMAGE SHOT TRAILS EACH SHOT"]],
+				"ribs": [["rbhard", "HARD RIBS", "HIS SHOTS AND ENEMY SHOTS DESTROY EACH OTHER"], ["rbbaby", "BABY BACK RIBS", "AN EXTRA LITTLE SHOT TAILING BEHIND"]],
 				"bone": [["bnbig", "BIG BONE", "KNUCKLES WIDER APART AND LARGER"], ["bntwirl", "TWIRL BONE", "THE KNUCKLES SPIN AROUND EACH OTHER"]],
-				"fast": [["qkveng", "VENGEANCE", "TWO VOLLEYS THE INSTANT HE'S HIT"], ["qkreveng", "RE-VENGEANCE", "FIRST TOUCH WHILE SAFE: TWO VOLLEYS"]],
+				"fast": [["qkveng", "VENGEANCE", "HE FIRES BACK THE MOMENT HE'S HIT"], ["qkreveng", "RE-VENGEANCE", "HE FIRES BACK AT THE FIRST SHOT WHILE SAFE"]],
 				"cdrop": [["rbriches", "RICHES", "EXTRA CANDY IS GUMBALLS MORE OFTEN"], ["rbloot", "LOOTER", "BOSSES DROP ONE MORE SUGAR RUSH, OR A BUCKET"]],
 				"revive": [["swbreath", "BREATH OF LIFE", "KEEP YOUR POWER-UPS ON SECOND WIND"], ["swbone", "THROW ME A BONE", "A DYING PLAYER GETS ONE OF YOUR LIVES"]]}},
 		{"id": "jester", "name": "JESTER", "spr": JESTER, "orb": "#f3efe0",
@@ -678,8 +678,8 @@ func _build_chars() -> void:
 			"ups": {
 				"trick": [["tkany", "BOUNCE OFF ANY PLAYER", "BALLS BOUNCE BACK UP OFF ANY PLAYER"], ["tkwrap", "CROSS SCREEN", "BALLS GO OFF ONE SIDE AND IN THE OTHER"]],
 				"food": [["fdrange", "INCREASE RANGE", "PULLS FOOD FROM HALF AGAIN AS FAR"], ["fdcandy", "PULL CANDY", "PULLS IN CANDY TOO"]],
-				"wicked": [["wkextra", "EXTRA USE", "WICKED CLOWN WORKS TWICE"], ["wksafe", "X2 SAFETY", "THE HIT THAT FIRES IT: SAFE TWICE AS LONG"]],
-				"juggle": [["jgbouncy", "EXTRA BOUNCY", "NINE BOUNCES AFTER A KICK, NOT FOUR"], ["jghigh", "EXTRA HIGH", "KICKS 12 PX HIGHER, 2 PX PER SAFETY STEP"]],
+				"wicked": [["wkextra", "EXTRA USE", "WICKED CLOWN WORKS TWICE"], ["wksafe", "X2 SAFETY", "THE HIT THAT FIRES IT KEEPS HIM SAFE LONGER"]],
+				"juggle": [["jgbouncy", "EXTRA BOUNCY", "BALLS BOUNCE MORE AND STAY HIGHER FOR LONGER"], ["jghigh", "EXTRA HIGH", "KICKS GO HIGHER, HIGHER STILL WITH SAFETY"]],
 				"pinata": [["pngum", "ALL GUMBALLS", "EVERY PIECE IS A GUMBALL"], ["pnjaw", "JAW BREAKER", "THE PIECES HURT ALL THE WAY DOWN"]]}},
 		# THE LITTLE GIRL: secret, 1 in 10 on RANDOM until her bag is full. No SPECIAL stat and no abilities of her
 		# own: +1 to two random stats each run (prestige is +1 to all, like anyone), and pumpkins hand her other characters'
@@ -4172,6 +4172,18 @@ func update(dt: float) -> void:
 				next_wave()
 
 # ---------------------------------------------------------------- game drawing
+# POUNCE ready (held, cooled down): the eyes glint orange. The Cat's eyes are y, the Little Girl's g.
+func glint_pal(p: Dictionary) -> Dictionary:
+	var pal := char_pal(p.ch, p.n)
+	if not p.eq.has("swpounce") or p.pcd > 0:
+		return pal
+	var o: Dictionary = pal.duplicate()
+	if o.has("y"):
+		o.y = "#ff8a1f"
+	elif o.has("g"):
+		o.g = "#ff8a1f"
+	return o
+
 # the palette an enemy is drawn with: during its tell the eyes change (the vampire's blink black three times over
 # his tell, the witch's blinks red once, the spider's green once)
 var tell_pals := {}
@@ -4534,7 +4546,7 @@ func draw_game() -> void:
 			look = [C.golem, C.golem2]
 			spr(look[fr], char_pal(p.ch, p.n), px - 14, 190 + bob, 2)
 		else:
-			spr(look[fr], char_pal(p.ch, p.n), px - 12, 196 + bob, 2)
+			spr(look[fr], glint_pal(p), px - 12, 196 + bob, 2)
 		if p.has("mask"):
 			var M: Dictionary = MASKS[p.mask]
 			spr(M.rows, M.pal, px - 12 + M.left * 2, 196 + bob + M.top * 2, 2)
@@ -4677,11 +4689,6 @@ func draw_hud() -> void:
 			sp += "PRE %d " % pr
 		if int(p.get("sugar", 0)) > 0:
 			sp += "SUG %d " % p.sugar
-		# the LITTLE GIRL's random +1s, start and SUGAR RUSH together
-		for b in BOOSTS:
-			var r: int = int(p.get("roll", {}).get(b[0], 0)) + int(p.get("sroll", {}).get(b[0], 0))
-			if r > 0:
-				sp += "%s+%d " % [b[3], r]
 		if sp != "":
 			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
 		var boosts := ""
@@ -4757,7 +4764,7 @@ func shop_items() -> Array:
 			var cells := []
 			for u in ups_of(sch).get(w[0], []):
 				if not oup.has(u[0]):
-					cells.append([u[1], str(UP_COST), not have_pow or c < UP_COST])
+					cells.append([u[1], "%d CANDY" % UP_COST, not have_pow or c < UP_COST])
 				else:
 					var on := up_on(stab, sch, u[0])
 					cells.append([u[1], "ON" if on else "OFF", not have_pow or not on])
@@ -5119,6 +5126,28 @@ func draw_ui() -> void:
 			rows.append(["P%d CANDY" % (p.n + 1), "+%d" % p.got])
 		draw_panel("GAME OVER", rows, "PRESS SPACE FOR MENU")
 
+# break a line at spaces so each piece fits in w px at the small size; pieces after the first are indented
+func wrap_text(line: String, w: int) -> Array:
+	var out := []
+	var cur := ""
+	for word in line.split(" "):
+		var try := word if cur == "" else cur + " " + word
+		if text_w(try, 1) <= w or cur == "":
+			cur = try
+		else:
+			out.append(cur)
+			cur = "  " + word
+	out.append(cur)
+	return out
+
+# the stats in a roll dictionary (stat key -> points) as words, one name per point: "DAMAGE, DAMAGE, MOVE SPEED"
+func stat_names(rolls: Dictionary) -> String:
+	var names := []
+	for b in BOOSTS:
+		for i in int(rolls.get(b[0], 0)):
+			names.append(b[1].trim_suffix(" UP"))
+	return ", ".join(names) if not names.is_empty() else "NONE YET"
+
 # POWER UPS, from the pause: each player in the game, what they hold this run and nothing they don't:
 # abilities (code and name), boosts, and the prestige / SUGAR RUSH / random-roll line
 func draw_pows() -> void:
@@ -5141,19 +5170,25 @@ func draw_pows() -> void:
 		var pr := prestige(p.n, p.ch)
 		if pr > 0:
 			lines.append(["PRE %d PRESTIGE" % pr, "#c9a8ff"])
-		if int(p.get("sugar", 0)) > 0:
-			lines.append(["SUG %d SUGAR RUSH" % p.sugar, "#c9a8ff"])
-		for b in BOOSTS:
-			var r: int = int(p.get("roll", {}).get(b[0], 0)) + int(p.get("sroll", {}).get(b[0], 0))
-			if r > 0:
-				lines.append(["%s+%d %s" % [b[3], r, b[1]], "#c9a8ff"])
+		# SUGAR RUSH names the stat it boosts; the LITTLE GIRL's start rolls and SUGAR RUSHes list their stats
+		if is_girl(p.ch):
+			lines.append(["RANDOM: " + stat_names(p.get("roll", {})), "#c9a8ff"])
+			if int(p.get("sugar", 0)) > 0:
+				lines.append(["SUG %d SUGAR RUSH: %s" % [p.sugar, stat_names(p.get("sroll", {}))], "#c9a8ff"])
+		elif int(p.get("sugar", 0)) > 0:
+			lines.append(["SUG %d SUGAR RUSH: %s" % [p.sugar, special_of(p.ch)[1]], "#c9a8ff"])
 		if lines.is_empty():
 			lines.append(["NOTHING YET", "#9d8cc4"])
-		cols.append(lines)
-		most = maxi(most, lines.size())
-	# the box is as tall as the longest list needs
-	var y := 100.0
-	var h := 120.0 + most * 12
+		# a column is 120 px: a long line wraps onto indented lines under it
+		var wrapped := []
+		for l in lines:
+			for piece in wrap_text(l[0], 118):
+				wrapped.append([piece, l[1]])
+		cols.append(wrapped)
+		most = maxi(most, wrapped.size())
+	# the box is as tall as the longest list needs, starting high enough that a full set fits
+	var y := 24.0
+	var h := 110.0 + most * 11
 	draw_box(y, h)
 	T("POWER UPS", 80, y + 18, 3, "#ff8a1f")
 	for i in ps.size():
@@ -5166,7 +5201,7 @@ func draw_pows() -> void:
 		ry += 36
 		for l in cols[i]:
 			T(l[0], x, ry, 1, l[1])
-			ry += 12
+			ry += 11
 	T("BACK: ESC, BACKSPACE, SPACE OR B", 320, y + h - 18, 1, "#9d8cc4", 1)
 
 func draw_pause() -> void:
@@ -5195,8 +5230,8 @@ func draw_pause() -> void:
 	if why != "":
 		T(why, 300, y + 58 + m.sel * 26, 1, "#ff8a1f")
 	ry += 8
-	for line in ["KEYBOARD LEFT: A D MOVE, SPACE OR W SHOOT, ESC JOINS OR MENU", "KEYBOARD RIGHT: ARROWS MOVE, UP OR ENTER SHOOT, BACKSPACE JOINS OR MENU",
-			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y OR R2 SHOOT, START JOINS OR MENU",
+	for line in ["KEYBOARD LEFT: A D MOVE, SPACE OR W SHOOT, Q E POUNCE, ESC JOINS OR MENU", "KEYBOARD RIGHT: ARROWS MOVE, UP OR ENTER SHOOT, < > POUNCE, BACKSPACE JOINS OR MENU",
+			"CONTROLLER: STICK OR D-PAD MOVE, A B X Y OR R2 SHOOT, LB RB POUNCE, START JOINS OR MENU",
 			"BOOSTS: DM DAMAGE  FR FIRE RATE  SS SHOT SPEED  MS MOVE  OS ORB SIZE  LS SAFETY"]:
 		T(line, 80, ry, 1, "#9d8cc4")
 		ry += 16

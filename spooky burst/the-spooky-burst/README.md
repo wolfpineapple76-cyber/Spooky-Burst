@@ -227,7 +227,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   everything available: abilities you don't hold, plus the bought, ON upgrades of the abilities you do hold.
   Boosts start once all of that is held, so it's about fifteen pumpkins to a full set. An upgrade is lost with
   its ability (death, SECOND WIND, WICKED CLOWN used up). The HUD code gains a count, TRK, TRK1, TRK2, and
-  POWER UPS lists the upgrades under their ability. The Little Girl has no SHOP page: once she holds a borrowed
+  POWER UPS lists the upgrades under their ability. The upgrade descriptions on the SHOP page are in words;
+  the numbers live here. The Little Girl has no SHOP page: once she holds a borrowed
   ability, its SHOP upgrades can drop for her from later pumpkins too, if that slot has bought and switched them ON.
 - The Jester's SHOP: TRICK SHOT: BOUNCE OFF ANY PLAYER (balls bounce back up off any player, not just him);
   CROSS SCREEN (balls go off one side and in the other, and still fall through the floor). NEEDS FOOD BADLY:
@@ -257,7 +258,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   block clears enemy shots within a cat width around him and above his head, with a real cat hiss). CAT
   REFLEXES: POUNCE (the first ability on a button: Q and E for the left keyboard player, comma and period for
   the arrows player, LB and RB on a controller; he jumps 26 px that way through anything in between, a puff
-  where he was, then a 5 second cooldown); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
+  where he was, then a 5 second cooldown; his eyes glint orange while it's ready, and the pause menu's control
+  lines name the keys); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
   LONG TAIL (1.5 cat widths beyond him, 48 px); TALL TAIL (grabs from above his head too, 26 px higher, Sugar
   Rush included).
 - The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two
@@ -289,7 +291,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   trick or treat bucket. While a slot doesn't own her, picking RANDOM (the "?" in the picker, or RANDOM as the
   favourite) rolls her 1 time in 10. She has no SPECIAL stat and no abilities of her own. At the start of a
   run she gets +1 to two stats picked at random, and every SUGAR RUSH she catches is
-  +1 to a random stat; the HUD shows them as DM+1, LS+1 and so on on her prestige line. The glowing pumpkin
+  +1 to a random stat; the POWER UPS page names them (RANDOM: DAMAGE, LONGER SAFETY) and the stats her SUGAR
+  RUSHes landed on, where everyone else's SUGAR RUSH line names their SPECIAL. The glowing pumpkin
   hands her an ability from any other character, drawn from the ones that slot has bought and switched ON, up
   to five at a time; after that, boosts as usual. A slot she loses (death, SECOND WIND, WICKED CLOWN firing) is
   open again, and the next pumpkin fills it with another random draw. She puts on a mask of whichever character
