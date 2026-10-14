@@ -81,7 +81,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
     instead, and before the PUMPKIN KING it's witches, vampires, witches, vampires and one row of bats.
   - Beating the PUMPKIN KING shows STAGE 1 COMPLETE, then comes the HAUNTED MANSION (below). Beating the
     GRIM REAPER there shows STAGE 2 COMPLETE, and it starts over in the graveyard from wave 1's lineup.
-    Every stage beaten makes every enemy after it +1 HP.
+    Every stage beaten makes every enemy and spider web after it tougher: +1 health a stage alone, +1.25 with
+    2 players, +1.5 with 3, +2 with 4 (counted when it appears). It also lets one more bat or spider dive at
+    once: 2 per player plus 1 per stage beaten, never more than 8 (a ceiling; each still rolls its own chance).
 - The wave counter counts 1-25 in each stage: the graveyard, then the mansion starts again at WAVE 1. The game
   over screen and BEST WAVE say which stage too (STAGE 2 WAVE 7), and the stages keep counting round the loop.
 - The PRIMAL BAT swoops down at you, flies off one side and comes back in from the other to strafe across
@@ -272,8 +274,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   the other side). WIGGLE TAIL:
   LONG TAIL (the tail reaches 1.5 cat widths beyond him, 48 px, and the curl stretches to match); TALL TAIL (the
   tail reaches 12 px higher, Sugar Rush included).
-- The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two
-  waves); OVERGROW (up to 6 lives; six life icons sit a little closer). HEAVY FIST: IRON FIST (a fist does
+- The Zombie's SHOP: REGROW: FRESH FLESH (an extra life as a boss battle starts, on top of the usual one every
+  two waves); OVERGROW (up to 6 lives; six life icons sit a little closer). HEAVY FIST: IRON FIST (a fist does
   triple a plain orb on a boss); GRABBY (a fist collects candy it passes through, for the Zombie; not buckets,
   apples or pumpkins). ROT CLOUD: ROT CORPSE (graveyard and mansion enemies move 15% slower in their flights,
   dives, drops and swoops; bosses keep their pace); ROT FOOD (candy, buckets, apples and every other drop fall

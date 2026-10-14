@@ -58,7 +58,8 @@ WAVES AND ENEMIES
   caps are never the right way, diminishing returns with a floor is (it stays getting harder).
   Within a stage the level follows the cadence: set 1 relaxed, set 2 medium, set 3 hard, set 4 harder, set 5
   find the gaps or get hit. The wave right after a boss is a breather (lower level, one row fewer). Each stage
-  beaten adds a step: 0.5 * (1 - e^(-stages/2.5)) + 0.06 * stages. Sets 1-2 (into 3) must stay survivable
+  beaten adds a step: 0.576 * (1 - e^(-stages/2.5)) + 0.06 * stages ("why not at least start at +0.25", so the
+  first stage beaten adds exactly 0.25, then 0.19, 0.15, 0.12 ... down to 0.06). Sets 1-2 (into 3) must stay survivable
   enough that a team thinned by the last boss can build back up through surviving, not through handouts.
 - Every attack has a tell in proportion to its punishment (see Game-Design-Document.md).
 - Bosses: PRIMAL BAT, BLACK WIDOW, VAMPIRE LORD, WITCH QUEEN, PUMPKIN KING. A boss's minions show up in the
@@ -67,6 +68,11 @@ WAVES AND ENEMIES
   After the PUMPKIN KING comes STAGE 1 COMPLETE, then Sammie's HAUNTED MANSION (25 waves, bosses in order
   SPIDER BEAST < BAT CAT < PUPPET DOLL < THE TWINS < GRIM REAPER). After the GRIM REAPER comes STAGE 2 COMPLETE,
   and it starts over in the graveyard at wave 1's lineup with every enemy tougher (+1 HP per stage beaten).
+- Co-op: "coop should make this harder": enemy health per stage beaten +1 / +1.25 / +1.5 / +2 for 1 / 2 / 3 / 4
+  players ("the health growth is double for 4 player coop"), decimals allowed ("players already get things like
+  5% damage"); spider webs grow like other enemies. Divers at once: 2 per player (2/4/6/8), "8 could be the hard
+  cap and if your less then 8 then you get +1 diver cap per stage beat". Not wanted: more enemy fire in co-op
+  ("we already have such a boost on speed it gets crazy"), or lowering boss health when players drop out.
 - Mansion waves 1-4 ease in with a slight slow mix, not one kind per wave. Before a boss, half the enemies in
   each wave are its kind, as in the graveyard: spiders before the SPIDER BEAST, bats before BAT CAT (her bats
   recoloured as small PRIMAL BATs, not new art), dolls before the PUPPET DOLL, ghosts before the GRIM REAPER.
@@ -212,7 +218,8 @@ THE SHOP (character ability upgrades), Hero's idea "that might eventually replac
   player, comma / period for the arrows player, LB / RB on a controller; a puff where he left) / Zoomies ("can
   leave the screen on either side entering from the other side"). WIGGLE TAIL: Long Tail ("1.5 cat widths") /
   Tall Tail ("grabs from above his head too, Sugar Rush included").
-  Zombie: REGROW: Ready Regrow ("the same as always and one on a boss wave") / Overgrow ("up to 6 lives").
+  Zombie: REGROW: Ready Regrow ("the same as always and one on a boss wave"; later renamed: "Ready grow is a
+  dumb name" → Fresh Flesh, "Gain an extra life at the start of a Boss Battle.") / Overgrow ("up to 6 lives").
   HEAVY FIST: Iron Fist ("triple damage on bosses") / Grabby ("if the fist passes through candy, not powerups
   or apples just candy, it is collected for the zombie"). ROT CLOUD: Rot Corpse ("enemies move a little slower
   too") / Rot Food ("collectable things like candy and bags and apples fall slower"). THICK SKIN: Thicker Skin

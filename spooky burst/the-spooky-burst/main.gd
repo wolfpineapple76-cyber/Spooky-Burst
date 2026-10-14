@@ -627,7 +627,7 @@ func _build_chars() -> void:
 				"ghostshot": [["gsspooky", "SPOOKY", "THE GHOST SHOTS DRIFT TOWARD ENEMIES"], ["gshaunt", "HAUNT", "CLINGS TO AN ENEMY AND HITS AGAIN"]],
 				"restless": [["rsfast", "FAST SHOT", "ORBS FLY FASTER"], ["rsback", "WON'T STOP", "OFF THE TOP AND BACK IN FROM THE BOTTOM"]],
 				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "PASSES THROUGH WEBS"]],
-				"soulmate": [["smsix", "SELF DEFENSE", "SHE FIRES BACK TWICE AS MUCH"], ["smcandy", "GHOST CANDY", "SHARING IS CARING."]],
+				"soulmate": [["smsix", "SELF DEFENSE", "SHE FIRES BACK TWICE AS MUCH"], ["smcandy", "GHOST CANDY", "SHARING IS CARING"]],
 				"ghostress": [["grstudy", "QUICK STUDY", "HER COPIES TAKE YOUR BOOSTS"], ["grfriend", "BRING A FRIEND", "A SECOND GHOSTRESS FOR BOSS FIGHTS"]]}},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
@@ -658,7 +658,7 @@ func _build_chars() -> void:
 				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]],
 			"golem": GOLEM, "golem2": _alt(GOLEM, {14: ".PPPP....PPPP.", 15: ".PPPP....PPPP."}),
 			"ups": {
-				"regen": [["rgboss", "READY REGROW", "A LIFE AT THE START OF A BOSS WAVE TOO"], ["rgover", "OVERGROW", "ROOM FOR ONE MORE LIFE"]],
+				"regen": [["rgboss", "FRESH FLESH", "GAIN AN EXTRA LIFE AT THE START OF A BOSS BATTLE"], ["rgover", "OVERGROW", "ROOM FOR ONE MORE LIFE"]],
 				"fist": [["fsiron", "IRON FIST", "FISTS HIT BOSSES MUCH HARDER"], ["fsgrab", "GRABBY", "FISTS COLLECT THE CANDY THEY PASS"]],
 				"slow": [["rtcorpse", "ROT CORPSE", "ENEMIES MOVE A LITTLE SLOWER TOO"], ["rtfood", "ROT FOOD", "CANDY, BUCKETS AND APPLES FALL SLOWER"]],
 				"longinv": [["skthick", "THICKER SKIN", "SHOTS THAT TOUCH HIM WHILE SAFE DIE"], ["skgolem", "FLESH GOLEM", "TALLER AND A TOUCH WIDER"]],
@@ -1474,7 +1474,7 @@ func burst(x: float, y: float, col: String, n: int) -> void:
 		var s := 30 + randf() * 70
 		G.parts.append({"x": x, "y": y, "vx": cos(a) * s, "vy": sin(a) * s, "life": 0.35 + randf() * 0.3, "col": col})
 
-func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st: String) -> Dictionary:
+func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: float, st: String) -> Dictionary:
 	return {"ty": ty, "hx": hx, "hy": hy, "x": x, "y": y, "hp": hp, "max": hp, "st": st, "t": randf() * 6.0, "vx": 0.0, "flash": 0.0,
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
 		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "vol": [], "p2": false, "laugh": 0.0}
@@ -1531,7 +1531,7 @@ func next_wave() -> void:
 		b.bk = BOSS_ORDER[c / 5 - 1] if c <= YARD_WAVES else MBOSS_ORDER[c / 5 - 6]
 		b.t = 0.0
 		G.en.append(b)
-		# READY REGROW: a life as a boss wave starts
+		# FRESH FLESH: an extra life as a boss battle starts
 		for p in G.players:
 			if not p.out and p.eq.has("regen") and p.eq.has("rgboss") and p.lives < max_lives(p):
 				p.lives += 1
@@ -1583,9 +1583,11 @@ func level(w: int) -> float:
 	var sw := shown_wave(w)
 	return SET_LEVEL[(sw - 1) / 5] + WAVE_IN_SET[(sw - 1) % 5] + stage_step((w - 1) / YARD_WAVES)
 
-# the step a number of stages beaten adds: quick at first, then a floor of 0.06 a stage, forever
+# the step a number of stages beaten adds: 0.25 for the first, then smaller steps down to a floor of 0.06 a
+# stage, forever
+const STEP_RISE := 0.19 / (1.0 - 0.67032)   # sized so the first stage beaten adds exactly 0.25 (exp(-0.4) = 0.67032)
 func stage_step(k: int) -> float:
-	return 0.5 * (1.0 - exp(-k / 2.5)) + 0.06 * k
+	return STEP_RISE * (1.0 - exp(-k / 2.5)) + 0.06 * k
 
 func lv() -> float:
 	return level(G.wave)
@@ -1612,7 +1614,7 @@ func mansion_wave() -> void:
 		for q in 8:
 			if (q + r) % 2 == 1 or (two and (q < 2 or q > 5)):
 				continue
-			var e := new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, MHP[ty] + G.hpup, "enter")
+			var e := new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, MHP[ty] + hp_bonus(), "enter")
 			e.wait = r * 0.25 + (q / 2) * 0.08
 			G.en.append(e)
 
@@ -1650,7 +1652,7 @@ func wave_rows(w: int) -> Array:
 # vampires drop in from above as dark red-eyed bats and turn into vampires when they get there
 func arrive(ty: String, hx: float, hy: float, i: int, r: int) -> Dictionary:
 	var e: Dictionary
-	var hp: int = (MHP[ty] if in_mansion() else HP[ty]) + G.hpup
+	var hp: float = (MHP[ty] if in_mansion() else HP[ty]) + hp_bonus()
 	if ty == "b" or ty == "k":
 		var left := i % 2 == 0
 		e = new_enemy(ty, hx, hy, -24.0 if left else 344.0, 16.0 + r * 8, hp, "enter")
@@ -1671,7 +1673,7 @@ func arrive(ty: String, hx: float, hy: float, i: int, r: int) -> Dictionary:
 
 func new_spider(spot: int) -> Dictionary:
 	var a: Array = SPIDER_SPOTS[spot]
-	var e := new_enemy("s", a[0], a[1], a[0], -16, HP.s + G.hpup, "enter")
+	var e := new_enemy("s", a[0], a[1], a[0], -16, HP.s + hp_bonus(), "enter")
 	e.spot = spot
 	e.wt = 2.0 + randf() * 2.0
 	e.silk = 0.0
@@ -1712,6 +1714,17 @@ func spare_life() -> bool:
 		if p.lives >= 2:
 			return true
 	return false
+
+# every stage beaten adds health to every enemy and web, more in co-op: per stage +1 alone, +1.25 with 2 players,
+# +1.5 with 3, +2 with 4 (the players alive when it appears; health can be a fraction, like damage)
+const STAGE_HP := [1.0, 1.25, 1.5, 2.0]
+func hp_bonus() -> float:
+	return G.hpup * STAGE_HP[clampi(live().size(), 1, 4) - 1]
+
+# how many bats, mansion bats and spiders can be diving or dropping at once: 2 per player alive, +1 for each stage
+# beaten, never more than 8. It's only a ceiling: each one still rolls its own chance to go
+func dive_cap() -> int:
+	return mini(8, 2 * maxi(1, live().size()) + G.hpup)
 
 # bosses get 50% more health for each extra player, and change when players join or leave
 func boss_mult() -> float:
@@ -2061,7 +2074,8 @@ func kill(e: Dictionary, fist := false) -> void:
 		G.clearing = 2.4
 		say(BOSS_NAMES[e.bk] + " DEFEATED", 2.0)
 		# every stage beaten (the PUMPKIN KING ends the graveyard, the GRIM REAPER the mansion) makes every
-		# enemy after it 1 HP tougher, and its STAGE COMPLETE banner follows the DEFEATED one
+		# enemy and web after it tougher (hp_bonus) and lets more dive at once (dive_cap), and its STAGE COMPLETE
+		# banner follows the DEFEATED one
 		if e.bk == 2 or e.bk == 9:
 			G.hpup += 1
 			G.after = "STAGE %d COMPLETE" % stage_of(G.wave)
@@ -2429,7 +2443,7 @@ func boss(e: Dictionary, dt: float) -> void:
 	elif m == 3:
 		if e.bk == 1:
 			for i in 2:
-				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, HP.w + G.hpup, "fly")
+				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, HP.w + hp_bonus(), "fly")
 				w.dir = 1 if i == 1 else -1
 				w.fy = 120.0 + i * 24
 				G.en.append(w)
@@ -2457,7 +2471,7 @@ func boss(e: Dictionary, dt: float) -> void:
 				summon(e, "v", 2)
 			else:
 				for i in (4 if rage else 3):
-					G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + G.hpup, "dive"))
+					G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, HP.b + hp_bonus(), "dive"))
 			sfx("squeak")
 	elif m == 4:
 		# the PRIMAL BAT swoops down at you, the VAMPIRE LORD calls bats into formation to swoop for him,
@@ -2674,7 +2688,7 @@ func mboss(e: Dictionary, dt: float) -> void:
 	elif m == 3:
 		if sty == 1:
 			for i in 2:
-				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, MHP.w + G.hpup, "fly")
+				var w := new_enemy("w", 62 + (randi() % 8) * 28, 118, e.x, e.y + 10, MHP.w + hp_bonus(), "fly")
 				w.dir = 1 if i == 1 else -1
 				w.fy = 120.0 + i * 24
 				G.en.append(w)
@@ -2688,7 +2702,7 @@ func mboss(e: Dictionary, dt: float) -> void:
 			# BAT CAT calls its bats; the SPIDER BEAST its spiders
 			var kind := "k" if mb == 2 else "b"
 			for i in (4 if rage else 3):
-				G.en.append(new_enemy(kind, 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, MHP[kind] + G.hpup, "dive"))
+				G.en.append(new_enemy(kind, 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, MHP[kind] + hp_bonus(), "dive"))
 			sfx("squeak")
 	elif m == 4:
 		if mb == 4:
@@ -3295,7 +3309,7 @@ func enemy_attacks(dt: float, _w: int) -> void:
 	var flying: int = G.en.filter(func(o): return o.ty == "w" and (o.st == "fly" or o.st == "swoop" or o.st == "preswoop")).size()
 	var pd := dt / ((2.0 / (1.0 + 2.6 * L)) * 8)
 	for e in bats + kbats:
-		if diving < ceili((bats.size() + kbats.size()) / 8.0) + 1 and randf() < pd:
+		if diving < dive_cap() and randf() < pd:
 			if indoors and e.ty == "b":
 				# a mansion spider wiggles and lets out a bit of thread (the tell), then drops straight down on it
 				e.st = "predrop"
@@ -3468,7 +3482,14 @@ func trick_hits(s: Dictionary) -> void:
 	for e in G.en:
 		if e.dead or e.laugh > 0 or is_same(e, s.inside) or not trick_touch(s, e):
 			continue
-		e.hp -= s.dmg
+		# with LUCKY COIN every hit flips it: half the time a knock back, half double damage
+		var dmg: float = s.dmg
+		if s.coin:
+			if randf() < 0.5:
+				shove(e, Vector2(e.x - s.ox, e.y - s.oy).normalized() * 4.0 * s.dmg)
+			else:
+				dmg *= 2.0
+		e.hp -= dmg
 		e.flash = 0.1
 		s.inside = e
 		trick_bounce(s, e.x, e.y, (27 if e.ty == "B" else 11) + s.grow, (20 if e.ty == "B" else 9) + s.grow / 2.0, e)
@@ -3549,7 +3570,7 @@ func spider(e: Dictionary, dt: float) -> void:
 	e.wt = 4.1 / (1.0 + 0.9 * lv()) + randf()
 	var spot = web_spot()
 	if spot != null and G.webs.filter(func(o): return is_same(o.own, e)).size() < 2:
-		var wb := {"hx": spot.x, "y": spot.y, "hp": WEB_HP, "own": e, "fixed": false, "g": 0.0}
+		var wb := {"hx": spot.x, "y": spot.y, "hp": WEB_HP + hp_bonus(), "own": e, "fixed": false, "g": 0.0}
 		G.webs.append(wb)
 		e.silk = 0.25
 		e.silk_to = wb
@@ -3606,7 +3627,7 @@ func dangle_spiders(e: Dictionary, n: int) -> void:
 	var tx: float = (pick(alive_p).x if not alive_p.is_empty() else 160.0)
 	for i in n:
 		var x := clampf(tx + (i - (n - 1) / 2.0) * 40, 20, 300)
-		var s := new_enemy("s", x, 120.0 + randf() * 12, x, e.y + 10, HP.s + G.hpup, "drop")
+		var s := new_enemy("s", x, 120.0 + randf() * 12, x, e.y + 10, HP.s + hp_bonus(), "drop")
 		s.spot = -1
 		s.wt = 1.5 + randf() * 1.5
 		s.silk = 0.0
@@ -3617,7 +3638,7 @@ func web_wall(x: float) -> void:
 	for dx in [-26.0, 0.0, 26.0]:
 		var wx := clampf(x + dx, 20, 300)
 		if G.webs.filter(func(wb): return absf(web_x(wb, form_sway()) - wx) < 14 and absf(wb.y - 116) < 6).is_empty():
-			G.webs.append({"hx": wx, "y": 116.0, "hp": WEB_HP, "own": null, "fixed": true, "g": 0.0})
+			G.webs.append({"hx": wx, "y": 116.0, "hp": WEB_HP + hp_bonus(), "own": null, "fixed": true, "g": 0.0})
 
 # POUNCE: the first ability on a button. Q / E for the left keyboard player, comma / period for the arrows
 # player, LB / RB on a controller: the Cat jumps 50 px that way (through anything in between), then a 5 second
