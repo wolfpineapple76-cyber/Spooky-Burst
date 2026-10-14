@@ -116,6 +116,10 @@ MENUS AND CONTROLS
 - "If you get a sugar rush but you're at max sugar rush it should say 500 points also the max pumpkin point bonus
   should be increased to 500", "the bottom corner of the title screen should have a version number like V. xxx"
   (V. 0.1 to start, one constant).
+- Stage 1 tells (Hero): "Vampire Eyes could blink black 3 times before firing / Witch eyes could blink red once
+  before firing / Bats could fly upward about 12 pixels before diving / Spider eyes blink green once before
+  shooting venom shot, no extra tell for web / no new boss tells yet". Written: half a second, a quarter, a
+  third of a second, a quarter.
 - Debug console for testing: ~ opens a command line along the bottom, Enter runs it, ~ or Esc closes it.
   The game pauses while it's open and every key goes to it. Commands start with "/".
     /debug stage 1 or /debug stage 2   start that stage at wave 1, with the HP boost it would have

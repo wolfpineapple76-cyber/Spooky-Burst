@@ -59,6 +59,13 @@ const VLORD := ["....KKKKKKK....", "...KKKKKKKKK...", "...KSSSSSSSK...", "...Srr
 const WQUEEN := [".......P.......", "......PPP......", ".....PPPPP.....", "....PPYYYPP....", "..PPPPPPPPPPP..", "....GGGGGGG....", "....GkGGGkG....",
 	"....GGGmGGG....", ".....GGGGG.....", "...PPPPPPPPP...", "..PPPPPPPPPPP..", "BBBBBBBBBBBBYYY", "..P.........YYY"]
 const CROWN := ["Y.Y.Y", "YYYYY"]
+# the stage 1 tells, each a short timer before the attack with the eyes changed: the vampire's eyes blink black
+# three times before his aimed shot, the witch's eye blinks red once before her candy corn, the spider's eyes
+# blink green once before venom, and a bat rises 12 px before it dives
+const TELL_V := 0.5
+const TELL_W := 0.25
+const TELL_S := 0.25
+const TELL_B := 0.3
 const EPAL := {"X": "#8a66e0", "e": "#ffe45c", "P": "#7a35d6", "O": "#ff8a1f", "G": "#8fd66a", "k": "#1b0f33", "B": "#a8743a", "Y": "#ffd92e",
 	"K": "#4a4170", "S": "#e6dcf5", "r": "#ff3355", "W": "#ffffff", "R": "#b3122e", "m": "#3a1420", "D": "#3a2252", "N": "#4a2f5a",
 	"H": "#e0213f", "L": "#7a5a8e", "Q": "#2a1830"}
@@ -3162,7 +3169,7 @@ func enemy_attacks(dt: float, _w: int) -> void:
 	var ws := formed("w")
 	var vs := formed("v")
 	var indoors := in_mansion()
-	var diving: int = G.en.filter(func(o): return (o.ty == "b" or o.ty == "k") and (o.st == "dive" or o.st == "drop" or o.st == "predrop")).size()
+	var diving: int = G.en.filter(func(o): return (o.ty == "b" or o.ty == "k") and (o.st == "dive" or o.st == "drop" or o.st == "predrop" or o.st == "predive")).size()
 	var flying: int = G.en.filter(func(o): return o.ty == "w" and (o.st == "fly" or o.st == "swoop" or o.st == "preswoop")).size()
 	var pd := dt / ((2.0 / (1.0 + 2.6 * L)) * 8)
 	for e in bats + kbats:
@@ -3172,7 +3179,9 @@ func enemy_attacks(dt: float, _w: int) -> void:
 				e.st = "predrop"
 				e.spt = 0.45
 			else:
-				e.st = "dive"
+				# the tell: it rises 12 px first, then dives
+				e.st = "predive"
+				e.spt = TELL_B
 			e.n = 0
 			e.vx = 0.0
 			diving += 1
@@ -3180,12 +3189,12 @@ func enemy_attacks(dt: float, _w: int) -> void:
 	var pc := dt / ((1.2 / (1.0 + 1.7 * L)) * 8)
 	var pf := dt / ((3.4 / (1.0 + 1.1 * L)) * 8)
 	for e in ws:
-		if G.gap.c <= 0 and randf() < pc:
-			# a mansion doll shoots a button at you
+		if G.gap.c <= 0 and e.get("tell", 0.0) <= 0 and randf() < pc:
+			# a mansion doll shoots a button at you; a witch's eye blinks red first, then the candy corn
 			if indoors:
 				button(e)
 			else:
-				corn(e)
+				e.tell = TELL_W
 			G.gap.c = 0.12
 		if flying < ceili(ws.size() / 8.0) + 1 and randf() < pf:
 			if indoors:
@@ -3205,18 +3214,40 @@ func enemy_attacks(dt: float, _w: int) -> void:
 	var alive_p := live()
 	var pv := dt / ((2.7 / (1.0 + 1.25 * L)) * 4)
 	for e in vs:
-		if G.gap.v <= 0 and not alive_p.is_empty() and randf() < pv:
+		if G.gap.v <= 0 and e.get("tell", 0.0) <= 0 and not alive_p.is_empty() and randf() < pv:
 			if indoors:
 				# a mansion ghost's eyes glow (the tell), then it cries
 				if e.get("cry", 0.0) <= 0:
 					e.cry = 0.5
 			else:
-				var tg: Dictionary = pick(alive_p)
-				var dx: float = tg.x - e.x
-				var dy: float = 209 - e.y
-				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-				G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
+				# the vampire's eyes blink black three times, then the aimed shot
+				e.tell = TELL_V
 			G.gap.v = 0.12
+
+# the vampire's aimed shot at a random live player
+func vamp_shot(e: Dictionary) -> void:
+	var alive_p := live()
+	if alive_p.is_empty():
+		return
+	var tg: Dictionary = pick(alive_p)
+	var dx: float = tg.x - e.x
+	var dy: float = 209 - e.y
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 70, "vy": dy / d * 70, "k": "r", "ph": 0.0, "dead": false})
+
+# a stage 1 tell running out fires the attack it was for
+func tells(e: Dictionary, dt: float) -> void:
+	if e.get("tell", 0.0) <= 0:
+		return
+	e.tell -= dt
+	if e.tell > 0:
+		return
+	if e.ty == "v":
+		vamp_shot(e)
+	elif e.ty == "w":
+		corn(e)
+	elif e.ty == "s":
+		venom(e.x, e.y)
 
 # LUCKY COIN's knock back: each shove slides the enemy over at SHOVE_SPEED px a second rather than jumping.
 # Anything held to a spot (formation, a hanging spider, a boss) gets an offset from it that adds up with every
@@ -3400,7 +3431,7 @@ func spider(e: Dictionary, dt: float) -> void:
 		e.silk = 0.25
 		e.silk_to = wb
 	else:
-		venom(e.x, e.y)
+		e.tell = TELL_S   # the tell: eyes green, then venom (no tell for a web)
 
 # the spot just below the front (lowest) enemy of a random column that has no web yet, or null
 func web_spot():
@@ -3737,6 +3768,7 @@ func update(dt: float) -> void:
 		e.t += dt
 		e.flash -= dt
 		shoving(e, dt)
+		tells(e, dt)
 		if e.ty == "B":
 			boss(e, dt)
 			continue
@@ -3779,6 +3811,15 @@ func update(dt: float) -> void:
 				e.y = -14
 				e.x = tx
 				e.st = "return"
+		elif e.st == "predive":
+			# the tell: the bat lifts 12 px off its spot, then dives
+			e.spt -= dt
+			e.x = tx
+			e.y = ty - 12.0 * minf(1.0, (TELL_B - e.spt) / TELL_B)
+			if e.spt <= 0:
+				e.st = "dive"
+				e.n = 0
+				e.vx = 0.0
 		elif e.st == "predrop":
 			# the tell: a wiggle on its spot with a bit of thread showing, then the drop
 			e.spt -= dt
@@ -4106,6 +4147,34 @@ func update(dt: float) -> void:
 				next_wave()
 
 # ---------------------------------------------------------------- game drawing
+# the palette an enemy is drawn with: during its tell the eyes change (the vampire's blink black three times over
+# his tell, the witch's blinks red once, the spider's green once)
+var tell_pals := {}
+func tell_pal(e: Dictionary) -> Dictionary:
+	var tl: float = e.get("tell", 0.0)
+	if tl <= 0:
+		return EPAL
+	var key := ""
+	if e.ty == "v" and int(floor((TELL_V - tl) / (TELL_V / 6.0))) % 2 == 0:
+		key = "v"
+	elif e.ty == "w" and tl > TELL_W * 0.4:
+		key = "w"
+	elif e.ty == "s" and tl > TELL_S * 0.4:
+		key = "s"
+	if key == "":
+		return EPAL
+	if not tell_pals.has(key):
+		var o: Dictionary = EPAL.duplicate()
+		match key:
+			"v":
+				o.r = "#1b0f33"
+			"w":
+				o.k = "#ff3b5c"
+			"s":
+				o.r = "#7dff5a"
+		tell_pals[key] = o
+	return tell_pals[key]
+
 func draw_game() -> void:
 	var gt: float = G.t
 	var B = null
@@ -4223,12 +4292,12 @@ func draw_game() -> void:
 			R(sx, 0, 1, maxi(0, sy - 6), "#cbbcff", 0.45)
 			if e.silk > 0 and e.has("silk_to"):
 				pline(sx, sy, web_x(e.silk_to, sw), e.silk_to.y, 1, "#e6e0f5")
-			spr(SPIDER, EPAL, sx - 11, sy - 9, 2, fl)
+			spr(SPIDER, tell_pal(e), sx - 11, sy - 9, 2, fl)
 		else:
 			if e.ty == "w":
-				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, EPAL, x - 1, int(round(e.y)) - 9, 2, fl)
+				spr(WITCH if e.get("face", 1) > 0 else WITCH_L, tell_pal(e), x - 1, int(round(e.y)) - 9, 2, fl)
 			else:
-				spr(VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+				spr(VAMP, tell_pal(e), x, int(round(e.y)) - 8, 2, fl)
 	if G.rot != null:
 		# the Pumpkin King rotting away after his final defeat
 		var rk: float = G.t - G.rot.t0

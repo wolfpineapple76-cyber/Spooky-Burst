@@ -161,6 +161,12 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - This version saves to a new file (spooky_burst_v2.cfg), so everyone starts fresh. Reset Save erases one player
   (their candy, characters, upgrades and prestige) or everything.
 
+## Stage 1 tells
+- Every graveyard attack shows first. A vampire's eyes blink black three times over half a second before his
+  aimed shot. A witch's eye blinks red for a quarter second before her candy corn (no tell for her fly-by). A
+  spider's eyes blink green for a quarter second before a venom shot (no extra tell for a web). A bat rises
+  12 px over a third of a second before it dives. The mansion keeps its own tells.
+
 ## Sounds
 - Most sounds are tiny generated blips. The hiss (audio/hiss.wav) is "Cat hissing #2" by rickismyname on
   Freesound, CC0 (public domain), cut to one hiss and converted to mono 22 kHz.

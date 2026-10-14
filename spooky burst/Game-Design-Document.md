@@ -42,6 +42,10 @@ The final boss's job is to test your skills with all of the enemies and new atta
 
 Keep in mind also the first sets of waves will likely be dealt with by less players who have less power ups due to death. So, hopefully by the 3rd to 4th boss it has let you breathe enough to build back up some.
 
+STAGE 1 TELLS
+
+Vampire: eyes blink black three times before the aimed shot. Witch: eye blinks red once before candy corn. Bat: rises 12 px before diving. Spider: eyes blink green once before venom, nothing extra for a web. No new boss tells yet.
+
 THE SHOP
 
 Each ability has two upgrades in a SHOP, 250 candy each, bought only once the ability is unlocked and kept through prestige. In a run they come from the pumpkin like abilities do, drawn at random alongside the abilities not yet held, so a full set is about fifteen pumpkins and the small boosts come after. An upgrade adds to what the ability does and never takes away an effect the normal shot or ability already has.
