@@ -541,6 +541,7 @@ var con_open := false
 var con_text := ""
 var con_msg := ""
 var con_mt := 0.0
+var con_help := false      # the help box is up over the console
 var muted := false
 var music: AudioStreamPlayer
 var tracks: Array = []
@@ -5640,10 +5641,18 @@ func draw_swatch() -> void:
 #   /debug littlegirl     the next RANDOM roll is the LITTLE GIRL; "unlock" / "lock" p1-p4 (p1 if none)
 #                         puts her in that slot's CHARACTERS as if her bag were full, or hides her again;
 #                         "reset" p1-p4 empties that slot's trick or treat bag (back to 1000 to go)
+#   /debug <name> [p1-p4]         give that player (p1 if none) an ability or SHOP upgrade for this run, by its
+#                                 name as CHARACTERS shows it, its HUD code or its key; "-" in front takes it away.
+#                                 An upgrade brings its ability; taking an ability takes its upgrades.
+#   /debug <character> all|-all   every ability and upgrade of that character, or none of them
+#   /debug prestige +N|-N <character> [p1-p4]   move that slot's prestige for the character, 0 to 10
+#   /debug off | /debug on        off: every command is unknown and nothing is listed, until /debug on
+#   /help, /?, /debug ?           list the commands
 func con_key(event: InputEventKey) -> void:
 	var k := event.keycode
 	if k == KEY_ESCAPE or k == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
 		con_open = false
+		con_help = false
 	elif k == KEY_ENTER or k == KEY_KP_ENTER:
 		con_run(con_text)
 	elif k == KEY_BACKSPACE:
@@ -5656,7 +5665,17 @@ func con_run(cmd: String) -> void:
 	# without the "/" in front it's not a command
 	var w := c.trim_prefix("/").split(" ", false) if c.begins_with("/") else PackedStringArray()
 	var msg := ""
-	if w.size() == 3 and w[0] == "debug" and w[1] == "stage" and (w[2] == "1" or w[2] == "2"):
+	con_help = false
+	var dbg_on: bool = sv("debug", true)
+	if w.size() == 2 and w[0] == "debug" and w[1] in ["on", "off"]:
+		sv_set("debug", w[1] == "on")
+		msg = "DEBUG " + w[1].to_upper()
+	elif not dbg_on:
+		msg = ""   # switched off: nothing below answers
+	elif (w.size() == 1 and (w[0] == "help" or w[0] == "?")) or (w.size() == 2 and w[0] == "debug" and w[1] == "?"):
+		con_help = true
+		msg = "COMMANDS"
+	elif w.size() == 3 and w[0] == "debug" and w[1] == "stage" and (w[2] == "1" or w[2] == "2"):
 		msg = debug_stage(int(w[2]))
 	elif w.size() >= 2 and w[0] == "debug" and w[1] == "sugarrush" and (w.size() == 2 or w[2] in ["on", "off"]):
 		if w.size() == 3:
@@ -5684,12 +5703,112 @@ func con_run(cmd: String) -> void:
 		var n := int(w[2].substr(1)) - 1
 		add_candy(n, maxi(int(w[3]), -candy_of(n)))
 		msg = "P%d CANDY: %d" % [n + 1, candy_of(n)]
+	elif w.size() >= 2 and w[0] == "debug":
+		msg = debug_give(Array(w.slice(1)))
 	if msg == "":
 		con_msg = "UNKNOWN COMMAND"
 	else:
 		con_msg = msg
-		con_open = msg == "START A GAME FIRST"
+		con_open = msg == "START A GAME FIRST" or con_help
 	con_mt = 2.5
+
+# the rest of /debug: prestige, a character's all / -all, or one ability or upgrade by name, each with an
+# optional p1-p4 at the end (p1 if none). "" means it wasn't understood.
+func debug_give(w: Array) -> String:
+	var n := 0
+	if w.size() >= 2 and w[-1] in ["p1", "p2", "p3", "p4"]:
+		n = int(w[-1].substr(1)) - 1
+		w = w.slice(0, w.size() - 1)
+	if w.is_empty():
+		return ""
+	# /debug prestige +N|-N <character>
+	if w[0] == "prestige" and w.size() >= 3 and (w[1].begins_with("+") or w[1].begins_with("-")) and w[1].substr(1).is_valid_int():
+		var ch := find_char(" ".join(w.slice(2)))
+		if ch < 0:
+			return "NO CHARACTER CALLED " + " ".join(w.slice(2)).to_upper()
+		var pre := clampi(prestige(n, ch) + int(w[1]), 0, PRESTIGE_MAX)
+		sv_set(pkey(n, "pre." + chars[ch].id), pre)
+		return "P%d %s PRESTIGE: %d" % [n + 1, chars[ch].name, pre]
+	# /debug <character> all | -all, or /debug -<character> all
+	if w.size() >= 2 and w[-1] in ["all", "-all"]:
+		var take: bool = w[-1] == "-all" or w[0].begins_with("-")
+		var ch := find_char(" ".join(w.slice(0, w.size() - 1)).trim_prefix("-"))
+		if ch < 0:
+			return "NO CHARACTER CALLED " + " ".join(w.slice(0, w.size() - 1)).trim_prefix("-").to_upper()
+		var p = debug_player(n)
+		if p == null:
+			return "P%d IS NOT IN A GAME" % (n + 1)
+		for pw in chars[ch].pow:
+			if take:
+				drop_pow(p, pw[0])
+			else:
+				debug_hold(p, pw[0])
+				for u in ups_of(ch).get(pw[0], []):
+					debug_hold(p, u[0])
+		return "P%d: %s %s" % [n + 1, "NONE OF" if take else "ALL OF", chars[ch].name]
+	# /debug <name> or /debug -<name>: an ability or upgrade
+	var take: bool = w[0].begins_with("-")
+	var name := " ".join(w).trim_prefix("-")
+	var key := find_key(name)
+	if key == "":
+		return ""
+	var p = debug_player(n)
+	if p == null:
+		return "P%d IS NOT IN A GAME" % (n + 1)
+	var label: String = chars[POW_SRC[key]].pow.filter(func(x): return x[0] == key)[0][1] if POW_SRC.has(key) else UP_INFO[key].up[1]
+	if take:
+		if POW_SRC.has(key):
+			drop_pow(p, key)
+		else:
+			p.eq.erase(key)
+		return "P%d: NO %s" % [n + 1, label]
+	debug_hold(p, key)
+	return "P%d: %s" % [n + 1, label]
+
+# a player in the game by slot, or null (no game, or nobody in that slot)
+func debug_player(n: int):
+	if mode != "game" and mode != "pause":
+		return null
+	var p = player_n(n)
+	return null if p == null or p.out else p
+
+# hold an ability or upgrade for the run (an upgrade brings its ability; the Little Girl takes the mask)
+func debug_hold(p: Dictionary, key: String) -> void:
+	if UP_INFO.has(key):
+		debug_hold(p, UP_INFO[key].pow)
+	if POW_SRC.has(key) and is_girl(p.ch) and not p.has("mask"):
+		p.mask = chars[POW_SRC[key]].id
+	if key == "wicked":
+		p.erase("wk2")
+	p.eq[key] = true
+
+# a character by its name as CHARACTERS shows it, or its id, any case; -1 if none
+func find_char(name: String) -> int:
+	var q := name.strip_edges().to_lower()
+	for i in chars.size():
+		if chars[i].name.to_lower() == q or chars[i].id == q:
+			return i
+	return -1
+
+# an ability or SHOP upgrade key by its name, HUD code or key, any case (a trailing s is forgiven); "" if none
+func find_key(name: String) -> String:
+	var q := name.strip_edges().to_lower()
+	for try in [q, q.trim_suffix("s")]:
+		for ch in chars:
+			for w in ch.pow:
+				if w[1].to_lower() == try or w[3].to_lower() == try or w[0] == try:
+					return w[0]
+		for k in UP_INFO:
+			if UP_INFO[k].up[1].to_lower() == try or k == try:
+				return k
+	return ""
+
+const CON_HELP := ["/debug stage 1|2   start that stage at wave 1", "/debug gc p1-p4 N   give that slot N candy",
+	"/debug sugarrush [on|off]   SUGAR RUSH locked or unlocked", "/debug littlegirl [unlock|lock|reset] [p1-p4]",
+	"/debug <ability or upgrade> [p1-p4]   hold it this run; -<name> takes it away",
+	"/debug <character> all|-all [p1-p4]   all of its abilities and upgrades, or none",
+	"/debug prestige +N|-N <character> [p1-p4]", "/debug off | /debug on   off: no command answers, nothing is listed",
+	"/help, /?, /debug ?   this list"]
 
 # clears the screen like a boss kill and starts the stage at its wave 1
 func debug_stage(st: int) -> String:
@@ -5719,6 +5838,10 @@ func draw_console() -> void:
 		T(con_msg, 8, 438, 2, "#ffd92e")
 	if not con_open:
 		return
+	if con_help:
+		R(0, 432 - 14 - CON_HELP.size() * 12, 640, 14 + CON_HELP.size() * 12, "#000000", 0.85)
+		for i in CON_HELP.size():
+			T(CON_HELP[i].to_upper(), 8, 432 - 8 - (CON_HELP.size() - i) * 12, 1, "#f6f1ff")
 	R(0, 456, 640, 24, "#000000")
 	T(con_text, 8, 462, 2, "#f6f1ff")
 	if fmod(t, 0.8) < 0.4:

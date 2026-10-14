@@ -129,6 +129,14 @@ MENUS AND CONTROLS
     /debug littlegirl unlock|lock [p1-p4]   put her in that slot's CHARACTERS as if her bag were full, or hide
                                        her again (p1 if no player is given)
     /debug littlegirl reset [p1-p4]    empty that slot's trick or treat bag, back to 1000 to go
+    /debug <name> [p1-p4]              hold that ability or SHOP upgrade this run (name as CHARACTERS shows it,
+                                       HUD code or key, any case, "ribbed shots" forgiven); -<name> takes it.
+                                       An upgrade brings its ability; taking an ability takes its upgrades.
+                                       Needs a game with that player in it. The Little Girl takes the mask.
+    /debug <character> all|-all [p1-p4]   every ability and upgrade of that character, or none
+    /debug prestige +N|-N <character> [p1-p4]   move the slot's prestige for that character, 0 to 10
+    /debug off, /debug on              off: no command answers and nothing is listed, until on (saved)
+    /help, /?, /debug ?                a box listing the commands, up until the next command or Esc
 - Jester: juggling balls take his DAMAGE UP and ORB SIZE; each LONGER SAFETY step from his SPECIAL, prestige
   and SUGAR RUSH (not pumpkins) lets a kick go 1 px higher. The present rises until 12 px from an enemy or
   12 px short of the top row, then bursts, so it's not wasted down low.
