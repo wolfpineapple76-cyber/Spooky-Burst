@@ -4773,13 +4773,18 @@ func draw_hud() -> void:
 			sp += "SUG %d " % p.sugar
 		if sp != "":
 			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
-		# the boosts, with half-width gaps so all six at 10 fit in the player's quarter
-		var bx: float = CODE_X[p.n][0]
+		# the boosts; when they'd run past the player's quarter (the last quarter ends at the screen's edge) they
+		# split into two lines of three, the extra line above
+		var bl := []
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:
-				var bs := "%s%d" % [b[3], bo(p, b[0])]
-				T(bs, bx, 408, 1, "#7df2ff")
-				bx += text_w(bs, 1) + 3
+				bl.append("%s%d" % [b[3], bo(p, b[0])])
+		var room: int = 640 - 6 - CODE_X[p.n][0] if p.n == MAX_PLAYERS - 1 else 160 - 6
+		var lines := [bl]
+		if text_w(" ".join(bl), 1) > room:
+			lines = [bl.slice(0, 3), bl.slice(3)]
+		for li in lines.size():
+			T(" ".join(lines[li]), CODE_X[p.n][0], 408 - (lines.size() - 1 - li) * 12, 1, "#7df2ff")
 	if G.players.size() == 1 and mode == "game":
 		T("TO JOIN: START ON A CONTROLLER, OR BACKSPACE ON THE KEYBOARD", 320, 466, 1, "#9d8cc4", 1)
 	if G.toast != null and mode == "game":
