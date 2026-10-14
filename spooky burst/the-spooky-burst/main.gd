@@ -645,7 +645,13 @@ func _build_chars() -> void:
 			"tr": {"shot": 2}, "desc": "HAS A BONE TO PICK WITH HIS FOES",
 			"pow": [["ribs", "RIBBED SHOT", "TWO EXTRA ORBS OUT TO THE SIDES", "RIB"], ["bone", "BONE THROW", "TWO ORBS JOINED AS A BONE", "BNE"],
 				["fast", "QUICK BONES", "ORBS FLY FASTER", "QCK"], ["cdrop", "GRAVE ROBBER", "ALL ENEMIES DROP MORE CANDY", "ROB"],
-				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]]},
+				["revive", "SECOND WIND", "COME BACK ONCE WITH 2 LIVES", "2ND"]],
+			"ups": {
+				"ribs": [["rbhard", "HARD RIBS", "HIS SHOTS AND ENEMY SHOTS DESTROY EACH OTHER"], ["rbbaby", "BABY BACK RIBS", "A SMALL HALF-DAMAGE SHOT TRAILS EACH SHOT"]],
+				"bone": [["bnbig", "BIG BONE", "KNUCKLES WIDER APART AND LARGER"], ["bntwirl", "TWIRL BONE", "THE KNUCKLES SPIN AROUND EACH OTHER"]],
+				"fast": [["qkveng", "VENGEANCE", "TWO VOLLEYS THE INSTANT HE'S HIT"], ["qkreveng", "RE-VENGEANCE", "FIRST TOUCH WHILE SAFE: TWO VOLLEYS"]],
+				"cdrop": [["rbriches", "RICHES", "EXTRA CANDY IS GUMBALLS MORE OFTEN"], ["rbloot", "LOOTER", "BOSSES DROP ONE MORE SUGAR RUSH, OR A BUCKET"]],
+				"revive": [["swbreath", "BREATH OF LIFE", "KEEP YOUR POWER-UPS ON SECOND WIND"], ["swbone", "THROW ME A BONE", "A DYING PLAYER GETS ONE OF YOUR LIVES"]]}},
 		{"id": "jester", "name": "JESTER", "spr": JESTER, "orb": "#f3efe0",
 			"spr2": _alt(JESTER, {11: ".BB......oo.", 12: "BBB......ooo"}),
 			"pals": [{"B": "#2c2638", "W": "#f6f1ff", "S": "#f6d2b8", "k": "#1b0f33", "p": "#ff9ec2", "m": "#b0405a", "e": "#ffffff", "D": "#f3efe0", "o": "#f6f1ff"},
@@ -1984,8 +1990,10 @@ func down(e: Dictionary, fist := false) -> void:
 
 const CANDY_ODDS := [0.25, 1.0 / 3.0, 0.5]
 # a piece of candy falls from x, y. A third of them are gumballs, worth 2.
+# RICHES (with GRAVE ROBBER): gumballs 40% of the time instead of a third
 func drop_candy(x: float, y: float) -> void:
-	G.candy.append({"x": x, "y": y, "dead": false, "x2": randf() < 1.0 / 3.0})
+	var gum := 0.4 if G.players.any(func(p): return not p.out and p.eq.has("cdrop") and p.eq.has("rbriches")) else 1.0 / 3.0
+	G.candy.append({"x": x, "y": y, "dead": false, "x2": randf() < gum})
 
 func kill(e: Dictionary, fist := false) -> void:
 	e.dead = true
@@ -1999,9 +2007,16 @@ func kill(e: Dictionary, fist := false) -> void:
 		# or 4 players are alive right now. They fall beside the candy (which spreads 40 px either side of the
 		# boss), never through it: one on the side with more room, two one each side
 		var n_sr := (2 if live().size() >= 3 else 1) if sv("pk_beaten", false) else 0
-		for i in n_sr:
-			var side := (1.0 if e.x < 160 else -1.0) if n_sr == 1 else (i * 2.0 - 1.0)
-			G.drops.append({"x": clampf(e.x + side * 72, 30.0, 290.0), "y": -12.0, "k": "r", "dead": false})
+		var far := 1.0 if e.x < 160 else -1.0   # the side with more room
+		var spots := [far * 72] if n_sr == 1 else ([-72.0, 72.0] if n_sr == 2 else [])
+		# LOOTER (a Skeleton with GRAVE ROBBER): one more SUGAR RUSH, further out, or a treat bucket while it's locked
+		var loot: bool = G.players.any(func(p): return not p.out and p.eq.has("cdrop") and p.eq.has("rbloot"))
+		if loot and n_sr > 0:
+			spots.append(far * 110)
+		elif loot:
+			G.drops.append({"x": clampf(e.x + far * 72, 30.0, 290.0), "y": -12.0, "k": "b", "dead": false})
+		for sx in spots:
+			G.drops.append({"x": clampf(e.x + sx, 30.0, 290.0), "y": -12.0, "k": "r", "dead": false})
 		for o in G.en:
 			if not o.dead:
 				o.dead = true
@@ -2077,32 +2092,57 @@ func hurt(p: Dictionary) -> void:
 	var x2: bool = p.eq.has("wksafe")
 	var fired := wicked(p)
 	p.inv = (4.0 if p.eq.has("longinv") else 2.0) * (1.0 + 0.06 * lvl(p, "safe")) * (2.0 if fired and x2 else 1.0)
+	p.erase("rv_used")   # RE-VENGEANCE is ready again for this safe spell
+	# VENGEANCE: two volleys the instant he's hit
+	if p.eq.has("qkveng") and p.lives > 0:
+		for i in 2:
+			volley(p, p.x, 194.0, lean(p), false)
+		sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 	burst(p.x, 209, "#ffffff", 16)
 	sfx("hurt")
 	G.shake = 0.25
 	if p.lives <= 0:
+		var donor = bone_donor(p)
 		if p.eq.has("revive") and not p.revived:
-			# SECOND WIND: wiped just like dying (power-ups and boosts gone), then back with 2 lives
-			p.eq = {}
-			p.bo = {}
-			p.sugar = 0
-			p.sroll = {}
-			p.sh = 0.0
+			# SECOND WIND: wiped just like dying (power-ups and boosts gone), then back with 2 lives. With BREATH OF
+			# LIFE he keeps everything.
+			if not p.eq.has("swbreath"):
+				wipe(p)
 			p.revived = true
 			p.lives = 2
 			say("SECOND WIND", 1.5)
+		elif donor != null:
+			# THROW ME A BONE: a Skeleton with more than one life gives up one. They keep their abilities only if
+			# he has BREATH OF LIFE.
+			donor.lives -= 1
+			p.lives = 1
+			if not donor.eq.has("swbreath"):
+				wipe(p)
+			say("THROW ME A BONE!", 1.5)
+			sfx("life")
 		else:
 			# out of lives: every power-up and boost from this run is lost, and nobody else gets them.
 			# Candy is already saved to their profile, so they keep that.
 			p.out = true
-			p.eq = {}
-			p.bo = {}
-			p.sugar = 0
-			p.sroll = {}
-			p.sh = 0.0
+			wipe(p)
 			p.revived = false
 	if live().is_empty():
 		game_over()
+
+# everything a run gave a player: abilities and their upgrades, boosts, SUGAR RUSH (and the Little Girl's rolls from it)
+func wipe(p: Dictionary) -> void:
+	p.eq = {}
+	p.bo = {}
+	p.sugar = 0
+	p.sroll = {}
+	p.sh = 0.0
+
+# THROW ME A BONE: another live player with SECOND WIND and that upgrade, and more than one life, or null
+func bone_donor(p: Dictionary):
+	for q in live():
+		if not is_same(q, p) and q.lives > 1 and q.eq.has("revive") and q.eq.has("swbone"):
+			return q
+	return null
 
 func game_over() -> void:
 	mode = "over"
@@ -2680,8 +2720,9 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 	var xs := [x]
 	# BONE THROW: every orb comes out as a pair side by side, drawn as the two ends of one bone
 	var bone: bool = p.eq.has("bone")
+	var bigb: bool = bone and p.eq.has("bnbig")   # BIG BONE: the knuckles further apart and a size up
 	if bone:
-		xs = [x - 4, x + 4]
+		xs = [x - 7, x + 7] if bigb else [x - 4, x + 4]
 	var gs: bool = p.eq.has("ghostshot")
 	var vxs := vxs_of(p)
 	var col: String = shot_col(p.n, p.ch)
@@ -2714,7 +2755,9 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 				"stop": p.eq.has("coin") and p.eq.has("ckstop"), "knock": p.eq.has("coin") and p.eq.has("ckknock"),
 				# the Zombie's: IRON FIST, GRABBY (fists), CLEAR WEBS, HARD PUNCH (punch through)
 				"iron": p.eq.has("fist") and p.eq.has("fsiron"), "grab": p.eq.has("fist") and p.eq.has("fsgrab"),
-				"cweb": p.eq.has("punch") and p.eq.has("pcweb"), "hard": p.eq.has("punch") and p.eq.has("pchard")}
+				"cweb": p.eq.has("punch") and p.eq.has("pcweb"), "hard": p.eq.has("punch") and p.eq.has("pchard"),
+				# the Skeleton's: HARD RIBS, BIG BONE, TWIRL BONE
+				"hardr": p.eq.has("ribs") and p.eq.has("rbhard"), "bigb": bigb, "twirl": bone and p.eq.has("bntwirl")}
 			if trick:
 				# TRICK SHOT: a ball doing 1 damage (boosted as usual) with no limit on hits
 				s.dmg = 1.0 if plain else 1.0 * (1.0 + 0.05 * lvl(p, "dmg"))
@@ -2724,11 +2767,31 @@ func volley(p: Dictionary, x: float, y: float, ln: float, helper: bool, plain :=
 			G.shots.append(s)
 			row.append(s)
 		made.append(row)
-	# the two ends of each bone know each other, so the bone can be drawn whole while both are flying
+	# the two ends of each bone know each other, so the bone can be drawn whole while both are flying (the left
+	# end leads: TWIRL BONE turns the pair around their middle from there)
 	if bone:
 		for i in made[0].size():
 			made[0][i].mate = made[1][i]
 			made[1][i].mate = made[0][i]
+			made[0][i].lead = true
+			made[0][i].tw = 0.0
+	# BABY BACK RIBS: a small shot at half damage right behind each shot (not behind trick balls)
+	if p.eq.has("ribs") and p.eq.has("rbbaby") and not trick:
+		var babies := []
+		for row in made:
+			for s in row:
+				var b: Dictionary = s.duplicate()
+				b.y = s.y + 8.0
+				b.dmg = s.dmg * 0.5
+				b.baby = true
+				b.bone = false
+				b.gs = false
+				b.grow = 0.0
+				b.hit = []
+				b.erase("mate")
+				b.erase("lead")
+				babies.append(b)
+		G.shots.append_array(babies)
 	# RIBBED SHOT: a faint white rib arcs between the two side shots as they leave, fading by 24 px up
 	if p.eq.has("ribs"):
 		var row: Array = made[0]
@@ -3586,6 +3649,25 @@ func update(dt: float) -> void:
 			s.py = s.y
 		if s.y < -6 or s.x < -6 or s.x > 326 or s.y > 246:
 			s.dead = true
+		# TWIRL BONE: the two knuckles spin around the bone's middle as it flies
+		if s.get("twirl", false) and s.get("lead", false) and s.has("mate") and not s.mate.dead:
+			var mt: Dictionary = s.mate
+			var mid := Vector2((s.x + mt.x) / 2.0, (s.y + mt.y) / 2.0)
+			var r := 7.0 if s.get("bigb", false) else 4.0
+			s.tw += 7.0 * dt
+			s.x = mid.x - cos(s.tw) * r
+			s.y = mid.y - sin(s.tw) * r
+			mt.x = mid.x + cos(s.tw) * r
+			mt.y = mid.y + sin(s.tw) * r
+		# HARD RIBS: his shots and enemy shots destroy each other
+		if s.get("hardr", false) and not s.dead:
+			for b in G.eb:
+				if not b.dead and b.k != "web" and b.k != "claw" and not b.get("knocked", false) and absf(b.x - s.x) < 8 and absf(b.y - s.y) < 8:
+					b.dead = true
+					s.dead = true
+					burst(s.x, s.y, "#f3efe0", 8)
+					sfx("pop")
+					break
 		# STOP SHOT and KNOCK SHOT: a coin meeting an enemy shot: half the time they cancel out, or half the time it
 		# knocks the shot back up at the enemies and is spent
 		if (s.get("stop", false) or s.get("knock", false)) and not s.dead:
@@ -3861,7 +3943,7 @@ func update(dt: float) -> void:
 			# a piercing shot never hits the same enemy twice
 			if e.dead or e.laugh > 0 or s.hit.any(func(h): return is_same(h, e)):
 				continue
-			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + s.grow
+			var hw: float = (27 if e.ty == "B" else 11) + (6 if s.big else 0) + (3 if s.get("bigb", false) else 0) + s.grow
 			var hh: float = (20 if e.ty == "B" else 9) + (3 if s.big else 0) + s.grow / 2.0
 			if absf(s.x - e.x) < hw and swept(s, e.y, hh):
 				# LUCKY COIN flips on every hit: half the time it shoves the enemy away from the shooter, 4 px per point
@@ -3903,11 +3985,19 @@ func update(dt: float) -> void:
 
 	# things hitting players
 	for p in G.players:
-		# THICKER SKIN: while he's safe, enemy shots that touch him die instead of passing through
-		if not p.out and p.inv > 0 and mode == "game" and p.eq.has("skthick"):
+		# while he's safe: THICKER SKIN kills enemy shots that touch him instead of letting them through, and
+		# RE-VENGEANCE answers the first one that touches him with two volleys
+		if not p.out and p.inv > 0 and mode == "game" and (p.eq.has("skthick") or p.eq.has("qkreveng")):
 			for b in G.eb:
-				if not b.dead and not b.get("knocked", false) and b.k != "web" and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
-					b.dead = true
+				if not b.dead and not b.get("knocked", false) and b.k != "web" and not b.has("rv%d" % p.n) and absf(b.x - p.x) < 7 + gol(p) and absf(b.y - 209) < 10 + 3 * gol(p):
+					b["rv%d" % p.n] = true
+					if p.eq.has("skthick"):
+						b.dead = true
+					if p.eq.has("qkreveng") and not p.get("rv_used", false):
+						p.rv_used = true
+						for i in 2:
+							volley(p, p.x, 194.0, lean(p), false)
+						sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 		if p.out or p.inv > 0 or mode != "game":
 			continue
 		var was_hit := false
@@ -4276,14 +4366,22 @@ func draw_game() -> void:
 				fp[str(i)] = "#" + Color("#a8d088").lerp(Color(col), i / float(fi.size() - 1)).to_html(false)
 			spr_mid(fi, fp, x, y, sc)
 			continue
+		if s.get("baby", false):
+			# BABY BACK RIBS: a small dot of the shot colour
+			R(x - 1, y - 1, 3, 3, col)
+			continue
 		if s.bone:
 			var bp := {"w": "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false)}
 			var m = s.get("mate")
-			if m != null and not m.dead and s.x < m.x:
-				R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
+			var bigk: bool = bg or s.get("bigb", false)   # BIG BONE: the knuckles a size up
+			if m != null and not m.dead and s.get("lead", false):
+				if s.get("twirl", false):
+					pline(s.x, s.y, m.x, m.y, 2 * sc, bp.w)
+				elif s.x < m.x:
+					R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
 			# each end grows outward from the shaft, so the bone stays joined
 			var left: bool = m == null or s.x < m.x
-			var be: Array = (BONE_LB if bg else BONE_L) if left else (BONE_RB if bg else BONE_R)
+			var be: Array = (BONE_LB if bigk else BONE_L) if left else (BONE_RB if bigk else BONE_R)
 			var bw: int = be[0].length() * sc
 			spr(be, bp, x + 2 - bw if left else x - 1, y - (be.size() * sc) / 2, sc)
 			continue

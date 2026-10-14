@@ -259,6 +259,18 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   with him, so he shields players beside him and catches from higher; it's the Zombie's body, so the Little
   Girl never draws it). PUNCH THROUGH: CLEAR WEBS (double damage to web tiles); HARD PUNCH (the Cat's coin
   knock back on half the hits, no double).
+- The Skeleton's SHOP: RIBBED SHOT: HARD RIBS (all three of his shots destroy an enemy shot they meet, and
+  themselves, every time; webs and claws excepted); BABY BACK RIBS (a small dot at half damage trails right
+  behind each shot, not behind trick balls). BONE THROW: BIG BONE (the knuckles 14 apart instead of 8, drawn a
+  size up and hitting a little wider); TWIRL BONE (the two knuckles spin around the bone's middle as it flies,
+  the shaft drawn between them). QUICK BONES: VENGEANCE (two volleys the instant he's hit); RE-VENGEANCE (the
+  first enemy shot to touch him while he's safe draws two volleys, once per safe spell; the shot still passes
+  through unless THICKER SKIN is there). GRAVE ROBBER: RICHES (candy from enemies is gumballs 40% of the time
+  instead of a third); LOOTER (a boss drops one more SUGAR RUSH, further out on the roomier side; while SUGAR
+  RUSH is locked, a treat bucket instead). SECOND WIND: BREATH OF LIFE (he keeps his abilities, upgrades,
+  boosts and SUGAR RUSH on SECOND WIND, which still works once); THROW ME A BONE (when another player's last
+  life goes and he has more than one, he gives up one and they stay in with 1; they lose their power-ups
+  unless he has BREATH OF LIFE; his own SECOND WIND comes first for himself).
 - Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
 - The Little Girl's present costs her bag the same candy it costs her stash, so catching her own pieces can't
   fill it for her.
