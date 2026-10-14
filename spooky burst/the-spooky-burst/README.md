@@ -233,7 +233,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   CROSS SCREEN (balls go off one side and in the other, and still fall through the floor). NEEDS FOOD BADLY:
   INCREASE RANGE (half again as far); PULL CANDY (candy too). WICKED CLOWN: EXTRA USE (works twice before a
   pumpkin is needed); X2 SAFETY (the hit that fires it leaves him safe twice as long, other hits not). JUGGLING
-  BALLS: EXTRA BOUNCY (balls bounce higher and longer before settling); EXTRA HIGH (kicks 12 px higher and 2 px
+  BALLS: EXTRA BOUNCY (after a kick a ball's landings keep 90, 80, 70, 60, 50, 40, 30, 20 and 10% of its speed, nine
+  bounces, where a normal ball keeps 80, 60, 40 and 20%, four); EXTRA HIGH (kicks 12 px higher and 2 px
   per LONGER SAFETY step instead of 1). I'M NOT A PINATA: ALL GUMBALLS (every piece is a gumball, so a box
   costs more); JAW BREAKER (the pieces keep hurting all the way down, one hit per enemy, drawn as the rainbow
   jaw breaker ball, and turn back into candy near the ground).

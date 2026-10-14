@@ -678,7 +678,7 @@ func _build_chars() -> void:
 				"trick": [["tkany", "BOUNCE OFF ANY PLAYER", "BALLS BOUNCE BACK UP OFF ANY PLAYER"], ["tkwrap", "CROSS SCREEN", "BALLS GO OFF ONE SIDE AND IN THE OTHER"]],
 				"food": [["fdrange", "INCREASE RANGE", "PULLS FOOD FROM HALF AGAIN AS FAR"], ["fdcandy", "PULL CANDY", "PULLS IN CANDY TOO"]],
 				"wicked": [["wkextra", "EXTRA USE", "WICKED CLOWN WORKS TWICE"], ["wksafe", "X2 SAFETY", "THE HIT THAT FIRES IT: SAFE TWICE AS LONG"]],
-				"juggle": [["jgbouncy", "EXTRA BOUNCY", "BALLS BOUNCE HIGHER AND LONGER"], ["jghigh", "EXTRA HIGH", "KICKS 12 PX HIGHER, 2 PX PER SAFETY STEP"]],
+				"juggle": [["jgbouncy", "EXTRA BOUNCY", "NINE BOUNCES AFTER A KICK, NOT FOUR"], ["jghigh", "EXTRA HIGH", "KICKS 12 PX HIGHER, 2 PX PER SAFETY STEP"]],
 				"pinata": [["pngum", "ALL GUMBALLS", "EVERY PIECE IS A GUMBALL"], ["pnjaw", "JAW BREAKER", "THE PIECES HURT ALL THE WAY DOWN"]]}},
 		# THE LITTLE GIRL: secret, 1 in 10 on RANDOM until her bag is full. No SPECIAL stat and no abilities of her
 		# own: +1 to two random stats each run (prestige is +1 to all, like anyone), and pumpkins hand her other characters'
@@ -2964,6 +2964,9 @@ func food_pull(d: Dictionary, dt: float, candy := false) -> void:
 # there is one), at the Jester, and at a random spot. They block enemy shots and do 2 damage to enemies they
 # touch, and never leave the play area.
 const JUG_GROUND := 218.0
+# what each landing keeps of the speed, bounce by bounce after a kick: normal, and with EXTRA BOUNCY
+const JUG_BOUNCE := [80, 60, 40, 20]
+const JUG_BOUNCY := [90, 80, 70, 60, 50, 40, 30, 20, 10]
 const JUG_GRAV := 420.0
 func juggle(p: Dictionary, dt: float) -> void:
 	if not p.eq.has("juggle"):
@@ -2982,11 +2985,17 @@ func juggle(p: Dictionary, dt: float) -> void:
 		b.ang += b.vx / 4.5 * dt
 		if b.y < JUG_GROUND - 1.0:
 			b.ang += 6.0 * (signf(b.vx) if b.vx != 0.0 else 1.0) * dt
-		# bounce on the ground, a little less each time, until it settles (EXTRA BOUNCY: higher and for longer)
+		# bounce on the ground: each landing keeps the next percentage of its speed from the list (JUG_BOUNCE, or
+		# JUG_BOUNCY with EXTRA BOUNCY), then it settles; a kick starts the list over
 		if b.y >= JUG_GROUND:
 			b.y = JUG_GROUND
-			var bouncy: bool = p.eq.has("jgbouncy")
-			b.vy = -b.vy * (0.7 if bouncy else 0.45) if b.vy > (25.0 if bouncy else 40.0) else 0.0
+			var lst: Array = JUG_BOUNCY if p.eq.has("jgbouncy") else JUG_BOUNCE
+			var n: int = int(b.get("bn", 0))
+			if b.vy > 15.0 and n < lst.size():
+				b.vy = -b.vy * lst[n] / 100.0
+				b.bn = n + 1
+			else:
+				b.vy = 0.0
 			b.vx *= 0.6
 			if absf(b.vx) < 4.0:
 				b.vx = 0.0
@@ -3044,6 +3053,7 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	var flight := 2.0 * absf(b.vy) / JUG_GRAV
 	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
 	b.cd = 0.3
+	b.bn = 0
 	b.y = minf(b.y, JUG_GROUND - 1.0)
 	sfx("shoot0")
 
