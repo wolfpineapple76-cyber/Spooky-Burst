@@ -119,8 +119,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   or a POWER TREAT (5%): one of the pumpkin's small boosts, never a character ability.
 - Each character has a SPECIAL, its own boost worth 2 steps: the Ghost's fire rate, the Cat's move speed, the
   Zombie's damage, the Skeleton's shot speed, the Jester's safe time after a hit. Its CHARACTERS page names it.
-- SUGAR RUSH: when a boss dies it tosses a cotton candy high into the air (two if 3 or 4 players are alive at
-  that moment). It falls beside the boss's candy, never through it, so you choose which to go for. Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
+- SUGAR RUSH: once the PUMPKIN KING has been beaten on this save, when a boss dies it tosses a cotton candy high
+  into the air (two if 3 or 4 players are alive at that moment). It falls beside the boss's candy, never through it, so you choose which to go for. Whoever catches one gets +1 to their SPECIAL, up to 10, so it can reach +12. The HUD shows
   SUG 1 to SUG 10 on the prestige line under your power-up codes. It's lost with your power-ups and boosts when
   you're out of lives.
 - Once the Jester is bought he pops out of the pumpkin on the right of the title screen, bobbing like a
@@ -188,12 +188,15 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   full one.
 - JUGGLING BALLS gives him a green, a blue and an orange ball that sit on the ground until someone walks into
   one, kicking it 1-2 rows up toward another player, then the Jester, then a random spot, in turn. They block
-  enemy shots, do 2 damage to enemies they touch and never leave the play area. A ball that has come to a stop
+  enemy shots, do the Jester's orb damage to enemies they touch (DAMAGE UP counts, and ORB SIZE grows their
+  reach) and never leave the play area. A kick can go up to 1 px higher for every step of LONGER SAFETY from his
+  SPECIAL, prestige and SUGAR RUSH, so a maxed Jester juggles up to about 22 px higher. A ball that has come to a stop
   rolls back to the Jester and stops a step short of him, ready to kick again. They roll as they go and spin
   in the air.
 - I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 pieces of candy, some of them gumballs.
-  It costs him half of what it's worth (rounded up). It bursts about 3 rows up, the pieces hit enemies on the way
-  out (1 damage, gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can
+  It costs him half of what it's worth (rounded up). The box rises until it's within 12 px of an enemy on any
+  side, or 12 px short of the top row's height, then bursts; the pieces hit enemies on the way out (1 damage,
+  gumballs 2), then rain down for anyone to catch. With less candy he throws only what he can
   pay for, with none nothing.
 
 ## Where things are

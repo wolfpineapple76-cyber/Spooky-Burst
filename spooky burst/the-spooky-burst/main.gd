@@ -1763,10 +1763,10 @@ func kill(e: Dictionary, fist := false) -> void:
 			burst(e.x + (randf() - 0.5) * 50, e.y + (randf() - 0.5) * 36, "#b3122e" if i % 2 == 1 else "#ffd92e", 14)
 		for i in 6:
 			drop_candy(e.x + (i - 2.5) * 16, e.y)
-		# SUGAR RUSH: it tosses one high into the air, two if 3 or 4 players are alive right now. They fall beside
-		# the candy (which spreads 40 px either side of the boss), never through it: one on the side with more
-		# room, two one each side
-		var n_sr := 2 if live().size() >= 3 else 1
+		# SUGAR RUSH (once the PUMPKIN KING has been beaten on this save): it tosses one high into the air, two if 3
+		# or 4 players are alive right now. They fall beside the candy (which spreads 40 px either side of the
+		# boss), never through it: one on the side with more room, two one each side
+		var n_sr := (2 if live().size() >= 3 else 1) if sv("pk_beaten", false) else 0
 		for i in n_sr:
 			var side := (1.0 if e.x < 160 else -1.0) if n_sr == 1 else (i * 2.0 - 1.0)
 			G.drops.append({"x": clampf(e.x + side * 72, 30.0, 290.0), "y": -12.0, "k": "r", "dead": false})
@@ -1788,6 +1788,8 @@ func kill(e: Dictionary, fist := false) -> void:
 			G.hpup += 1
 			G.after = "STAGE %d COMPLETE" % stage_of(G.wave)
 			G.clearing = 4.4
+		if e.bk == 2:
+			sv_set("pk_beaten", true)   # from now on bosses drop SUGAR RUSH (saved for the team, like the high score)
 		sfx("roar")
 		G.shake = 1.2
 		if e.bk == 2:
@@ -2641,15 +2643,16 @@ func juggle(p: Dictionary, dt: float) -> void:
 		for s in G.eb:
 			if not s.dead and absf(s.x - b.x) < 7.0 and absf(s.y - b.y) < 7.0:
 				s.dead = true
-		# 2 damage to an enemy it touches (once every half second per enemy)
+		# his orb damage to an enemy it touches (once every half second per enemy); ORB SIZE grows its reach
+		var grow := 0.4 * lvl(p, "size")
 		for e in G.en:
 			if e.dead or e.laugh > 0 or e.get("wait", 0.0) > 0 or G.t < e.get("jbt", -1.0):
 				continue
 			var hw: float = 27.0 if e.ty == "B" else 11.0
 			var hh: float = 20.0 if e.ty == "B" else 9.0
-			if absf(b.x - e.x) < hw + 4.0 and absf(b.y - e.y) < hh + 4.0:
+			if absf(b.x - e.x) < hw + 4.0 + grow and absf(b.y - e.y) < hh + 4.0 + grow / 2.0:
 				e.jbt = G.t + 0.5
-				e.hp -= 2
+				e.hp -= orb_dmg(p)
 				e.flash = 0.1
 				if e.hp <= 0:
 					down(e)
@@ -2666,7 +2669,9 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	elif b.k == 1:
 		tx = j.x
 	b.k = (b.k + 1) % 3
-	var h := 30.0 + randf() * 14.0
+	# up to 1 px higher per step of LONGER SAFETY from his SPECIAL, prestige and SUGAR RUSH (not the pumpkins')
+	var extra: float = chars[j.ch].tr.get("safe", 0) + prestige(j.n, j.ch) + int(j.get("sugar", 0))
+	var h := 30.0 + randf() * (14.0 + extra)
 	b.vy = -sqrt(2.0 * JUG_GRAV * h)
 	var flight := 2.0 * absf(b.vy) / JUG_GRAV
 	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
@@ -2676,9 +2681,9 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 
 # I'M NOT A PINATA: when he loses a life he tosses up a gift box of up to 8 pieces of candy (some gumballs, worth 2).
 # It costs him half of what it's worth from his stash, rounded up; with less he throws only what he can pay for,
-# with none nothing. The box goes up
-# about 3 rows and bursts; the pieces fly out hitting enemies (1 damage, a gumball 2), then rain down as candy
-# for anyone to catch.
+# with none nothing. The box rises until it's within 12 px of an enemy (any side) or 12 px short of the top row,
+# then bursts; the pieces fly out hitting enemies (1 damage, a gumball 2), then rain down as candy for anyone
+# to catch.
 func pinata(p: Dictionary) -> void:
 	# it costs him half of what it throws out (rounded up), so a full box doesn't drain him
 	var have := candy_of(p.n)
@@ -2695,13 +2700,19 @@ func pinata(p: Dictionary) -> void:
 	if pieces.is_empty():
 		return
 	add_candy(p.n, -ceili(worth / 2.0))
-	G.gifts.append({"x": p.x, "y": 196.0, "top": 196.0 - 66.0, "pieces": pieces, "n": p.n, "dead": false})
+	G.gifts.append({"x": p.x, "y": 196.0, "top": 44.0 + 12.0, "pieces": pieces, "n": p.n, "dead": false})
 	sfx("treat")
 
 func gifts_and_pieces(dt: float) -> void:
 	for g in G.gifts:
 		g.y -= 160.0 * dt
-		if g.y <= g.top:
+		# it bursts within 12 px of any enemy, or 12 px short of the top row's height, whichever comes first
+		var near: bool = g.y <= g.top
+		for e in G.en:
+			if not e.dead and e.laugh <= 0 and absf(g.x - e.x) < (27.0 if e.ty == "B" else 11.0) + 12.0 and absf(g.y - e.y) < (20.0 if e.ty == "B" else 9.0) + 12.0:
+				near = true
+				break
+		if near:
 			g.dead = true
 			burst(g.x, g.y, "#f6f1ff", 14)
 			sfx("pop")
@@ -4794,6 +4805,7 @@ func draw_swatch() -> void:
 # Commands start with "/":
 #   /debug stage 1 or 2   start that stage at wave 1, with the HP boost it would have
 #   /debug gc p1-p4 N     give that player slot N candy
+#   /debug sugarrush      say whether SUGAR RUSH is LOCKED or UNLOCKED; "on" / "off" sets it
 func con_key(event: InputEventKey) -> void:
 	var k := event.keycode
 	if k == KEY_ESCAPE or k == KEY_QUOTELEFT or event.unicode == 96 or event.unicode == 126:
@@ -4812,6 +4824,10 @@ func con_run(cmd: String) -> void:
 	var msg := ""
 	if w.size() == 3 and w[0] == "debug" and w[1] == "stage" and (w[2] == "1" or w[2] == "2"):
 		msg = debug_stage(int(w[2]))
+	elif w.size() >= 2 and w[0] == "debug" and w[1] == "sugarrush" and (w.size() == 2 or w[2] in ["on", "off"]):
+		if w.size() == 3:
+			sv_set("pk_beaten", w[2] == "on")
+		msg = "SUGAR RUSH: " + ("UNLOCKED" if sv("pk_beaten", false) else "LOCKED")
 	elif w.size() == 4 and w[0] == "debug" and w[1] == "gc" and w[2] in ["p1", "p2", "p3", "p4"] and w[3].is_valid_int():
 		var n := int(w[2].substr(1)) - 1
 		add_candy(n, maxi(int(w[3]), -candy_of(n)))

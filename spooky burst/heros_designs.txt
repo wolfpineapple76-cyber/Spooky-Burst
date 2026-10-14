@@ -26,8 +26,9 @@ PROGRESSION
 - Each character is a bit better at one thing, its SPECIAL, worth 2 boosts: Ghost fire rate, Cat move speed,
   Zombie damage, Skeleton shot speed, Jester longer safety (he's built around taking a hit and bouncing back).
   Its page in CHARACTERS names it (SPECIAL: ... +2); the join picker never does.
-- SUGAR RUSH (cotton candy): a boss tosses one high into the air when it dies, two if 3-4 players are alive at
-  that moment. It falls beside the candy stream, not through it: you choose which to go for. Each one caught adds +1 to the catcher's SPECIAL, up to 10 (so +12 in all), and it's lost with
+- SUGAR RUSH (cotton candy): locked until the PUMPKIN KING has been beaten once on the save (team-wide flag,
+  /debug sugarrush on|off to test). Then a boss tosses one high into the air when it dies, two if 3-4 players
+  are alive at that moment. It falls beside the candy stream, not through it: you choose which to go for. Each one caught adds +1 to the catcher's SPECIAL, up to 10 (so +12 in all), and it's lost with
   the power-ups and boosts on death. The HUD shows SUG 1 to SUG 10 on the prestige line, in its style, since
   it's more special than the power-ups. Build back up by surviving, not handouts.
 - The treat bucket's POWER TREAT (5%) is one of the pumpkin's small boosts, never a character ability.
@@ -110,6 +111,10 @@ MENUS AND CONTROLS
   The game pauses while it's open and every key goes to it. Commands start with "/".
     /debug stage 1 or /debug stage 2   start that stage at wave 1, with the HP boost it would have
     /debug gc p3 500                   give that player slot (p1-p4) that much candy
+    /debug sugarrush [on|off]          say whether SUGAR RUSH is LOCKED or UNLOCKED, or set it
+- Jester: juggling balls take his DAMAGE UP and ORB SIZE; each LONGER SAFETY step from his SPECIAL, prestige
+  and SUGAR RUSH (not pumpkins) lets a kick go 1 px higher. The present rises until 12 px from an enemy or
+  12 px short of the top row, then bursts, so it's not wasted down low.
 
 CHARACTER LOOKS
 - A character's name sets its look: the Black Cat is always black. Players tell cats apart by a coloured tummy.
