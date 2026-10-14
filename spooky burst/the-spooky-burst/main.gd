@@ -4546,11 +4546,20 @@ func draw_game() -> void:
 			var m = s.get("mate")
 			var bigk: bool = bg or s.get("bigb", false)   # BIG BONE: the knuckles a size up
 			if s.get("twirl", false) and m != null and not m.dead:
-				# TWIRL BONE: the shaft (drawn once, from the lead end) and a round knob on each end
+				# TWIRL BONE: the whole bone drawn once, from the lead end, turned to the angle of its spin so the
+				# knuckles keep facing along the shaft as they circle
 				if s.get("lead", false):
-					pline(s.x, s.y, m.x, m.y, 2 * sc, bp.w)
-				var kb: Array = ORB_B if bigk else ORB
-				spr_mid(kb, {"c": bp.w}, x, y, sc)
+					var mid := Vector2((s.x + m.x) / 2.0, (s.y + m.y) / 2.0)
+					var tr := mid.distance_to(Vector2(s.x, s.y))
+					var bl: Array = BONE_LB if bigk else BONE_L
+					var br: Array = BONE_RB if bigk else BONE_R
+					var bw: int = bl[0].length() * sc
+					var bh: int = bl.size() * sc
+					draw_set_transform(mid, s.tw, Vector2.ONE)
+					R(-tr + 2, -sc, 2 * tr - 3, 2 * sc, bp.w)
+					spr(bl, bp, -tr + 2 - bw, -bh / 2.0, sc)
+					spr(br, bp, tr - 1, -bh / 2.0, sc)
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 				continue
 			if m != null and not m.dead and s.get("lead", false) and s.x < m.x:
 				R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
