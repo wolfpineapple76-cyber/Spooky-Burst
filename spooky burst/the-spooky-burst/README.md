@@ -173,7 +173,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 
 ## Characters
 - The Black Cat is black for every player; players 2-4 have a coloured tummy matching their orbs.
-- NINE LIVES shows as the cat's tail curled up over his head while the shield is ready.
+- NINE LIVES shows as a halo floating over his head while the shield is ready; the hit takes it and it comes
+  back as the shield recharges. The Little Girl wears it too when she borrows NINE LIVES.
 - LUCKY COIN shoots big gold coins that flip as they fly. Every hit is a coin flip: half the time it knocks the
   enemy away from you (4 px per point of damage), the other half it does double damage. Knocks add up and the
   enemy drifts back slowly, so keeping at one drives it up or off to the side, never off the screen. It keeps
@@ -181,8 +182,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - WIGGLE TAIL: his tail does the collecting. A candy, power-up, bucket or apple that comes within a cat width
   beyond him, as high as his head, starts the swipe out toward it; the swipe follows it as it falls, waits out
   at full reach a moment for it, and it's taken the instant the drawn tail touches it, nothing else takes it.
-  With NINE LIVES the curled tail wags out instead, dipping a little toward things below head height, and only
-  what the curl itself touches is taken.
+  NINE LIVES doesn't change the tail: the halo shows the shield instead.
 - HEAVY FIST makes the Zombie's shots little fists that do double damage, and enemies they finish off drop
   candy more often. PUNCH THROUGH lets them go through enemies like SPECTRAL SHOT,
   and through a web tile they break (halving the same way). ROT CLOUD slows every enemy shot to 75%; each
@@ -265,7 +265,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   where he was, then a 5 second cooldown; his eyes glint orange while it's ready, and the pause menu's control
   lines name the keys); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
   LONG TAIL (the tail reaches 1.5 cat widths beyond him, 48 px, and the curl stretches to match); TALL TAIL (the
-  tail reaches 12 px higher, and with NINE LIVES the curl is drawn 12 px taller, Sugar Rush included).
+  tail reaches 12 px higher, Sugar Rush included).
 - The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two
   waves); OVERGROW (up to 6 lives; six life icons sit a little closer). HEAVY FIST: IRON FIST (a fist does
   triple a plain orb on a boss); GRABBY (a fist collects candy it passes through, for the Zombie; not buckets,

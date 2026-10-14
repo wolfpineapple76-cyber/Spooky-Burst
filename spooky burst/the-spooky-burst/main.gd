@@ -138,6 +138,9 @@ const JBELL_B := ["...ccc...", "..cWccc..", ".cWccccc.", ".cWccccc.", "ccccccccc
 const TBALL := ["..ccc..", ".cWccc.", "cWccccc", "ccccccc", "cccccwc", ".cccww.", "..cww.."]
 const TBALL_B := ["...ccc...", "..cWccc..", ".cWccccc.", "cWccccccc", "ccccccccc", "cccccccwc", ".ccccccw.", "..cccww..", "...cww..."]
 # JUGGLING BALLS: a shiny ball, always one green, one blue and one orange
+# NINE LIVES: a halo over the head while the shield is ready; the hit takes it, it comes back as it recharges
+const HALO := ["..YYYYYY..", ".Y......Y.", "..YYYYYY.."]
+const HALOPAL := {"Y": "#ffd92e"}
 const JUGBALL := ["..ccccc..", ".ccWlccc.", "cWllccccc", "cWlcccccc", "ccccccccc", "ccccccccc", "cccccccdc", ".cccccdd.", "..ddddd.."]
 # the ball turned by quarter turns, so it rolls
 var jug_rot := {}
@@ -643,7 +646,7 @@ func _build_chars() -> void:
 			"pow": [["regen", "REGROW", "GET A LIFE BACK EVERY 2 WAVES", "RGN"], ["fist", "HEAVY FIST", "DOUBLE DAMAGE, MORE CANDY", "FST"],
 				["slow", "ROT CLOUD", "ENEMY SHOTS MOVE SLOWER", "ROT"], ["longinv", "THICK SKIN", "STAY SAFE LONGER AFTER A HIT", "SKN"],
 				["punch", "PUNCH THROUGH", "SHOTS PUNCH THROUGH ENEMIES", "PCH"]],
-			"golem": GOLEM, "golem2": _alt(GOLEM, {8: "G.SSSSSSSSSS.G", 11: "...SSSSSSSS...", 15: ".PPPP....PPPP."}),
+			"golem": GOLEM, "golem2": _alt(GOLEM, {14: ".PPPP....PPPP.", 15: ".PPPP....PPPP."}),
 			"ups": {
 				"regen": [["rgboss", "READY REGROW", "A LIFE AT THE START OF A BOSS WAVE TOO"], ["rgover", "OVERGROW", "ROOM FOR ONE MORE LIFE"]],
 				"fist": [["fsiron", "IRON FIST", "FISTS HIT BOSSES MUCH HARDER"], ["fsgrab", "GRABBY", "FISTS COLLECT THE CANDY THEY PASS"]],
@@ -2919,35 +2922,12 @@ const TAIL_EARLY := 8.0
 # TAIL reaches TAIL_HIGH px higher, and with NINE LIVES the curl is drawn that much taller.
 const TAIL_HIGH := 12.0
 const TAIL_TOUCH := 7.0   # how close to the drawn tail's line a thing is caught (a candy is 11 wide, the tail 2)
-const TAIL_DIP := 16.0    # how far the curl's wag can dip toward a thing below head height
 const TAIL_HOLD := 0.3    # how long a swipe waits out at full reach for its target to fall onto it
 func tail_reach_px(p: Dictionary) -> float:
 	return 48.0 if p.eq.has("tllong") else 36.0
 
 func tail_top(p: Dictionary) -> float:
 	return 188.0 - (TAIL_HIGH if p.eq.has("tltall") else 0.0)
-
-func tail_wag(p: Dictionary) -> bool:
-	return p.eq.has("shield") and p.sh <= 0
-
-# the curl's points as offsets from (px, 196): resting or in its wag, stretched sideways for LONG TAIL and
-# raised TAIL_HIGH for TALL TAIL (the base two points stay on him)
-func wag_points(p: Dictionary, tl) -> Array:
-	var pts: Array
-	if tl != null and tl.get("wag", false):
-		pts = wag_pose(WAG_RIGHT if tl.rx > 0 else WAG_LEFT, tl.t)
-	else:
-		pts = TAIL_REST.duplicate()
-	var sx := tail_reach_px(p) / 36.0
-	var up := TAIL_HIGH if p.eq.has("tltall") else 0.0
-	# wagging at something below head height, the curl dips toward it (up to TAIL_DIP)
-	var dip := 0.0
-	if tl != null and tl.get("wag", false):
-		dip = clampf(tl.ty - 192.0, 0.0, TAIL_DIP)
-	var out := []
-	for j in pts.size():
-		out.append(Vector2(pts[j].x * sx, pts[j].y - (up if j >= 2 else 0.0) + (dip if j >= 2 else 0.0)))
-	return out
 
 # the swoop's curve from its base to its tip (offsets from (px, by)), k being how far out it is
 func swoop_points(tl: Dictionary, k: float) -> Array:
@@ -2964,18 +2944,12 @@ func swoop_points(tl: Dictionary, k: float) -> Array:
 		pts.append(a1.lerp(a2, u).lerp(a2.lerp(a3, u), u))
 	return pts
 
-# the drawn tail right now, as points in game space: the curl (resting or wagging) with NINE LIVES, the
-# swoop during a swipe, nothing otherwise
+# the drawn tail right now, as points in game space: the swoop during a swipe, nothing otherwise
 func tail_points(p: Dictionary) -> Array:
-	var at := Vector2(p.x, 196.0)
-	var pts: Array
-	if tail_wag(p):
-		pts = wag_points(p, p.get("tl"))
-	elif p.get("tl") != null:
-		pts = swoop_points(p.tl, tail_reach(p.tl))
-	else:
+	if p.get("tl") == null:
 		return []
-	return pts.map(func(v): return v + at)
+	var at := Vector2(p.x, 196.0)
+	return swoop_points(p.tl, tail_reach(p.tl)).map(func(v): return v + at)
 
 # how far a point is from the drawn tail (far if there's none)
 func tail_dist(p: Dictionary, v: Vector2) -> float:
@@ -2997,10 +2971,8 @@ func wiggle_reach(o: Dictionary) -> bool:
 		var tl = p.get("tl")
 		# a thing coming near starts the swipe toward it, or re-aims one that has done its job and is coming back
 		if near and (tl == null or (tl.get("done", false) and tl.t >= TAIL_OUT)):
-			var wag := tail_wag(p)
-			var rx := clampf(o.x - p.x, -reach, reach)
-			p.tl = {"t": 0.0, "rx": rx, "ty": clampf(o.y, top, 224.0), "wag": wag, "obj": o, "done": false,
-				"end": (WAG_LEFT[-1][0] if rx < 0 else WAG_RIGHT[-1][0]) if wag else TAIL_OUT + TAIL_BACK}
+			p.tl = {"t": 0.0, "rx": clampf(o.x - p.x, -reach, reach), "ty": clampf(o.y, top, 224.0), "obj": o, "done": false,
+				"end": TAIL_OUT + TAIL_BACK}
 			tl = p.tl
 		if tl == null:
 			continue
@@ -3009,7 +2981,7 @@ func wiggle_reach(o: Dictionary) -> bool:
 		if not tl.done and is_same(tl.get("obj"), o):
 			tl.rx = clampf(o.x - p.x, -reach, reach)
 			tl.ty = clampf(o.y, top, 224.0)
-			if not tl.wag and tl.t > TAIL_OUT and tl.get("held", 0.0) < TAIL_HOLD:
+			if tl.t > TAIL_OUT and tl.get("held", 0.0) < TAIL_HOLD:
 				tl.held = tl.get("held", 0.0) + (tl.t - TAIL_OUT)
 				tl.t = TAIL_OUT
 		# the drawn tail touching it is the catch
@@ -4265,7 +4237,8 @@ func tell_pal(e: Dictionary) -> Dictionary:
 	if tl <= 0:
 		return EPAL
 	var key := ""
-	if e.ty == "v" and int(floor((TELL_V - tl) / (TELL_V / 6.0))) % 2 == 0:
+	var ph := int(floor((TELL_V - tl) / (TELL_V / 6.0) + 0.001))   # (+ a hair: no float flicker at a boundary)
+	if e.ty == "v" and ph < 6 and ph % 2 == 0:
 		key = "v"
 	elif e.ty == "s" and tl > TELL_S * 0.4:
 		key = "s"
@@ -4609,10 +4582,11 @@ func draw_game() -> void:
 			continue
 		var px := int(round(p.x))
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
-		if p.eq.has("shield") and p.sh <= 0:
-			draw_tail(p, px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt)
-		elif p.get("tl") != null:
+		if p.get("tl") != null:
 			draw_swoop(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.tl)
+		# NINE LIVES ready: a halo a pixel above the head (the golem's head is higher)
+		if p.eq.has("shield") and p.sh <= 0:
+			spr(HALO, HALOPAL, px - 10, 196 + bob - 8 - 6 * gol(p), 2)
 		# stuck in a SPIDER BEAST web
 		if p.web > 0:
 			spr(WEBSHOT, WEBSHOTPAL, px - 9, 203 + bob, 2)
@@ -4648,49 +4622,6 @@ func draw_game() -> void:
 		while tx < 220:
 			R(tx, 7, 1, 5, "#1b0f33")
 			tx += 12
-
-# NINE LIVES shield: the tail comes out from behind, up the side and curls over the head.
-# Drawn before the cat so it sits behind him. by is the top of the sprite. Points are from (px, by).
-const TAIL_REST := [Vector2(8, 20), Vector2(14, 15), Vector2(16, 6), Vector2(14, -2), Vector2(8, -7), Vector2(0, -9),
-	Vector2(-6, -8), Vector2(-9, -4)]
-# the curl turned the other way, hooked out to his right
-const TAIL_FLIP := [Vector2(8, 20), Vector2(14, 15), Vector2(16, 6), Vector2(18, -2), Vector2(24, -7), Vector2(32, -9),
-	Vector2(38, -8), Vector2(41, -4)]
-# straight up behind him, the same length
-const TAIL_UP := [Vector2(0, 20), Vector2(0, 12.2), Vector2(0, 3), Vector2(0, -5.3), Vector2(0, -13.1), Vector2(0, -21.3),
-	Vector2(0, -27.4), Vector2(0, -32.4)]
-# WIGGLE TAIL with NINE LIVES wags: to the right the curl turns over to the other side and back. To the left it
-# goes straight up behind him, the whole cat flips (the tail is straight so it doesn't show), the same wag plays
-# mirrored, and it goes back up behind him and flips home. [time, pose, mirrored]
-# Out fast, back slowly, like the swipe.
-const WAG_RIGHT := [[0.0, TAIL_REST, false], [0.06, TAIL_FLIP, false], [0.5, TAIL_REST, false]]
-const WAG_LEFT := [[0.0, TAIL_REST, false], [0.03, TAIL_UP, false], [0.06, TAIL_REST, true], [0.12, TAIL_FLIP, true],
-	[0.45, TAIL_REST, true], [0.55, TAIL_UP, false], [0.65, TAIL_REST, false]]
-func draw_tail(p: Dictionary, px: int, by: int, col: String, gt: float) -> void:
-	var tl = p.get("tl")
-	var pts := wag_points(p, tl)
-	if tl == null or not tl.get("wag", false):
-		# resting, with a slow sway at the tip
-		var sw := int(round(sin(gt * 3) * 1))
-		for j in pts.size():
-			if j >= 4:
-				pts[j] += Vector2(sw, 0)
-	for j in pts.size():
-		pts[j] += Vector2(px, by)
-	smooth_line(pts, col, 4)
-
-# the tail's pose at time t in a wag: an eased blend between the keyframes either side
-func wag_pose(keys: Array, t: float) -> Array:
-	for i in keys.size() - 1:
-		if t <= keys[i + 1][0] or i == keys.size() - 2:
-			var u := smoothstep(0.0, 1.0, clampf((t - keys[i][0]) / (keys[i + 1][0] - keys[i][0]), 0.0, 1.0))
-			var out := []
-			for j in TAIL_REST.size():
-				var a: Vector2 = keys[i][1][j] * (Vector2(-1, 1) if keys[i][2] else Vector2.ONE)
-				var b: Vector2 = keys[i + 1][1][j] * (Vector2(-1, 1) if keys[i + 1][2] else Vector2.ONE)
-				out.append(a.lerp(b, u))
-			return out
-	return TAIL_REST.duplicate()
 
 # a smooth curve through pts (Catmull-Rom), 3 px wide for the first thick segments and 2 px after
 func smooth_line(pts: Array, col: String, thick: int) -> void:
