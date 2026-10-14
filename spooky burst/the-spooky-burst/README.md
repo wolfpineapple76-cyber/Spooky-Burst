@@ -135,8 +135,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
   The Ghost starts free. Each character's page shows a line about what it's a bit better at:
-  the Ghost shoots 10% faster, the Black Cat moves 8% faster, the Zombie does 10% more damage,
-  and the Skeleton's and the Jester's shots fly 8% faster (each worth 2 boosts, stacking with everything else).
+  the Ghost shoots 10% faster, the Black Cat moves 8% faster, the Zombie does 10% more damage, the Skeleton's
+  shots fly 8% faster, and the Jester stays safe 12% longer after a hit (each worth 2 boosts, stacking with
+  everything else).
 - PRESTIGE: once you own a character and all its upgrades, a PRESTIGE row shows at the bottom of its page.
   Confirming relocks the character and all its upgrades, and gives that character +1 of every boost
   for good, up to PRESTIGE 10/10 (so 10 more on top of the 10 a run can give). Each prestige level makes
