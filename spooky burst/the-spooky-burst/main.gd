@@ -4540,8 +4540,12 @@ func draw_game() -> void:
 			spr_mid(fi, fp, x, y, sc)
 			continue
 		if s.get("baby", false):
-			# BABY BACK RIBS: a small dot, bone-coloured behind a bone, the shot colour behind an orb
-			R(x - 1, y - 1, 3, 3, "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false) if s.get("ofbone", false) else col)
+			# BABY BACK RIBS: a little rib, a three-pixel V pointing up, bone-coloured behind a bone, the shot colour
+			# behind an orb
+			var bc: String = "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false) if s.get("ofbone", false) else col
+			R(x - 1, y - 1, 1, 1, bc)
+			R(x + 1, y - 1, 1, 1, bc)
+			R(x, y, 1, 1, bc)
 			continue
 		if s.bone:
 			var bp := {"w": "#" + Color("#f3efe0").lerp(Color(col), 0.25).to_html(false)}
