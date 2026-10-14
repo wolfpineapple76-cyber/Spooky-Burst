@@ -7,3 +7,8 @@ SOUNDS THAT WON'T BE HEARD
   (11%) are in the same range. Only boom, pop, ring, roar, hurt and the King's laugh carry.
 - Any tell that leans on a sound needs a real sound first. To discuss with Sammie: which effects matter, and
   whether to replace them with proper samples or regenerate them louder and longer.
+
+SOUL MATE'S THREE VOLLEYS FIRE ALMOST AT ONCE (Hero, play test)
+- "I think Soul Mates 3 volly needs a delay between shots, it seems lightning fast". The gap is SOUL_GAP, 0.07 s
+  between her three volleys, so all three leave in about a seventh of a second. Something like 0.2 s would read
+  as three shots. Not changed yet.
