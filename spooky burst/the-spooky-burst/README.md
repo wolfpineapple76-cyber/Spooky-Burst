@@ -176,9 +176,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - NINE LIVES shows as a halo floating over his head while the shield is ready; the hit takes it and it comes
   back as the shield recharges. The Little Girl wears it too when she borrows NINE LIVES.
 - LUCKY COIN shoots big gold coins that flip as they fly. Every hit is a coin flip: half the time it knocks the
-  enemy away from you (4 px per point of damage), the other half it does double damage. Knocks add up and the
-  enemy drifts back slowly, so keeping at one drives it up or off to the side, never off the screen. It keeps
-  moving and attacking. Bosses can be knocked too.
+  enemy away from you (4 px per point of damage), the other half it does double damage. Each knock slides the
+  enemy over, and a new knock replaces what's left of the last one's slide rather than saving up, so it never
+  holds an enemy in place mid-attack. In formation the knocks add up and the enemy drifts back slowly, so
+  keeping at one drives it up or off to the side, never off the screen. It keeps moving and attacking. Bosses can be knocked too.
 - WIGGLE TAIL: his tail does the collecting. A candy, power-up, bucket or apple that comes within a cat width
   beyond him, as high as his head, starts the swipe out toward it; the swipe follows it as it falls, waits out
   at full reach a moment for it, and it's taken the instant the drawn tail touches it, nothing else takes it.
@@ -247,9 +248,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   EYE); HAUNT (a ghost shot that hits an enemy that lives clings to it for half a second, then hits once more
   before passing on, or ending if it can't pierce). RESTLESS SHOT: FAST SHOT (orbs fly at QUICK BONES speed);
   WON'T STOP (a shot off the top comes back in through the bottom once, at half the damage it left with, fresh
-  hits allowed). SPECTRAL SHOT: SOLID SPIRIT (the first enemy passed doesn't halve it); THROUGH WEBS (a web it
-  breaks is passed, halving once like an enemy; a web that holds still stops it). SOUL MATE: SELF DEFENSE (six
-  volleys back instead of three); GHOST CANDY (when she catches a candy or gumball she tosses up a see-through
+  hits allowed). SPECTRAL SHOT: SOLID SPIRIT (the first enemy passed doesn't halve it); THROUGH WEBS (passes
+  through webs and leaves them alone, halving once for each web like an enemy). SOUL MATE: SELF DEFENSE (twice
+  as much: three volleys back, a half-second pause, then three more); GHOST CANDY (when she catches a candy or gumball she tosses up a see-through
   candy worth 1 for anyone else; she can't catch it, and it costs the player nothing). GHOSTRESS: QUICK STUDY
   (her copies take your boosts: damage, shot speed and orb size; without it her copies are plain, abilities
   only); BRING A FRIEND (a second Ghostress trails further back while a boss is up).
@@ -263,7 +264,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   REFLEXES: POUNCE (the first ability on a button: Q and E for the left keyboard player, comma and period for
   the arrows player, LB and RB on a controller; he jumps 50 px that way through anything in between, a puff
   where he was, then a 5 second cooldown; his eyes glint orange while it's ready, and the pause menu's control
-  lines name the keys); ZOOMIES (running into a side comes out the other). WIGGLE TAIL:
+  lines name the keys); ZOOMIES (running into a side comes out the other, and with POUNCE a pounce past an edge carries on in from
+  the other side). WIGGLE TAIL:
   LONG TAIL (the tail reaches 1.5 cat widths beyond him, 48 px, and the curl stretches to match); TALL TAIL (the
   tail reaches 12 px higher, Sugar Rush included).
 - The Zombie's SHOP: REGROW: READY REGROW (a life as a boss wave starts, on top of the usual one every two

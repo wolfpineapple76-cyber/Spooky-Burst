@@ -487,8 +487,10 @@ const LEAN_MAX := 15.0
 const LEAN_TIME := 1.0
 # SOUL MATE and GHOSTRESS: small ghosts that trail you along the ground. HELP_Y is the middle of them.
 const HELP_Y := 212.0
-# SOUL MATE fires 3 volleys back for every enemy shot or enemy that touches her, this far apart
+# SOUL MATE fires 3 volleys back for every enemy shot or enemy that touches her, this far apart. SELF DEFENSE
+# fires a second three after SELF_PAUSE
 const SOUL_GAP := 0.2
+const SELF_PAUSE := 0.5
 
 # 5x7 pixel font, drawn in code so the project needs no font file.
 const GLYPHS := {
@@ -624,8 +626,8 @@ func _build_chars() -> void:
 			"ups": {
 				"ghostshot": [["gsspooky", "SPOOKY", "THE GHOST SHOTS DRIFT TOWARD ENEMIES"], ["gshaunt", "HAUNT", "CLINGS TO AN ENEMY AND HITS AGAIN"]],
 				"restless": [["rsfast", "FAST SHOT", "ORBS FLY FASTER"], ["rsback", "WON'T STOP", "OFF THE TOP AND BACK IN FROM THE BOTTOM"]],
-				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "BREAKS A WEB AND KEEPS GOING"]],
-				"soulmate": [["smsix", "SELF DEFENSE", "SHE FIRES BACK TWICE AS HARD"], ["smcandy", "GHOST CANDY", "SHE TOSSES UP A FREE CANDY FOR OTHERS"]],
+				"spectral": [["spsolid", "SOLID SPIRIT", "NO HALVING ON THE FIRST ENEMY PASSED"], ["spweb", "THROUGH WEBS", "PASSES THROUGH WEBS"]],
+				"soulmate": [["smsix", "SELF DEFENSE", "SHE FIRES BACK TWICE AS MUCH"], ["smcandy", "GHOST CANDY", "SHARING IS CARING."]],
 				"ghostress": [["grstudy", "QUICK STUDY", "HER COPIES TAKE YOUR BOOSTS"], ["grfriend", "BRING A FRIEND", "A SECOND GHOSTRESS FOR BOSS FIGHTS"]]}},
 		{"id": "cat", "name": "BLACK CAT", "spr": CAT, "orb": "#ffe45c",
 			"spr2": _alt(CAT, {0: "KK.......KK.", 1: "KKK.....KKK.", 12: "KK..KKKK..KK"}),
@@ -2893,13 +2895,15 @@ func helpers(p: Dictionary, dt: float) -> void:
 		track_lean(h, h.v, dt)
 		if key != "sm":
 			continue
-		# SELF DEFENSE: six volleys back instead of three
-		var back := 6 if p.eq.has("smsix") else 3
+		# SELF DEFENSE: a second three volleys after a pause
+		var back := 3
+		var again: int = 3 if p.eq.has("smsix") else 0
 		var tag := "s%d" % p.n
 		for b in G.eb:
 			if not b.dead and not b.has(tag) and absf(b.x - h.x) < 6 and absf(b.y - HELP_Y) < 7:
 				b[tag] = true
 				h.q += back
+				h.q2 = h.get("q2", 0) + again
 		for e in G.en:
 			var big: bool = e.ty == "B"
 			var on: bool = not e.dead and e.laugh <= 0 and absf(e.x - h.x) < (30 if big else 10) and absf(e.y - HELP_Y) < (28 if big else 11)
@@ -2908,6 +2912,7 @@ func helpers(p: Dictionary, dt: float) -> void:
 			elif not e.has(tag):
 				e[tag] = true
 				h.q += back
+				h.q2 = h.get("q2", 0) + again
 				e.hp -= orb_dmg(p) * vxs_of(p).size() * (2 if p.eq.has("bone") else 1)
 				e.flash = 0.1
 				if e.hp <= 0:
@@ -2919,6 +2924,11 @@ func helpers(p: Dictionary, dt: float) -> void:
 			volley(p, h.x, HELP_Y - 8, lean(h), true)
 			h.q -= 1
 			h.qt = SOUL_GAP
+			# the first three are out: SELF DEFENSE's second three follow after the pause
+			if h.q == 0 and h.get("q2", 0) > 0:
+				h.q = h.q2
+				h.q2 = 0
+				h.qt = SELF_PAUSE
 			sfx("shoot1" if p.n % 2 == 1 else "shoot0")
 
 # p catches the candy k
@@ -3360,17 +3370,18 @@ func tells(e: Dictionary, dt: float) -> void:
 	elif e.ty == "s":
 		venom(e.x, e.y)
 
-# LUCKY COIN's knock back: each shove slides the enemy over at SHOVE_SPEED px a second rather than jumping.
-# Anything held to a spot (formation, a hanging spider, a boss) gets an offset from it that adds up with every
-# shove and drifts back at KICK_BACK px a second, slower than steady hits push it, so keeping at one enemy drives
-# it away. Anything flying about is just moved and carries on. Never off screen. A boss ignores shoves while he's
+# LUCKY COIN's knock back: each shove slides the enemy over at SHOVE_SPEED px a second rather than jumping. A new
+# shove replaces what's left of the last one instead of adding to it, so hits never save up into a push that holds
+# an enemy in place. Anything held to a spot (formation, a hanging spider, a boss) gets an offset from it that adds
+# up with every shove and drifts back at KICK_BACK px a second, slower than steady hits push it, so keeping at one
+# enemy drives it away. Anything flying about is just moved and carries on. Never off screen. A boss ignores shoves while he's
 # flying in, laughing or strafing and for half a second after, so they can't pile up and jump him when he settles.
 const KICK_BACK := 6.0
 const SHOVE_SPEED := 55.0
 func shove(e: Dictionary, d: Vector2) -> void:
 	if e.ty == "B" and e.get("calm", 0.5) > 0:
 		return
-	e.kq = e.get("kq", Vector2.ZERO) + d
+	e.kq = d
 
 # each frame: slide on with any shove still to come, and drift back
 func shoving(e: Dictionary, dt: float) -> void:
@@ -3616,7 +3627,11 @@ func pounce(p, d: int) -> void:
 	if p == null or p.out or mode != "game" or not p.eq.has("swpounce") or p.pcd > 0:
 		return
 	burst(p.x, 209, "#cbbcff", 10)
-	p.x = clampf(p.x + POUNCE_PX * d, 14, 306)
+	# with ZOOMIES a pounce past an edge carries on in from the other side
+	if p.eq.has("swzoom"):
+		p.x = 14.0 + fposmod(p.x + POUNCE_PX * d - 14.0, 292.0)
+	else:
+		p.x = clampf(p.x + POUNCE_PX * d, 14, 306)
 	p.pcd = POUNCE_CD
 	sfx("dash")
 
@@ -4066,13 +4081,21 @@ func update(dt: float) -> void:
 			continue
 		for wb in G.webs:
 			if wb.hp > 0 and absf(s.x - web_x(wb, sway)) < 9 and swept(s, wb.y, 5.0):
+				# THROUGH WEBS: the shot passes through and leaves the web alone, losing half as if passing an enemy
+				# (once for each web)
+				if s.get("webs", false):
+					if not s.get("wpass", []).any(func(o): return is_same(o, wb)):
+						s.wpass = s.get("wpass", []) + [wb]
+						s.dmg *= 0.5
+						s.dead = s.dmg < 1.0
+					continue
 				wb.hp -= s.dmg * (2.0 if s.get("cweb", false) else 1.0)   # CLEAR WEBS: double to webs
 				wb.flash = 0.1
 				s.dead = true
 				if wb.hp <= 0:
 					burst(web_x(wb, sway), wb.y, "#d8d2e8", 8)
-					# PUNCH THROUGH and THROUGH WEBS carry on through a web they break, halved as if it were an enemy
-					if s.punch or s.get("webs", false):
+					# PUNCH THROUGH carries on through a web it breaks, halved as if it were an enemy
+					if s.punch:
 						s.dmg *= 0.5
 						s.dead = s.dmg < 1.0
 				break
@@ -4750,11 +4773,13 @@ func draw_hud() -> void:
 			sp += "SUG %d " % p.sugar
 		if sp != "":
 			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
-		var boosts := ""
+		# the boosts, with half-width gaps so all six at 10 fit in the player's quarter
+		var bx: float = CODE_X[p.n][0]
 		for b in BOOSTS:
 			if bo(p, b[0]) > 0:
-				boosts += "%s%d " % [b[3], bo(p, b[0])]
-		T(boosts.strip_edges(), CODE_X[p.n][0], 408, 1, "#7df2ff", CODE_X[p.n][1])
+				var bs := "%s%d" % [b[3], bo(p, b[0])]
+				T(bs, bx, 408, 1, "#7df2ff")
+				bx += text_w(bs, 1) + 3
 	if G.players.size() == 1 and mode == "game":
 		T("TO JOIN: START ON A CONTROLLER, OR BACKSPACE ON THE KEYBOARD", 320, 466, 1, "#9d8cc4", 1)
 	if G.toast != null and mode == "game":

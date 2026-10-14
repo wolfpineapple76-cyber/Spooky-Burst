@@ -189,10 +189,14 @@ THE SHOP (character ability upgrades), Hero's idea "that might eventually replac
   a second dealing one more hit before passing"). RESTLESS SHOT: Fast Shot / Won't Stop ("Shots that hit the top
   of the screen come back through the bottom once at 50% damage of when they left"). SPECTRAL SHOT: Solid
   Spirit ("no halving on the first enemy passed") / Through Webs ("passes web tiles but breaks them. Counts
-  toward losing 50% as if passing one enemy"). SOUL MATE: Self Defense ("six volleys back instead of three") /
+  toward losing 50% as if passing one enemy"; later: "Through Webs passes through without hurting the web
+  leaving it alone"). SOUL MATE: Self Defense ("six volleys back instead of three"; later: "a better
+  description would be twice as much, she should shoot 2 volleys of 3", so three, a pause, three more) /
   Ghost Candy ("When she catches a candy or gumball, she throws a ghost candy into the air for anyone else to
   catch. It is worth 1 candy and she cannot catch it. Semi translucent. Costs nothing to the player when she
-  throws."). GHOSTRESS: Quick Study ("her copies take your boosts"; "change ghostress so that she does not get
+  throws." Description: "change the description not
+  effect of ghost candy to begin with 'Sharing is Caring.' if there is room it can have the rest of the
+  description"). GHOSTRESS: Quick Study ("her copies take your boosts"; "change ghostress so that she does not get
   all of your boosts until you buy that ability") / Bring a Friend ("during boss fights only a second Ghostress
   appears").
   Cat: LUCKY COIN: Stop Shot ("50% chance to destroy itself and an enemy shot when they collide") / Knock Shot
