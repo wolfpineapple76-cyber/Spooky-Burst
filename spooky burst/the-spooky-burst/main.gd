@@ -1759,7 +1759,9 @@ func open_picker(dev: Dictionary) -> void:
 	if split:
 		p.kb = "wasd"
 	var slot: int = rejoin.n if rejoin != null else free_slot(dev)
-	var ch: int = rejoin.ch if rejoin != null else char_pref(slot)
+	# the picker opens on the slot's favourite (RANDOM included) whether it's a first join or a rejoin: whoever
+	# they picked or rolled last time was for that game only
+	var ch: int = char_pref(slot)
 	G.picks.append({"dev": dev, "slot": slot, "ch": ch, "rejoin": rejoin, "split": split})
 	sfx("select")
 
