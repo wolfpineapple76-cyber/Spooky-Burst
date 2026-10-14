@@ -122,8 +122,8 @@ MENUS AND CONTROLS
   bounce back up off the thrower. The Jester shoots straight up without it. "the whole point is to make trick
   shot easier to bounce off the sides of enemies anyway", and the Little Girl gets it when she draws it.
 - THE LITTLE GIRL (secret sixth character): "1 in 10 chance if playing Random that it rolls". "her special is
-  not +2 to one stat instead its +1 to any stat rolled twice at the beginning of play", "+1 to another random
-  stat per prestige", her Sugar Rush is random too. "She has no unique abilities instead each time she gets a
+  not +2 to one stat instead its +1 to any stat rolled twice at the beginning of play", her Sugar Rush is random
+  too, but "prestige would still be a +1 to everything not just a random singular stat". "She has no unique abilities instead each time she gets a
   pumpkin she gets one ability randomly from any other characters abilities but once she has five for the
   current round she stops getting more and it switches to power ups as usual." Only ones bought and ON for that
   slot. "getting one fills a slot it doesn't lock it in as her ability": losing one (death, second wind,
@@ -131,7 +131,7 @@ MENUS AND CONTROLS
   Unlock: candy collected as her fills her trick or treat bag, 1000 to own her, per slot, shown under the
   candy total with the bucket icon counting down ("fill her trick or treat bag with candy to unlock her").
   Prestige relocks her: she's a secret again, bag back to 1000 ("the 1 in 10 chance to get her is already hard
-  enough"), and she starts with one more random +1. Look: pigtails and dress (Hero's pick, version 1), bucket in
+  enough"). Look: pigtails and dress (Hero's pick, version 1), bucket in
   hand. Masks: "5 masks, one for each of the other characters with eye holes cut out", the first pumpkin
   ability's character, worn "until she dies or loses all of her abilities". No stick (no room at 12 px), no
   string holes. Her eyes are green so they show through. Masks are each character's own face, bigger than her

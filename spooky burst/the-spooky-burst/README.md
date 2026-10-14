@@ -202,7 +202,7 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - THE LITTLE GIRL is a secret sixth character: pigtails, a dress in the player's colour, green eyes and her
   trick or treat bucket. While a slot doesn't own her, picking RANDOM (the "?" in the picker, or RANDOM as the
   favourite) rolls her 1 time in 10. She has no SPECIAL stat and no abilities of her own. At the start of a
-  run she gets +1 to two stats picked at random (one more per prestige), and every SUGAR RUSH she catches is
+  run she gets +1 to two stats picked at random, and every SUGAR RUSH she catches is
   +1 to a random stat; the HUD shows them as DM+1, LS+1 and so on on her prestige line. The glowing pumpkin
   hands her an ability from any other character, drawn from the ones that slot has bought and switched ON, up
   to five at a time; after that, boosts as usual. A slot she loses (death, SECOND WIND, WICKED CLOWN firing) is
@@ -211,8 +211,8 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   and takes it off once she holds nothing. Candy caught while playing her fills her trick or treat bag, shown
   under the candy total with a small bucket, counting down from 1000; full, the slot owns her for good and she
   shows in CHARACTERS, the picker and the favourite list like anyone. Her CHARACTERS page has nothing to buy,
-  just PRESTIGE: it relocks her (a secret again, bag back to 1000) for +1 to all stats and one more random +1 on
-  start. Her sprite is Hero's; a mask is drawn over her face the way hats are drawn on the title ghosts.
+  just PRESTIGE: it relocks her (a secret again, bag back to 1000) for +1 to all stats, like anyone's prestige.
+  Her sprite is Hero's; a mask is drawn over her face the way hats are drawn on the title ghosts.
 
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.

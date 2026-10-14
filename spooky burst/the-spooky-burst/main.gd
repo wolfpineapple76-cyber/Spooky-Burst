@@ -626,7 +626,7 @@ func _build_chars() -> void:
 				["food", "NEEDS FOOD BADLY", "ON 1 LIFE, PULLS IN FOOD", "FOD"], ["juggle", "JUGGLING BALLS", "3 BALLS TO KICK AROUND", "JUG"],
 				["pinata", "I'M NOT A PINATA", "I'VE GOT A PRESENT FOR YA", "PNT"]]},
 		# THE LITTLE GIRL: secret, 1 in 10 on RANDOM until her bag is full. No SPECIAL stat and no abilities of her
-		# own: +1 to two random stats each run (one more per prestige), and pumpkins hand her other characters'
+		# own: +1 to two random stats each run (prestige is +1 to all, like anyone), and pumpkins hand her other characters'
 		# abilities (the ones that slot has bought and switched ON), 5 at a time
 		{"id": "girl", "name": "LITTLE GIRL", "spr": GIRL, "orb": "#ff9ec2",
 			"spr2": _alt(GIRL, {2: "...hhhhhh...", 3: "hhhhSSSShhhh", 4: "hh.SgSSgS.hh", 5: "hh.SSSSSS.hh", 11: "..SS...SS.OO", 12: "..ss...ss..."}),
@@ -861,7 +861,7 @@ func girl_bag(p: Dictionary, c: int) -> void:
 		sfx("unlock")
 	sv_set(pkey(p.n, "bag"), bag)
 
-# +1 to a random stat: her SPECIAL (two at the start of a run, one more per prestige) and her SUGAR RUSH
+# +1 to a random stat: her SPECIAL (two at the start of a run) and her SUGAR RUSH
 func girl_roll(p: Dictionary, key: String) -> void:
 	var b: Array = pick(BOOSTS)
 	p[key][b[0]] = int(p[key].get(b[0], 0)) + 1
@@ -1283,9 +1283,9 @@ func special_of(ch: int) -> Array:
 
 func add_player(x: float, pad: int, kb: String, ch: int, slot: int) -> Dictionary:
 	var np := mk_player(x, slot, kb, pad, ch)
-	# the LITTLE GIRL's SPECIAL: +1 to two random stats, one more per prestige
+	# the LITTLE GIRL's SPECIAL: +1 to two random stats (prestige adds +1 to all, like everyone's)
 	if is_girl(ch):
-		for i in 2 + prestige(slot, ch):
+		for i in 2:
 			girl_roll(np, "roll")
 	G.players.append(np)
 	return np
@@ -1697,7 +1697,7 @@ func pick_ok(k: Dictionary) -> void:
 			np.roll = {}
 			np.erase("mask")
 			if is_girl(ch):
-				for i in 2 + prestige(np.n, ch):
+				for i in 2:
 					girl_roll(np, "roll")
 		np.x = open_x()
 		np.out = false
@@ -4238,7 +4238,7 @@ func shop_note() -> String:
 	if sch >= 0 and scur == shop_top() + chars[sch].pow.size() and pre_shown(stab, sch):
 		var why := pre_why(stab, sch)
 		if why == "" and is_girl(sch):
-			return "RELOCK HER FOR +1 BOOST TO ALL STATS AND ONE MORE RANDOM +1 ON START. SHE'S A SECRET AGAIN."
+			return "RELOCK HER FOR A +1 BOOST TO ALL STATS, PERMANENTLY. SHE'S A SECRET AGAIN."
 		return why if why != "" else "RELOCK %s AND ITS UPGRADES FOR A +1 BOOST TO ALL STATS, PERMANENTLY." % chars[sch].name
 	if sch >= 0 and not has_char(stab, sch):
 		return "BUY %s TO PLAY AS IT AND BUY ITS UPGRADES." % chars[sch].name
@@ -4263,7 +4263,7 @@ func draw_shop() -> void:
 		T(chars[sch].desc, 80, y + 72, 1, "#9d8cc4")
 		var sp := special_of(sch)
 		if is_girl(sch):
-			T("SPECIAL: +1 TO %d RANDOM STATS" % (2 + prestige(stab, sch)), 560, y + 72, 1, "#9d8cc4", 2)
+			T("SPECIAL: +1 TO 2 RANDOM STATS", 560, y + 72, 1, "#9d8cc4", 2)
 		else:
 			T("SPECIAL: %s +%d" % [sp[1], chars[sch].tr[sp[0]]], 560, y + 72, 1, "#9d8cc4", 2)
 	T("CANDY: %d" % candy_of(stab), 560, y + 52, 2, "#ffd92e", 2)
@@ -4279,7 +4279,7 @@ func draw_shop() -> void:
 	if spre >= 0:
 		var n := prestige(stab, sch) + 1
 		draw_panel("PRESTIGE", [["NO, KEEP IT", ""], ["YES, PRESTIGE", "%d/%d" % [n, PRESTIGE_MAX]]], "", spre,
-			"RELOCK HER FOR +1 TO ALL STATS AND ONE MORE RANDOM +1 ON START? HER BAG STARTS OVER." if is_girl(sch) else
+			"RELOCK HER FOR A +1 BOOST TO ALL STATS? SHE'S A SECRET AGAIN AND HER BAG STARTS OVER." if is_girl(sch) else
 			"RELOCK %s AND ALL %d UPGRADES FOR A +1 BOOST TO ALL STATS? PRICES GO UP 10%%." % [chars[sch].name, chars[sch].pow.size()])
 
 func shop_choose() -> void:
