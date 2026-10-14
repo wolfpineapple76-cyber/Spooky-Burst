@@ -2965,7 +2965,8 @@ func food_pull(d: Dictionary, dt: float, candy := false) -> void:
 # there is one), at the Jester, and at a random spot. They block enemy shots and do 2 damage to enemies they
 # touch, and never leave the play area.
 const JUG_GROUND := 218.0
-# what each landing keeps of the speed, bounce by bounce after a kick: normal, and with EXTRA BOUNCY
+# how high each bounce after a kick goes, as a share of the kick's own height (linear, not compounding): normal,
+# and with EXTRA BOUNCY
 const JUG_BOUNCE := [80, 60, 40, 20]
 const JUG_BOUNCY := [90, 80, 70, 60, 50, 40, 30, 20, 10]
 const JUG_GRAV := 420.0
@@ -2986,14 +2987,15 @@ func juggle(p: Dictionary, dt: float) -> void:
 		b.ang += b.vx / 4.5 * dt
 		if b.y < JUG_GROUND - 1.0:
 			b.ang += 6.0 * (signf(b.vx) if b.vx != 0.0 else 1.0) * dt
-		# bounce on the ground: each landing keeps the next percentage of its speed from the list (JUG_BOUNCE, or
+		# bounce on the ground: the next bounce goes to the list's share of the kick's height (JUG_BOUNCE, or
 		# JUG_BOUNCY with EXTRA BOUNCY), then it settles; a kick starts the list over
 		if b.y >= JUG_GROUND:
 			b.y = JUG_GROUND
 			var lst: Array = JUG_BOUNCY if p.eq.has("jgbouncy") else JUG_BOUNCE
 			var n: int = int(b.get("bn", 0))
-			if b.vy > 15.0 and n < lst.size():
-				b.vy = -b.vy * lst[n] / 100.0
+			var kh: float = b.get("kh", 0.0)
+			if b.vy > 15.0 and n < lst.size() and kh > 0.0:
+				b.vy = -sqrt(2.0 * JUG_GRAV * kh * lst[n] / 100.0)
 				b.bn = n + 1
 			else:
 				b.vy = 0.0
@@ -3055,6 +3057,7 @@ func jug_kick(j: Dictionary, b: Dictionary, kicker: Dictionary) -> void:
 	b.vx = clampf((tx - b.x) / flight, -160.0, 160.0)
 	b.cd = 0.3
 	b.bn = 0
+	b.kh = h   # the kick's height: each bounce is a share of it
 	b.y = minf(b.y, JUG_GROUND - 1.0)
 	sfx("shoot0")
 
