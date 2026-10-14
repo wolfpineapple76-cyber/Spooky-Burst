@@ -5803,12 +5803,13 @@ func find_key(name: String) -> String:
 				return k
 	return ""
 
-const CON_HELP := ["/debug stage 1|2   start that stage at wave 1", "/debug gc p1-p4 N   give that slot N candy",
-	"/debug sugarrush [on|off]   SUGAR RUSH locked or unlocked", "/debug littlegirl [unlock|lock|reset] [p1-p4]",
-	"/debug <ability or upgrade> [p1-p4]   hold it this run; -<name> takes it away",
-	"/debug <character> all|-all [p1-p4]   all of its abilities and upgrades, or none",
-	"/debug prestige +N|-N <character> [p1-p4]", "/debug off | /debug on   off: no command answers, nothing is listed",
-	"/help, /?, /debug ?   this list"]
+# (the font has no | or [ ], so: "or" and plain words)
+const CON_HELP := ["/debug stage 1 or 2   start that stage at wave 1", "/debug gc p1-p4 N   give that slot N candy",
+	"/debug sugarrush on or off   SUGAR RUSH locked or unlocked", "/debug littlegirl unlock, lock or reset, then p1-p4",
+	"/debug <ability or upgrade> p1-p4   hold it this run; -<name> takes it away",
+	"/debug <character> all or -all p1-p4   all of its abilities and upgrades, or none",
+	"/debug prestige +N or -N <character> p1-p4", "/debug off, /debug on   off: no command answers, nothing is listed",
+	"/help, /?, /debug ?   this list.   p1-p4 is optional: p1 if left off"]
 
 # clears the screen like a boss kill and starts the stage at its wave 1
 func debug_stage(st: int) -> String:
