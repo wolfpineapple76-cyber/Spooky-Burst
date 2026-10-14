@@ -1158,7 +1158,7 @@ func glyph(ch: String) -> ImageTexture:
 func text_w(s: String, sc: int) -> int:
 	return s.length() * 6 * sc
 
-func T(s: String, x: float, y: float, sc: int, col: String, align := 0, shadow := true) -> void:
+func T(s: String, x: float, y: float, sc: int, col: String, align := 0, shadow := true, a := 1.0) -> void:
 	s = s.to_upper()
 	var px := x
 	if align == 1:
@@ -1166,6 +1166,7 @@ func T(s: String, x: float, y: float, sc: int, col: String, align := 0, shadow :
 	elif align == 2:
 		px = x - text_w(s, sc)
 	var c := Color(col)
+	c.a *= a
 	for i in s.length():
 		var ch := s[i]
 		if ch == " ":
@@ -1173,7 +1174,7 @@ func T(s: String, x: float, y: float, sc: int, col: String, align := 0, shadow :
 		var tx := glyph(ch)
 		var rect := Rect2(px + i * 6 * sc, y, 5 * sc, 7 * sc)
 		if shadow:
-			draw_texture_rect(tx, Rect2(rect.position + Vector2(sc, sc), rect.size), false, Color(0, 0, 0, 0.9))
+			draw_texture_rect(tx, Rect2(rect.position + Vector2(sc, sc), rect.size), false, Color(0, 0, 0, 0.9 * a))
 		draw_texture_rect(tx, rect, false, c)
 
 # the title: candy corn stripes that shift letter by letter over a purple glow
@@ -3696,6 +3697,7 @@ func update(dt: float) -> void:
 
 	# players
 	for p in G.players:
+		hud_track(p, dt)
 		if p.out:
 			continue
 		var I := player_input(p)
@@ -4733,6 +4735,43 @@ func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> voi
 		pts[i] += Vector2(px, by) + Vector2(0, sin(u * 6 + gt * 20) * k * u)
 	smooth_line(pts, col, 5)
 
+# A player's three small HUD lines: b their boosts, c their ability codes, s their prestige and SUGAR RUSH count
+func hud_lines(p: Dictionary) -> Dictionary:
+	var codes := ""
+	for w in pow_list(p.ch):
+		if p.eq.has(w[0][0]):
+			var nu := ups_held(p, w[0][0])
+			codes += w[0][3] + (str(nu) if nu > 0 else "") + " "
+	var sp := ""
+	if prestige(p.n, p.ch) > 0:
+		sp += "PRE %d " % prestige(p.n, p.ch)
+	if int(p.get("sugar", 0)) > 0:
+		sp += "SUG %d " % p.sugar
+	var bl := []
+	for b in BOOSTS:
+		if bo(p, b[0]) > 0:
+			bl.append("%s%d" % [b[3], bo(p, b[0])])
+	return {"b": bl, "c": codes.strip_edges(), "s": sp.strip_edges()}
+
+# Each line shows for HUD_SHOW seconds whenever it changes (a boost caught, an ability gained or lost, a SUGAR RUSH,
+# or joining), then fades out over HUD_FADE; the POWER UPS page in the pause menu always has it all
+const HUD_SHOW := 3.0
+const HUD_FADE := 0.5
+func hud_track(p: Dictionary, dt: float) -> void:
+	var hl := hud_lines(p)
+	if not p.has("hud"):
+		p.hud = {"b": [[], 99.0], "c": ["", 99.0], "s": ["", 99.0]}
+	for k in hl:
+		if str(hl[k]) != str(p.hud[k][0]):
+			p.hud[k] = [hl[k], 0.0]
+		else:
+			p.hud[k][1] += dt
+
+func hud_alpha(p: Dictionary, k: String) -> float:
+	if not p.has("hud"):
+		return 0.0
+	return clampf(1.0 - (float(p.hud[k][1]) - HUD_SHOW) / HUD_FADE, 0.0, 1.0)
+
 func draw_hud() -> void:
 	# each player's own candy (what they have to spend in the CHARACTERS menu); nothing while they're still picking
 	var ps: Array = G.players.duplicate()
@@ -4757,34 +4796,20 @@ func draw_hud() -> void:
 	if not G.get("prestart", false):
 		T("WAVE %d" % shown_wave(G.wave), 627, 48, 2, "#ffd92e", 2)
 	for p in G.players:
-		var codes := ""
-		for w in pow_list(p.ch):
-			if p.eq.has(w[0][0]):
-				var nu := ups_held(p, w[0][0])
-				codes += w[0][3] + (str(nu) if nu > 0 else "") + " "
-		T(codes.strip_edges(), CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1])
+		var hl := hud_lines(p)
+		T(hl.c, CODE_X[p.n][0], 420, 1, "#ffd92e", CODE_X[p.n][1], true, hud_alpha(p, "c"))
 		# their prestige level for this character, which counts for every stat, and their SUGAR RUSH count, on
 		# their own line: both are more special than the power-ups
-		var pr := prestige(p.n, p.ch)
-		var sp := ""
-		if pr > 0:
-			sp += "PRE %d " % pr
-		if int(p.get("sugar", 0)) > 0:
-			sp += "SUG %d " % p.sugar
-		if sp != "":
-			T(sp.strip_edges(), CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1])
+		T(hl.s, CODE_X[p.n][0], 430, 1, "#c9a8ff", CODE_X[p.n][1], true, hud_alpha(p, "s"))
 		# the boosts; when they'd run past the player's quarter (the last quarter ends at the screen's edge) they
 		# split into two lines of three, the extra line above
-		var bl := []
-		for b in BOOSTS:
-			if bo(p, b[0]) > 0:
-				bl.append("%s%d" % [b[3], bo(p, b[0])])
+		var bl: Array = hl.b
 		var room: int = 640 - 6 - CODE_X[p.n][0] if p.n == MAX_PLAYERS - 1 else 160 - 6
 		var lines := [bl]
 		if text_w(" ".join(bl), 1) > room:
 			lines = [bl.slice(0, 3), bl.slice(3)]
 		for li in lines.size():
-			T(" ".join(lines[li]), CODE_X[p.n][0], 408 - (lines.size() - 1 - li) * 12, 1, "#7df2ff")
+			T(" ".join(lines[li]), CODE_X[p.n][0], 408 - (lines.size() - 1 - li) * 12, 1, "#7df2ff", 0, true, hud_alpha(p, "b"))
 	if G.players.size() == 1 and mode == "game":
 		T("TO JOIN: START ON A CONTROLLER, OR BACKSPACE ON THE KEYBOARD", 320, 466, 1, "#9d8cc4", 1)
 	if G.toast != null and mode == "game":

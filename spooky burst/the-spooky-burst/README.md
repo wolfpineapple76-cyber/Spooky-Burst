@@ -221,6 +221,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   or OFF and PRESTIGE wait for the main menu (greyed, with a note). POWER UPS lists each player in the game
   with their icon and what they hold right now, and only that: each ability as its code and name, their
   boosts, prestige, SUGAR RUSH and the Little Girl's random +1s.
+- The small lines along the bottom of the game (each player's boosts, ability codes, and prestige and SUGAR
+  RUSH) show for 3 seconds whenever they change, then fade away so the floor is clear; joining shows the
+  prestige line. POWER UPS in the pause menu always has the lot. With all six boosts the boost line splits
+  into two lines of three so it stays in the player's quarter.
 - THE SHOP: a character's page has a SHOP row above PRESTIGE once it's bought (only characters with upgrades
   written so far show it). The SHOP page has one row per ability with its two upgrades side by side, each with
   its price or ON / OFF; up and down move between abilities, left and right between the two, and the line at
