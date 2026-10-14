@@ -4555,11 +4555,12 @@ func draw_game() -> void:
 					var br: Array = BONE_RB if bigk else BONE_R
 					var bw: int = bl[0].length() * sc
 					var bh: int = bl.size() * sc
-					draw_set_transform(mid, s.tw, Vector2.ONE)
+					# turned about its middle, on top of the scene's own 2x (and shake) transform, which is put back after
+					draw_set_transform_matrix(scene_xf * Transform2D(s.tw, mid))
 					R(-tr + 2, -sc, 2 * tr - 3, 2 * sc, bp.w)
 					spr(bl, bp, -tr + 2 - bw, -bh / 2.0, sc)
 					spr(br, bp, tr - 1, -bh / 2.0, sc)
-					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+					draw_set_transform_matrix(scene_xf)
 				continue
 			if m != null and not m.dead and s.get("lead", false) and s.x < m.x:
 				R(x + 2, y - sc, int(round(m.x)) - x - 3, 2 * sc, bp.w)
@@ -5286,11 +5287,14 @@ func draw_toast(a: Dictionary) -> void:
 	T(a.desc, 320, y + 30, 2, "#f6f1ff", 1)
 	T("PLAYER %d" % (a.n + 1), 320, y + 52, 1, "#9d8cc4", 1)
 
+# the scene's transform this frame: 2x, shifted by the shake
+var scene_xf := Transform2D(0.0, Vector2(2, 2), 0.0, Vector2.ZERO)
 func _draw() -> void:
 	var off := Vector2.ZERO
 	if mode != "menu" and not G.is_empty() and G.shake > 0:
 		off = Vector2(round((randf() - 0.5) * 10), round((randf() - 0.5) * 10))
-	draw_set_transform(off, 0.0, Vector2(2, 2))
+	scene_xf = Transform2D(0.0, Vector2(2, 2), 0.0, off)
+	draw_set_transform_matrix(scene_xf)
 	if mode == "menu":
 		draw_menu_scene()
 	else:
