@@ -3259,22 +3259,54 @@ func gifts_and_pieces(dt: float) -> void:
 		c.x += c.vx * dt
 		c.y += c.vy * dt
 		# on the way out it hits enemies: 1 damage, a gumball 2
-		for e in G.en:
-			if e.dead or e.laugh > 0 or c.hit.any(func(h): return is_same(h, e)):
-				continue
-			var hw: float = 27.0 if e.ty == "B" else 11.0
-			var hh: float = 20.0 if e.ty == "B" else 9.0
-			if absf(c.x - e.x) < hw and absf(c.y - e.y) < hh:
-				c.hit.append(e)
-				e.hp -= 2 if c.x2 else 1
-				e.flash = 0.1
-				if e.hp <= 0:
-					down(e)
-		# once it starts falling it's just candy, raining down for anyone to catch. A JAW BREAKER keeps hurting on
-		# the way down, and is candy again only once it's near the ground
-		if c.vy >= 0.0 and (not c.jaw or c.y >= 180.0):
+		if c.jaw:
+			jaw_hits(c)
+		else:
+			for e in G.en:
+				if e.dead or e.laugh > 0 or c.hit.any(func(h): return is_same(h, e)):
+					continue
+				if piece_touch(c, e):
+					c.hit.append(e)
+					e.hp -= 2 if c.x2 else 1
+					e.flash = 0.1
+					if e.hp <= 0:
+						down(e)
+		# once it starts falling it's just candy, raining down for anyone to catch. A JAW BREAKER is the same candy,
+		# still a jaw breaker, still hurting enemies as it falls through them
+		if c.vy >= 0.0:
 			c.dead = true
-			G.candy.append({"x": clampf(c.x, 8.0, 312.0), "y": c.y, "dead": false, "x2": c.x2})
+			var k := {"x": clampf(c.x, 8.0, 312.0), "y": c.y, "dead": false, "x2": c.x2}
+			if c.jaw:
+				k.jaw = true
+				k.jhit = c.get("jhit", [])
+			G.candy.append(k)
+
+func piece_touch(c: Dictionary, e: Dictionary) -> bool:
+	return absf(c.x - e.x) < (27.0 if e.ty == "B" else 11.0) and absf(c.y - e.y) < (20.0 if e.ty == "B" else 9.0)
+
+# JAW BREAKER: a piece (flying out, or falling as candy) hurts an enemy it touches, 1 damage or 2 for a gumball, and
+# can hurt that same enemy again once JAW_AGAIN seconds have passed
+const JAW_AGAIN := 1.0
+func jaw_hits(c: Dictionary) -> void:
+	if not c.has("jhit"):
+		c.jhit = []   # [enemy, when it was last hurt by this piece]
+	for e in G.en:
+		if e.dead or e.laugh > 0 or not piece_touch(c, e):
+			continue
+		var last = null
+		for h in c.jhit:
+			if is_same(h[0], e):
+				last = h
+		if last != null and G.t - float(last[1]) < JAW_AGAIN:
+			continue
+		if last != null:
+			last[1] = G.t
+		else:
+			c.jhit.append([e, G.t])
+		e.hp -= 2 if c.x2 else 1
+		e.flash = 0.1
+		if e.hp <= 0:
+			down(e)
 
 func wiggle(p: Dictionary, dt: float) -> void:
 	if p.get("tl") == null:
@@ -4272,6 +4304,8 @@ func update(dt: float) -> void:
 		else:
 			k.y += 45 * dt * food_slow()
 		food_pull(k, dt, true)
+		if k.get("jaw", false):
+			jaw_hits(k)
 		var catcher = null
 		for p in live():
 			if absf(k.x - p.x) < 13 + gol(p) and absf(k.y - 209) < 14 + 3 * gol(p):

@@ -249,8 +249,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   nine bounces, where a normal ball goes to 80, 60, 40 and 20%, four; the sideways speed follows the same shares,
   so it hops shorter as it bounces lower, and a wall still turns it); EXTRA HIGH (kicks 12 px higher and 2 px
   per LONGER SAFETY step instead of 1). I'M NOT A PINATA: ALL GUMBALLS (every piece is a gumball, so a box
-  costs more); JAW BREAKER (the pieces keep hurting all the way down, one hit per enemy, drawn as the rainbow
-  jaw breaker ball, and turn back into candy near the ground).
+  costs more); JAW BREAKER (the pieces burst and fall exactly like normal pinata candy, drawn as the rainbow
+  jaw breaker ball, and hurt every enemy they touch on the way out and the way down, 1 or 2 for a gumball; the
+  same piece can hurt the same enemy again after a second).
 - The Ghost's SHOP: GHOST SHOT: SPOOKY (the two ghost shots drift toward the nearest enemy, gentler than CAT'S
   EYE); HAUNT (a ghost shot that hits an enemy that lives clings to it for half a second, then hits once more
   before passing on, or ending if it can't pierce). RESTLESS SHOT: FAST SHOT (orbs fly at QUICK BONES speed);

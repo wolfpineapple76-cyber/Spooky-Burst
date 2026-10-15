@@ -192,7 +192,9 @@ THE SHOP (character ability upgrades), Hero's idea "that might eventually replac
   Balls: Extra Bouncy / Extra High ("+12px and doubles the usual +1px per safety"). Pinata: All Gum Balls / Jaw
   Breaker ("the candy from his present causes damage all the way down, maybe changes the image but deals the
   same damage based on candy or gumball as before"; the old gumball graphic is the jaw breaker, gumballs got a
-  new pink one).
+  new pink one). Later: "they are suppose to fall exactly the same way that any other candy would from pinata,
+  like basically no change just reskinned as jaw breakers ... candy already hurts them from pinata so its the
+  same thing just left on the whole time"; a piece can hit the same enemy again "after 1 full second".
   Ghost: GHOST SHOT: Spooky ("slight homing effect") / Haunt ("if the enemy didn't die it sticks to it for half
   a second dealing one more hit before passing"). RESTLESS SHOT: Fast Shot / Won't Stop ("Shots that hit the top
   of the screen come back through the bottom once at 50% damage of when they left"). SPECTRAL SHOT: Solid
