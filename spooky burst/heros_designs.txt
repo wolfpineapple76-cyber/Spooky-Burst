@@ -161,7 +161,9 @@ MENUS AND CONTROLS
   Prestige relocks her: she's a secret again, bag back to 1000 ("the 1 in 10 chance to get her is already hard
   enough"). Look: pigtails and dress (Hero's pick, version 1), bucket in
   hand. Masks: "5 masks, one for each of the other characters with eye holes cut out", the first pumpkin
-  ability's character, worn "until she dies or loses all of her abilities". No stick (no room at 12 px), no
+  ability's character, worn "until she dies or loses all of her abilities". Later: "the little girls mask
+  matchs whatever she has the most abilities of instead of just the first one", abilities and upgrades both
+  counted, and on a tie she keeps the mask she has on. No stick (no room at 12 px), no
   string holes. Her eyes are green so they show through. Masks are each character's own face, bigger than her
   face, covering some hair: ghost comes down over her shoulders, zombie has his hair, jester has his whole hat
   with the bells.

@@ -923,6 +923,25 @@ func pow_list(ch: int) -> Array:
 				out.append([w, i])
 	return out
 
+# the LITTLE GIRL wears the mask of the character she holds the most of (abilities and their upgrades); on a tie
+# she keeps the one she has on; with no abilities she takes it off
+func girl_mask(p: Dictionary) -> void:
+	if pows_held(p).is_empty():
+		p.erase("mask")
+		return
+	var n := {}
+	for k in p.eq:
+		var c: int = POW_SRC[k] if POW_SRC.has(k) else (UP_INFO[k].ch if UP_INFO.has(k) else -1)
+		if c >= 0:
+			n[c] = int(n.get(c, 0)) + 1
+	var best := -1
+	for c in n:
+		if best < 0 or n[c] > n[best]:
+			best = c
+	var cur := find_char(p.get("mask", ""))
+	if cur < 0 or int(n.get(cur, 0)) < n[best]:
+		p.mask = chars[best].id
+
 # the LITTLE GIRL's bag: candy caught while playing her (until the slot owns her), GIRL_BAG unlocks her for that slot
 func girl_bag(p: Dictionary, c: int) -> void:
 	if not is_girl(p.ch) or has_char(p.n, GIRL_CH):
@@ -3741,8 +3760,8 @@ func update(dt: float) -> void:
 			continue
 		var I := player_input(p)
 		var ox: float = p.x
-		if pows_held(p).is_empty():
-			p.erase("mask")   # the LITTLE GIRL takes her mask off once she holds no ability
+		if is_girl(p.ch):
+			girl_mask(p)
 		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a SPIDER BEAST web
 		if p.web > 0:
 			p.web -= dt

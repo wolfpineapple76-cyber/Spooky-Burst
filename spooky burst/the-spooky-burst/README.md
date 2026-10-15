@@ -309,9 +309,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   RUSHes landed on, where everyone else's SUGAR RUSH line names their SPECIAL. The glowing pumpkin
   hands her an ability from any other character, drawn from the ones that slot has bought and switched ON, up
   to five at a time; after that, boosts as usual. A slot she loses (death, SECOND WIND, WICKED CLOWN firing) is
-  open again, and the next pumpkin fills it with another random draw. She puts on a mask of whichever character
-  her first ability came from (each mask is that character's face, her green eyes showing through the holes)
-  and takes it off once she holds nothing. Candy caught while playing her fills her trick or treat bag, shown
+  open again, and the next pumpkin fills it with another random draw. She wears the mask of the character she
+  holds the most of, abilities and their upgrades counted together (each mask is that character's face, her
+  green eyes showing through the holes); on a tie she keeps the one she has on, and she takes it off once she
+  holds nothing. Candy caught while playing her fills her trick or treat bag, shown
   under the candy total with a small bucket, counting down from 1000; full, the slot owns her for good and she
   shows in CHARACTERS, the picker and the favourite list like anyone. Her CHARACTERS page has nothing to buy,
   just PRESTIGE: it relocks her (a secret again, bag back to 1000) for +1 to all stats, like anyone's prestige.
