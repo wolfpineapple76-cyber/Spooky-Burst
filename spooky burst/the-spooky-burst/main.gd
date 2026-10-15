@@ -4690,7 +4690,7 @@ func draw_game() -> void:
 		var px := int(round(p.x))
 		var bob := int(round(sin(gt * 4 + i * 2) * 1.5))
 		if p.get("tl") != null:
-			draw_swoop(px, 196 + bob, char_pal(p.ch, p.n).values()[0], gt, p.tl)
+			draw_swoop(px, 196 + bob, tail_col(p), gt, p.tl)
 		# NINE LIVES ready: a halo a pixel above the head (the golem's head is higher)
 		if p.eq.has("shield") and p.sh <= 0:
 			spr(HALO, HALOPAL, px - 10, 196 + bob - 8 - 6 * gol(p), 2)
@@ -4702,7 +4702,7 @@ func draw_game() -> void:
 		if p.eq.has("tail") and p.get("tl") == null:
 			# on the Little Girl it's a cat's tail in the Cat's colour, tucked in to her narrower body
 			var girl: bool = p.ch == GIRL_CH
-			var tc := {"T": chars[1].pals[0].values()[0] if girl else char_pal(p.ch, p.n).values()[0]}
+			var tc := {"T": tail_col(p)}
 			if fr == 0:
 				spr(TAIL_L, tc, px - (12 if girl else 16), 210 + bob, 2)
 			else:
@@ -4760,6 +4760,10 @@ func tail_reach(tl: Dictionary) -> float:
 	return smoothstep(0.0, 1.0, clampf(u, 0.0, 1.0))
 
 # WIGGLE TAIL without NINE LIVES: the tail flicks up over his back in a soft arc toward what he collected and back
+# WIGGLE TAIL's colour: the Cat's fur in his player's colour, and on the Little Girl a cat's tail in the Cat's own
+func tail_col(p: Dictionary) -> String:
+	return chars[1].pals[0].values()[0] if is_girl(p.ch) else char_pal(p.ch, p.n).values()[0]
+
 func draw_swoop(px: int, by: int, col: String, gt: float, tl: Dictionary) -> void:
 	var k := tail_reach(tl)
 	var pts := swoop_points(tl, k)
