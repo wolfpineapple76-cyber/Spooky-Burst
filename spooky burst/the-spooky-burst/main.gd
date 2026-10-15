@@ -2032,11 +2032,20 @@ func down(e: Dictionary, fist := false) -> void:
 	else:
 		kill(e, fist)
 
-const CANDY_ODDS := [0.25, 1.0 / 3.0, 0.5]
-# a piece of candy falls from x, y. A third of them are gumballs, worth 2.
-# RICHES (with GRAVE ROBBER): gumballs 40% of the time instead of a third
+# The candy ladder, in percent: each step adds about half what the last did, then never less than 1 a step.
+# An enemy drops candy at the step for the number of GRAVE ROBBERs in play (25% with none), a HEAVY FIST kill one
+# step further; a dropped candy is a gumball at one step ahead of the number of RICHES in play (37% with none).
+const CANDY_LADDER := [25, 37, 43, 46, 47]
+func ladder(i: int) -> float:
+	return (CANDY_LADDER[i] if i < CANDY_LADDER.size() else CANDY_LADDER[-1] + (i - CANDY_LADDER.size() + 1)) / 100.0
+
+# how many players in play hold an ability (and its upgrade, if one is named)
+func holders(pow_key: String, up_key := "") -> int:
+	return G.players.filter(func(p): return not p.out and p.eq.has(pow_key) and (up_key == "" or p.eq.has(up_key))).size()
+
+# a piece of candy falls from x, y; a gumball (worth 2) at the RICHES step of the ladder
 func drop_candy(x: float, y: float) -> void:
-	var gum := 0.4 if G.players.any(func(p): return not p.out and p.eq.has("cdrop") and p.eq.has("rbriches")) else 1.0 / 3.0
+	var gum := ladder(1 + holders("cdrop", "rbriches"))
 	G.candy.append({"x": x, "y": y, "dead": false, "x2": randf() < gum})
 
 func kill(e: Dictionary, fist := false) -> void:
@@ -2053,12 +2062,16 @@ func kill(e: Dictionary, fist := false) -> void:
 		var n_sr := (2 if live().size() >= 3 else 1) if sv("pk_beaten", false) else 0
 		var far := 1.0 if e.x < 160 else -1.0   # the side with more room
 		var spots := [far * 72] if n_sr == 1 else ([-72.0, 72.0] if n_sr == 2 else [])
-		# LOOTER (a Skeleton with GRAVE ROBBER): one more SUGAR RUSH, further out, or a treat bucket while it's locked
-		var loot: bool = G.players.any(func(p): return not p.out and p.eq.has("cdrop") and p.eq.has("rbloot"))
-		if loot and n_sr > 0:
-			spots.append(far * 110)
-		elif loot:
-			G.drops.append({"x": clampf(e.x + far * 72, 30.0, 290.0), "y": -12.0, "k": "b", "dead": false})
+		# LOOTER (a Skeleton with GRAVE ROBBER): one more SUGAR RUSH with 1 or 2 Looters in play, two more with 3 or
+		# 4, further out (the second on the other side); or that many treat buckets while SUGAR RUSH is locked
+		var nl := holders("cdrop", "rbloot")
+		var extra := 0 if nl == 0 else (1 if nl <= 2 else 2)
+		for i in extra:
+			var side := far if i == 0 else -far
+			if n_sr > 0:
+				spots.append(side * 110)
+			else:
+				G.drops.append({"x": clampf(e.x + side * 72, 30.0, 290.0), "y": -12.0, "k": "b", "dead": false})
 		for sx in spots:
 			G.drops.append({"x": clampf(e.x + sx, 30.0, 290.0), "y": -12.0, "k": "r", "dead": false})
 		for o in G.en:
@@ -2096,8 +2109,8 @@ func kill(e: Dictionary, fist := false) -> void:
 	if e.ty == "s" and G.sp_more > 0:
 		G.sp_more -= 1
 		G.sp_q.append({"spot": e.spot, "t": 1.6})
-	# candy: a quarter of the time, a third with GRAVE ROBBER (anyone's) or a HEAVY FIST kill, half with both
-	if randf() < CANDY_ODDS[int(any_eq("cdrop")) + int(fist)]:
+	# candy: the GRAVE ROBBER step of the ladder, one step further for a HEAVY FIST kill
+	if randf() < ladder(holders("cdrop") + int(fist)):
 		drop_candy(e.x, e.y)
 	sfx("pop")
 

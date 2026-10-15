@@ -132,9 +132,10 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - The pumpkin the centre ghost holds on the title screen has the PUMPKIN KING's face (Sammie's). In play, each
   glowing power-up pumpkin is a coin flip between that face and the plain carved one, and the pumpkin it drops
   keeps the face it had.
-- An enemy drops candy a quarter of the time. GRAVE ROBBER (for everyone's kills while anyone has it) or a
-  HEAVY FIST killing blow raises that to a third, and both together to half. A third of all candy, boss candy
-  too, is a gumball worth 2.
+- An enemy drops candy a quarter of the time. Each GRAVE ROBBER in play (for everyone's kills) moves that up
+  the candy ladder, 25% / 37% / 43% / 46% / 47% and then 1% a step, and a HEAVY FIST killing blow counts as one
+  more step. A dropped candy, boss candy too, is a gumball worth 2 at one step ahead on the same ladder: 37%,
+  then 43% / 46% / 47% / 48% with 1 to 4 RICHES in play.
 - Spend it in CHARACTERS on the title screen. There's a tab for each player: LB / RB on a controller,
   left / right or Q / E on the keyboard. Switching tabs stays on the character you're looking at.
   Characters cost 500 candy and upgrades cost 100 (CHAR_COST and POW_COST at the top of main.gd).
@@ -290,9 +291,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   size up and hitting a little wider); TWIRL BONE (the two knuckles spin around the bone's middle as it flies,
   the shaft drawn between them). QUICK BONES: VENGEANCE (two volleys the instant he's hit); RE-VENGEANCE (the
   first enemy shot to touch him while he's safe draws two volleys, once per safe spell; the shot still passes
-  through unless THICKER SKIN is there). GRAVE ROBBER: RICHES (candy from enemies is gumballs 40% of the time
-  instead of a third); LOOTER (a boss drops one more SUGAR RUSH, further out on the roomier side; while SUGAR
-  RUSH is locked, a treat bucket instead). SECOND WIND: BREATH OF LIFE (he keeps his abilities, upgrades,
+  through unless THICKER SKIN is there). GRAVE ROBBER: RICHES (more gumballs; each one in play is a step up the
+  candy ladder, see above); LOOTER (a boss drops one more SUGAR RUSH with 1 or 2 Looters in play, two more with 3
+  or 4, further out, the second on the other side; while SUGAR RUSH is locked, that many treat buckets). SECOND WIND: BREATH OF LIFE (he keeps his abilities, upgrades,
   boosts and SUGAR RUSH on SECOND WIND, which still works once); THROW ME A BONE (when another player's last
   life goes and he has more than one, he gives up one and they stay in with 1; they lose their power-ups
   unless he has BREATH OF LIFE; his own SECOND WIND comes first for himself).
