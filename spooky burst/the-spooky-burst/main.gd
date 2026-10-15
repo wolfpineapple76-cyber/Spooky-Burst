@@ -1363,7 +1363,7 @@ func say(s: String, dur: float) -> void:
 # for their character. eq: upgrades they have this run. bo: how many of each boost this run. got: candy this run.
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
-		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false,
+		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0,
 		"ld": 1, "md": 0, "mv": 0.0, "tl": null, "web": 0.0, "sugar": 0, "roll": {}, "sroll": {}, "pcd": 0.0}
 
 # OVERGROW: up to 6 lives instead of 5
@@ -2161,12 +2161,14 @@ func hurt(p: Dictionary) -> void:
 	G.shake = 0.25
 	if p.lives <= 0:
 		var donor = bone_donor(p)
-		if p.eq.has("revive") and not p.revived:
+		if p.eq.has("revive"):
 			# SECOND WIND: wiped just like dying (power-ups and boosts gone), then back with 2 lives. With BREATH OF
-			# LIFE he keeps everything.
-			if not p.eq.has("swbreath"):
+			# LIFE he keeps everything else. Either way SECOND WIND is spent (its upgrades with it), so a pumpkin can
+			# hand it to him again
+			if p.eq.has("swbreath"):
+				drop_pow(p, "revive")
+			else:
 				wipe(p)
-			p.revived = true
 			p.lives = 2
 			say("SECOND WIND", 1.5)
 		elif donor != null:
@@ -2183,7 +2185,6 @@ func hurt(p: Dictionary) -> void:
 			# Candy is already saved to their profile, so they keep that.
 			p.out = true
 			wipe(p)
-			p.revived = false
 	if live().is_empty():
 		game_over()
 

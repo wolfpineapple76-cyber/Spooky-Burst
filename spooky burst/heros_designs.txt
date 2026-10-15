@@ -236,7 +236,8 @@ THE SHOP (character ability upgrades), Hero's idea "that might eventually replac
   treat bucket."). Stacking (later): GRAVE ROBBER candy 25 / 37 / 43 / 46 / 47 for 0-4 holders, "the same
   pattern to a floor of 1"; gumballs "37 / 43 / 46 / 47 / 48 ... one step ahead" (37 with no Riches); the
   Zombie's Heavy Fist "still has another step"; Looter "1-2 looters +1 rush, 3-4 looters +2 rushes". SECOND WIND: Breath of Life ("keep your powerups instead of losing them on second wind") /
-  Throw me a bone ("If another player dies, and you have more than one life lose one and they get it, they lose
+  (later: "when second wind has breath of life you still need to lose second wind or else its going to trigger
+  forever") / Throw me a bone ("If another player dies, and you have more than one life lose one and they get it, they lose
   their abilities if you dont have breath of life and keep them if you do").
 
 CHARACTER LOOKS

@@ -293,8 +293,9 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
   first enemy shot to touch him while he's safe draws two volleys, once per safe spell; the shot still passes
   through unless THICKER SKIN is there). GRAVE ROBBER: RICHES (more gumballs; each one in play is a step up the
   candy ladder, see above); LOOTER (a boss drops one more SUGAR RUSH with 1 or 2 Looters in play, two more with 3
-  or 4, further out, the second on the other side; while SUGAR RUSH is locked, that many treat buckets). SECOND WIND: BREATH OF LIFE (he keeps his abilities, upgrades,
-  boosts and SUGAR RUSH on SECOND WIND, which still works once); THROW ME A BONE (when another player's last
+  or 4, further out, the second on the other side; while SUGAR RUSH is locked, that many treat buckets). SECOND WIND: BREATH OF LIFE (he keeps his other abilities, upgrades,
+  boosts and SUGAR RUSH on SECOND WIND; SECOND WIND itself is spent with its upgrades, and a pumpkin can give it
+  again); THROW ME A BONE (when another player's last
   life goes and he has more than one, he gives up one and they stay in with 1; they lose their power-ups
   unless he has BREATH OF LIFE; his own SECOND WIND comes first for himself).
 - Gumballs are a glossy pink ball now; the old rainbow ball is the JAW BREAKER.
