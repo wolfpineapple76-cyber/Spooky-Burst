@@ -11,6 +11,7 @@ const CHAR_COST := 500
 const POW_COST := 100
 # PRESTIGE: relock a character and all its upgrades for +1 of every boost for it, up to this many times
 const PRESTIGE_MAX := 10
+const PRESTIGE_LOCKED := true
 
 # ---------------------------------------------------------------- sprites
 const GHOST := ["...XXXXXX...", "..XXXXXXXX..", ".XXXXXXXXXX.", ".XXoXXXXoXX.", "XXXoXXXXoXXX", "XXbXXXXXXbXX", "XXXXXmmXXXXX",
@@ -367,6 +368,8 @@ func owns(n: int, ch: int) -> Dictionary:
 
 # how many times this player has prestiged a character
 func prestige(n: int, ch: int) -> int:
+	if PRESTIGE_LOCKED:
+		return 0
 	return int(sv(pkey(n, "pre." + chars[ch].id), 0))
 
 func char_cost(n: int, ch: int) -> int:
@@ -1992,6 +1995,8 @@ func maxed(n: int, ch: int) -> bool:
 
 # the PRESTIGE row: hidden at 0 until the character is maxed, always there after its first prestige
 func pre_shown(n: int, ch: int) -> bool:
+	if PRESTIGE_LOCKED:
+		return false
 	return prestige(n, ch) > 0 or maxed(n, ch)
 
 # why this character can't be prestiged right now, or "" if it can
