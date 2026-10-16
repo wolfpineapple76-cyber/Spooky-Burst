@@ -256,6 +256,10 @@ const JACK0 := ["..................", "..................", "........SSS......."
 const JACKS := [JACK0]
 const JACKPAL := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffe45c"}
 const JACKPALB := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e", "l": "#ff9a33", "o": "#ee7a14", "y": "#ffc23a"}
+# Bat Cat's wall cats: a tall slim black cat on a ledge. Profile (looking across the room) when idle, front-on when it attacks.
+const WCIDLE := ["........KkKKkK....", "........KkKKkK....", "........KkkkkkK...", "........KkkkkkK...", ".......KkkkkfkkK..", ".......KkkkkffkK..", "......Kkkkkkkkkp..", ".....KkkkkkkkkK...", "....KkkkkkkkkK....", "....KkkkkkkkK.....", "....KkkkkkkkK.....", "....KkkkkkkkK.....", "...KkkkkkkkkkK....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkkkkkkkkK......", "llllllllllllllllll", "LLddLLLLLLLLLLddLL"]
+const WCFRONT := ["....KkK....KkK....", "....KkKKKKKKkK....", "....KkkkkkkkkK....", ".....KkkkkkkK.....", ".....KfkkkkfK.....", "....KkffkkffkK....", ".....KkkppkkK.....", ".....KkkkkkkK.....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "...KkkkkkkkkkkK...", "....KkkkkkkkkK....", "....KkkkkkkkkKK...", "....KkkkkkkkkKkK..", "....KkkkkkkkkKkK..", ".....KkkkkkkKkkK..", "llllllllllllllllll", "LLddLLLLLLLLLLddLL"]
+const WCPAL := {"k": "#0e0a14", "K": "#4a4170", "f": "#ff8a1f", "p": "#ff7fb5", "L": "#6b3f2a", "l": "#9a6a42", "d": "#3a2214"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -929,7 +933,7 @@ func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st
 		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "p2": false, "laugh": 0.0, "pnc": 0.0, "pncx": 0.0}
 
 func start_game(pad: int) -> void:
-	G = {"players": [], "shots": [], "eb": [], "en": [], "candy": [], "parts": [], "drops": [],
+	G = {"players": [], "shots": [], "eb": [], "wc": [], "en": [], "candy": [], "parts": [], "drops": [],
 		"wave": 0, "score": 0, "t": 0.0, "dive": 2.4, "wt": 1.5, "wf": 2.5, "vt": 3.0, "bt": 0.0, "clearing": 0.0,
 		"high": int(sv("high", 0)), "pk": null, "pk_t": 5.0, "pk_done": false,
 		"shake": 0.0, "boom": null, "rot": null, "slash": null, "toast": null, "menu": null, "picks": [], "bm": 1.0, "slow": 1.0}
@@ -955,6 +959,11 @@ func next_wave() -> void:
 		b.bk = 3 + (w / 5 - 4) % 5 if in_mansion() else (w / 5 - 1) % 3
 		b.t = 0.0
 		G.en.append(b)
+		if in_mansion() and b.bk == 5:
+			# two cats on the wall ledges: they throw fish bones, and swipe if you come too close
+			for sd in [-1, 1]:
+				G.wc.append({"side": sd, "x": 30.0 if sd < 0 else 290.0, "y": 157.0, "hp": 5, "st": "idle", "t": 0.0,
+					"shoot": 2.0 + (0.8 if sd > 0 else 0.0), "sx": 160.0, "flash": 0.0, "dead": false})
 		say(BOSS_NAMES[b.bk], 2.2)
 		sfx("roar")
 		G.shake = 1.0
@@ -1254,6 +1263,9 @@ func kill(e: Dictionary) -> void:
 				burst(o.x, o.y, "#8a66e0", 8)
 		for b in G.eb:
 			b.dead = true
+		for c in G.wc:
+			c.dead = true
+			burst(c.x, c.y, "#ff8a1f", 8)
 		G.clearing = 2.4
 		say(BOSS_NAMES[e.bk] + " DEFEATED", 2.0)
 		sfx("roar")
@@ -1308,6 +1320,91 @@ func game_over() -> void:
 	sfx("gameover")
 	sv_set("high", maxi(G.high, G.score))
 	sv_set("wave", maxi(int(sv("wave", 0)), G.wave))
+
+func flip_rows(rows: Array) -> Array:
+	var out := []
+	for r in rows:
+		var t := ""
+		for i in range(r.length() - 1, -1, -1):
+			t += r[i]
+		out.append(t)
+	return out
+
+func draw_fish_bone(b: Dictionary) -> void:
+	# a small fish skeleton flying head-first along its path
+	var a := atan2(b.vy, b.vx)
+	var d := Vector2(cos(a), sin(a))
+	var n := Vector2(-d.y, d.x)
+	var c := Vector2(b.x, b.y)
+	var tail := c - d * 6
+	var head := c + d * 6
+	pline(tail.x, tail.y, head.x, head.y, 1, "#f3efe0")
+	for k in [-3, 0, 3]:
+		var m: Vector2 = c + d * float(k)
+		pline(m.x - n.x * 3, m.y - n.y * 3, m.x + n.x * 3, m.y + n.y * 3, 1, "#d8d2c0")
+	R(round(head.x) - 1, round(head.y) - 1, 3, 3, "#f3efe0")
+	R(round(head.x), round(head.y), 1, 1, "#0e0a14")
+	var t1 := tail - d * 2 + n * 3
+	var t2 := tail - d * 2 - n * 3
+	pline(tail.x, tail.y, t1.x, t1.y, 1, "#f3efe0")
+	pline(tail.x, tail.y, t2.x, t2.y, 1, "#f3efe0")
+
+func draw_wall_cat(c: Dictionary) -> void:
+	var gt: float = G.t
+	var left: bool = c.side < 0
+	var front: bool = c.st != "idle"
+	var rows: Array = WCFRONT if front else WCIDLE
+	if not left:
+		rows = flip_rows(rows)
+	var ox := int(round(c.x)) - 18
+	var oy := int(round(c.y)) - 18
+	# red spot on the floor where the claws will land
+	if c.st == "tell" or c.st == "swipe":
+		var pulse := 0.5 + 0.25 * sin(gt * 18)
+		if c.st == "swipe":
+			pulse = 0.9
+		ellipse(int(round(c.sx)), 207, 20, 5, "#ff2244", pulse * 0.6)
+		ellipse(int(round(c.sx)), 207, 13, 3, "#ff2244", pulse)
+		ellipse(int(round(c.sx)), 207, 6, 2, "#ffb0b8", pulse)
+	spr(rows, WCPAL, ox, oy, 2, c.flash > 0)
+	if c.st == "tell" or c.st == "swipe":
+		# the arm grows out of the shoulder on the room side of the body
+		var k := 0.0
+		var sweep := 0.0
+		if c.st == "tell":
+			k = clampf((c.t - 0.45) / 0.35, 0.0, 1.0) * 0.6
+		else:
+			k = 0.6 + 0.4 * clampf(c.t / 0.1, 0.0, 1.0)
+			sweep = lerpf(-12.0, 12.0, clampf(c.t / 0.3, 0.0, 1.0)) * (-c.side)
+		if k > 0.0:
+			var sh := Vector2(ox + (23 if left else 13), oy + 22)
+			var tip := Vector2(c.sx + sweep, 204)
+			var p1 := sh + (tip - sh) * k
+			var mid: Vector2 = (sh + p1) / 2 + Vector2(13.0 * (1 if left else -1), -3)
+			var pts_arr := []
+			for i in 21:
+				var t := i / 20.0
+				var q := sh * (1 - t) * (1 - t) + mid * 2 * (1 - t) * t + p1 * t * t
+				pts_arr.append([q, 4.5 - 1.8 * t])
+			spr_blob(pts_arr, 1, "#4a4170")
+			spr_blob(pts_arr, 0, "#0e0a14")
+			ellipse(int(round(sh.x)), int(round(sh.y)), 5, 5, "#0e0a14")
+			if k > 0.5:
+				var dir := (tip - mid).normalized()
+				var pw := p1
+				ellipse(int(round(pw.x)), int(round(pw.y)), 4, 4, "#4a4170")
+				ellipse(int(round(pw.x)), int(round(pw.y)), 3, 3, "#0e0a14")
+				for kk in [-1, 0, 1]:
+					var an: float = atan2(dir.y, dir.x) + kk * 0.5
+					var s0 := pw + Vector2(cos(an), sin(an)) * 3
+					var s1 := pw + Vector2(cos(an), sin(an)) * 8
+					pline(s0.x, s0.y, s1.x, s1.y, 1, "#f6f1ff")
+
+func spr_blob(arr: Array, rim: int, col: String) -> void:
+	for it in arr:
+		var q: Vector2 = it[0]
+		var r: float = it[1] + rim
+		ellipse(int(round(q.x)), int(round(q.y)), int(round(r)), int(round(r)), col)
 
 # mansion doll: a button shot at one of the players
 func button(e: Dictionary) -> void:
@@ -1865,6 +1962,49 @@ func update(dt: float) -> void:
 			if b.life <= 0:
 				b.dead = true
 
+	# wall cats
+	for c in G.wc:
+		if c.dead:
+			continue
+		c.flash = maxf(0.0, c.flash - dt)
+		c.t += dt
+		if c.st == "idle":
+			c.shoot -= dt
+			var near = null
+			for p in live():
+				if (p.x < 64 if c.side < 0 else p.x > 256):
+					near = p
+			if near != null:
+				c.st = "tell"
+				c.t = 0.0
+				c.sx = near.x
+				sfx("squeak")
+			elif c.shoot <= 0 and not live().is_empty():
+				c.shoot = 2.4 + randf() * 1.2
+				var tg: Dictionary = pick(live())
+				var dx: float = tg.x - c.x
+				var dy: float = 209 - c.y
+				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+				G.eb.append({"x": c.x + c.side * 14, "y": c.y - 4, "vx": dx / d * 78, "vy": dy / d * 78, "k": "fish", "ph": 0.0, "dead": false})
+				sfx("squeak")
+		elif c.st == "tell":
+			if c.t >= 0.8:
+				c.st = "swipe"
+				c.t = 0.0
+				sfx("dash")
+		elif c.st == "swipe":
+			if c.t <= 0.2:
+				for p in live():
+					if p.inv <= 0 and absf(p.x - c.sx) < 16:
+						hurt(p)
+			if c.t >= 0.35:
+				c.st = "rest"
+				c.t = 0.0
+		elif c.st == "rest":
+			if c.t >= 1.2:
+				c.st = "idle"
+				c.t = 0.0
+
 	# orbs hitting enemies
 	for s in G.shots:
 		if s.dead:
@@ -1885,6 +2025,30 @@ func update(dt: float) -> void:
 					pk_laugh(e)
 				elif e.hp <= 0:
 					kill(e)
+				else:
+					sfx("bosshit")
+				break
+
+	for s in G.shots:
+		if s.dead:
+			continue
+		for c in G.wc:
+			if c.dead or is_same(c, s.last):
+				continue
+			var hw: float = 14 + (6 if s.big else 0) + s.grow
+			var hh: float = 20 + (3 if s.big else 0) + s.grow / 2.0
+			if absf(s.x - c.x) < hw and absf(s.y - c.y) < hh:
+				s.pc -= 1
+				s.last = c
+				if s.pc <= 0:
+					s.dead = true
+				c.hp -= s.dmg
+				c.flash = 0.1
+				if c.hp <= 0:
+					c.dead = true
+					pts(300)
+					burst(c.x, c.y, "#ff8a1f", 14)
+					sfx("pop")
 				else:
 					sfx("bosshit")
 				break
@@ -1954,6 +2118,7 @@ func update(dt: float) -> void:
 	var keep := func(o): return not o.dead
 	G.shots = G.shots.filter(keep)
 	G.eb = G.eb.filter(keep)
+	G.wc = G.wc.filter(keep)
 	G.en = G.en.filter(keep)
 	G.candy = G.candy.filter(keep)
 	G.drops = G.drops.filter(keep)
@@ -2046,6 +2211,8 @@ func draw_game() -> void:
 			spr(BATB if f == 1 else BATA, EPAL, x, int(round(e.y)) - 6, 2, fl)
 		else:
 			spr(WITCH if e.ty == "w" else VAMP, EPAL, x, int(round(e.y)) - 8, 2, fl)
+	for c in G.wc:
+		draw_wall_cat(c)
 	if G.slash != null:
 		var sl: Dictionary = G.slash
 		var hx := 160 if sl.side > 0 else 0
@@ -2104,6 +2271,8 @@ func draw_game() -> void:
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
 			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
+		elif b.k == "fish":
+			draw_fish_bone(b)
 		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
 		elif b.k == "web":
