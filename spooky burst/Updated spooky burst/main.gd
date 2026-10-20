@@ -1351,7 +1351,7 @@ func throw_mouse(c: Dictionary, tg, big: bool) -> void:
 	var dx: float = tg.x - sx
 	var dy: float = 209 - sy
 	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-	var sp := 120.0 if big else 78.0
+	var sp := 90.0 if big else 58.0
 	G.eb.append({"x": sx, "y": sy, "vx": dx / d * sp, "vy": dy / d * sp, "k": "mouseb" if big else "mouse", "ph": 0.0, "dead": false})
 	sfx("dash" if big else "squeak")
 
@@ -1970,11 +1970,11 @@ func update(dt: float) -> void:
 				c.sx = near.x
 				sfx("squeak")
 			elif c.shoot <= 0 and not live().is_empty():
-				c.shoot = 2.4 + randf() * 1.2
+				c.shoot = (3.2 + randf() * 1.4) * (1.0 + 0.25 * (live().size() - 1))   # more players: a calmer cat
 				throw_mouse(c, pick(live()), false)
 		elif c.st == "tell":
 			# hissing: puffed up and fangs out, then a big mouse comes flying
-			if c.t >= 0.8:
+			if c.t >= 1.0:
 				throw_mouse(c, pick(live()) if not live().is_empty() else null, true)
 				c.st = "rest"
 				c.t = 0.0
