@@ -260,6 +260,9 @@ const JACKPALB := {"D": "#7a3006", "M": "#c2520c", "S": "#3d6b2a", "f": "#ffb02e
 const WCIDLE := ["........KkKKkK....", "........KkKKkK....", "........KkkkkkK...", "........KkkkkkK...", ".......KkkkkfkkK..", ".......KkkkkffkK..", "......Kkkkkkkkkp..", ".....KkkkkkkkkK...", "....KkkkkkkkkK....", "....KkkkkkkkK.....", "....KkkkkkkkK.....", "....KkkkkkkkK.....", "...KkkkkkkkkkK....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkKkkkkkkkK.....", "..KkkkkkkkkK......", "llllllllllllllllll", "LLddLLLLLLLLLLddLL"]
 const WCFRONT := ["....KkK....KkK....", "....KkKKKKKKkK....", "....KkkkkkkkkK....", ".....KkkkkkkK.....", ".....KfkkkkfK.....", "....KkffkkffkK....", ".....KkkppkkK.....", ".....KkkkkkkK.....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "....KkkkkkkkkK....", "...KkkkkkkkkkkK...", "....KkkkkkkkkK....", "....KkkkkkkkkKK...", "....KkkkkkkkkKkK..", "....KkkkkkkkkKkK..", ".....KkkkkkkKkkK..", "llllllllllllllllll", "LLddLLLLLLLLLLddLL"]
 const WCPAL := {"k": "#0e0a14", "K": "#4a4170", "f": "#ff8a1f", "p": "#ff7fb5", "L": "#6b3f2a", "l": "#9a6a42", "d": "#3a2214"}
+# the toy mouse the wall cats throw (flies head-first)
+const WCMOUSE := ["..gg..gg......", "..gGg.gGgg....", ".ggpGggGpgg...", "gGGGGGGGGGGg..", "gGkGGGGGGGGgg.", "pGGGGGGGGGGGgr", "gGGGGGGGGGGg.r", ".gggggggggg.r."]
+const WCMOUSEPAL := {"g": "#9c98b3", "G": "#c9c5dc", "p": "#ff7fb5", "k": "#0e0a14", "r": "#ff6b7d"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -960,7 +963,7 @@ func next_wave() -> void:
 		b.t = 0.0
 		G.en.append(b)
 		if in_mansion() and b.bk == 5:
-			# two cats on the wall ledges: they throw fish bones, and swipe if you come too close
+			# two cats on the wall ledges: they throw toy mice, and hiss then throw a big one if you come too close
 			for sd in [-1, 1]:
 				G.wc.append({"side": sd, "x": 30.0 if sd < 0 else 290.0, "y": 157.0, "hp": 5, "st": "idle", "t": 0.0,
 					"shoot": 2.0 + (0.8 if sd > 0 else 0.0), "sx": 160.0, "flash": 0.0, "dead": false})
@@ -1330,81 +1333,56 @@ func flip_rows(rows: Array) -> Array:
 		out.append(t)
 	return out
 
-func draw_fish_bone(b: Dictionary) -> void:
-	# a small fish skeleton flying head-first along its path
-	var a := atan2(b.vy, b.vx)
-	var d := Vector2(cos(a), sin(a))
-	var n := Vector2(-d.y, d.x)
-	var c := Vector2(b.x, b.y)
-	var tail := c - d * 6
-	var head := c + d * 6
-	pline(tail.x, tail.y, head.x, head.y, 1, "#f3efe0")
-	for k in [-3, 0, 3]:
-		var m: Vector2 = c + d * float(k)
-		pline(m.x - n.x * 3, m.y - n.y * 3, m.x + n.x * 3, m.y + n.y * 3, 1, "#d8d2c0")
-	R(round(head.x) - 1, round(head.y) - 1, 3, 3, "#f3efe0")
-	R(round(head.x), round(head.y), 1, 1, "#0e0a14")
-	var t1 := tail - d * 2 + n * 3
-	var t2 := tail - d * 2 - n * 3
-	pline(tail.x, tail.y, t1.x, t1.y, 1, "#f3efe0")
-	pline(tail.x, tail.y, t2.x, t2.y, 1, "#f3efe0")
+func throw_mouse(c: Dictionary, tg, big: bool) -> void:
+	if tg == null:
+		return
+	var sx: float = c.x - c.side * 14
+	var sy: float = c.y - 4
+	var dx: float = tg.x - sx
+	var dy: float = 209 - sy
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	var sp := 120.0 if big else 78.0
+	G.eb.append({"x": sx, "y": sy, "vx": dx / d * sp, "vy": dy / d * sp, "k": "mouseb" if big else "mouse", "ph": 0.0, "dead": false})
+	sfx("dash" if big else "squeak")
+
+func draw_mouse(b: Dictionary) -> void:
+	var big: bool = b.k == "mouseb"
+	var rows: Array = WCMOUSE if b.vx < 0 else flip_rows(WCMOUSE)
+	var z := 3 if big else 2
+	spr(rows, WCMOUSEPAL, int(round(b.x)) - 7 * z, int(round(b.y)) - 4 * z, z)
 
 func draw_wall_cat(c: Dictionary) -> void:
 	var gt: float = G.t
 	var left: bool = c.side < 0
-	var front: bool = c.st != "idle"
-	var rows: Array = WCFRONT if front else WCIDLE
+	var hissing: bool = c.st == "tell"
+	var rows: Array = WCFRONT if c.st != "idle" else WCIDLE
 	if not left:
 		rows = flip_rows(rows)
 	var ox := int(round(c.x)) - 18
 	var oy := int(round(c.y)) - 18
-	# red spot on the floor where the claws will land
-	if c.st == "tell" or c.st == "swipe":
-		var pulse := 0.5 + 0.25 * sin(gt * 18)
-		if c.st == "swipe":
-			pulse = 0.9
-		ellipse(int(round(c.sx)), 207, 20, 5, "#ff2244", pulse * 0.6)
-		ellipse(int(round(c.sx)), 207, 13, 3, "#ff2244", pulse)
-		ellipse(int(round(c.sx)), 207, 6, 2, "#ffb0b8", pulse)
-	spr(rows, WCPAL, ox, oy, 2, c.flash > 0)
-	if c.st == "tell" or c.st == "swipe":
-		# the arm grows out of the shoulder on the room side of the body
-		var k := 0.0
-		var sweep := 0.0
-		if c.st == "tell":
-			k = clampf((c.t - 0.45) / 0.35, 0.0, 1.0) * 0.6
-		else:
-			k = 0.6 + 0.4 * clampf(c.t / 0.1, 0.0, 1.0)
-			sweep = lerpf(-12.0, 12.0, clampf(c.t / 0.3, 0.0, 1.0)) * (-c.side)
-		if k > 0.0:
-			var sh := Vector2(ox + (23 if left else 13), oy + 22)
-			var tip := Vector2(c.sx + sweep, 204)
-			var p1 := sh + (tip - sh) * k
-			var mid: Vector2 = (sh + p1) / 2 + Vector2(13.0 * (1 if left else -1), -3)
-			var pts_arr := []
-			for i in 21:
-				var t := i / 20.0
-				var q := sh * (1 - t) * (1 - t) + mid * 2 * (1 - t) * t + p1 * t * t
-				pts_arr.append([q, 4.5 - 1.8 * t])
-			spr_blob(pts_arr, 1, "#4a4170")
-			spr_blob(pts_arr, 0, "#0e0a14")
-			ellipse(int(round(sh.x)), int(round(sh.y)), 5, 5, "#0e0a14")
-			if k > 0.5:
-				var dir := (tip - mid).normalized()
-				var pw := p1
-				ellipse(int(round(pw.x)), int(round(pw.y)), 4, 4, "#4a4170")
-				ellipse(int(round(pw.x)), int(round(pw.y)), 3, 3, "#0e0a14")
-				for kk in [-1, 0, 1]:
-					var an: float = atan2(dir.y, dir.x) + kk * 0.5
-					var s0 := pw + Vector2(cos(an), sin(an)) * 3
-					var s1 := pw + Vector2(cos(an), sin(an)) * 8
-					pline(s0.x, s0.y, s1.x, s1.y, 1, "#f6f1ff")
-
-func spr_blob(arr: Array, rim: int, col: String) -> void:
-	for it in arr:
-		var q: Vector2 = it[0]
-		var r: float = it[1] + rim
-		ellipse(int(round(q.x)), int(round(q.y)), int(round(r)), int(round(r)), col)
+	var shake := 0
+	if hissing:
+		shake = int(round(sin(gt * 45) * 1.5))
+	spr(rows, WCPAL, ox + shake, oy, 2, c.flash > 0)
+	if hissing:
+		var px := ox + shake
+		# fur puffed up along both sides
+		for yy in [20, 26, 32, 14]:
+			pline(px + 6, oy + yy, px + 1, oy + yy - 3, 1, "#0e0a14")
+			pline(px + 30, oy + yy, px + 35, oy + yy - 3, 1, "#0e0a14")
+		# open mouth with fangs
+		R(px + 14, oy + 12, 8, 4, "#d22846")
+		R(px + 14, oy + 12, 2, 2, "#ffffff")
+		R(px + 20, oy + 12, 2, 2, "#ffffff")
+		if int(floor(gt * 12)) % 2 == 0:
+			R(px + 16, oy + 15, 4, 1, "#ff7fb5")
+		# spit lines out of the mouth, toward the room
+		var dx := 1 if left else -1
+		for k in [-1, 0, 1]:
+			var a := float(k) * 0.5
+			var x0 := px + 18 + dx * 8
+			var y0 := oy + 14
+			pline(x0, y0, x0 + dx * (6 + (int(floor(gt * 14)) % 2) * 3), y0 + k * 4, 1, "#eef0ff")
 
 # mansion doll: a button shot at one of the players
 func button(e: Dictionary) -> void:
@@ -1981,23 +1959,11 @@ func update(dt: float) -> void:
 				sfx("squeak")
 			elif c.shoot <= 0 and not live().is_empty():
 				c.shoot = 2.4 + randf() * 1.2
-				var tg: Dictionary = pick(live())
-				var dx: float = tg.x - c.x
-				var dy: float = 209 - c.y
-				var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-				G.eb.append({"x": c.x + c.side * 14, "y": c.y - 4, "vx": dx / d * 78, "vy": dy / d * 78, "k": "fish", "ph": 0.0, "dead": false})
-				sfx("squeak")
+				throw_mouse(c, pick(live()), false)
 		elif c.st == "tell":
+			# hissing: puffed up and fangs out, then a big mouse comes flying
 			if c.t >= 0.8:
-				c.st = "swipe"
-				c.t = 0.0
-				sfx("dash")
-		elif c.st == "swipe":
-			if c.t <= 0.2:
-				for p in live():
-					if p.inv <= 0 and absf(p.x - c.sx) < 16:
-						hurt(p)
-			if c.t >= 0.35:
+				throw_mouse(c, pick(live()) if not live().is_empty() else null, true)
 				c.st = "rest"
 				c.t = 0.0
 		elif c.st == "rest":
@@ -2059,7 +2025,7 @@ func update(dt: float) -> void:
 			continue
 		var was_hit := false
 		for b in G.eb:
-			if not b.dead and absf(b.x - p.x) < 7 and absf(b.y - 209) < 10:
+			if not b.dead and absf(b.x - p.x) < (11 if b.k == "mouseb" else 7) and absf(b.y - 209) < 10:
 				b.dead = true
 				if b.k == "web":
 					p.web = 2.0
@@ -2271,8 +2237,8 @@ func draw_game() -> void:
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
 			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
-		elif b.k == "fish":
-			draw_fish_bone(b)
+		elif b.k == "mouse" or b.k == "mouseb":
+			draw_mouse(b)
 		elif b.k == "tp" or b.k == "tb":
 			spr(BOWSHOT, BOWPINK if b.k == "tp" else BOWBLUE, x - 5, y - 5, 2)
 		elif b.k == "web":
