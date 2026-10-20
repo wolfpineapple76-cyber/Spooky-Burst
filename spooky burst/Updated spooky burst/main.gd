@@ -467,7 +467,7 @@ func _build_audio() -> void:
 	music = AudioStreamPlayer.new()
 	music.volume_db = -6.0
 	add_child(music)
-	for n in ["music_menu", "music_game", "music_boss"]:
+	for n in ["music_menu", "music_game", "music_boss", "music_carnival", "music_carnival_boss"]:
 		var st = load("res://audio/%s.wav" % n)
 		if st is AudioStreamWAV:
 			st.loop_mode = AudioStreamWAV.LOOP_FORWARD
@@ -495,6 +495,8 @@ func _update_music() -> void:
 		for e in G.en:
 			if e.ty == "B":
 				want = 2
+		if in_carnival():
+			want += 2   # level 3 has its own carnival tunes
 	if want != track:
 		track = want
 		if tracks[track] != null:
@@ -1393,14 +1395,17 @@ func flip_rows(rows: Array) -> Array:
 
 # a curly balloon string: it swirls gently when the balloon floats, and thrashes tighter and faster as it falls
 func draw_balloon_string(x: float, y: float, t: float, falling: bool) -> void:
-	var amp := 2.6 if falling else 1.6
+	# floating: it hangs below, swirling gently. falling: it streams up behind the balloon, curling and fluttering
+	var amp := 3.0 if falling else 1.6
 	var spd := 14.0 if falling else 5.0
 	var freq := 1.1 if falling else 0.8
-	var len := 18 if falling else 14
+	var len := 22 if falling else 14
+	var y0 := y - 21.0 if falling else y
+	var dv := -1.0 if falling else 1.0
 	for i in len:
 		var k := float(i)
-		var sx := x + sin(t * spd - k * freq) * (amp + k * 0.12) + cos(k * 1.9 + t * spd * 0.5) * 0.8
-		R(int(round(sx)), int(round(y + k)), 1, 1, "#eae4fa")
+		var sx := x + sin(t * spd - k * freq) * (amp + k * 0.14) + cos(k * 1.9 + t * spd * 0.5) * 0.8
+		R(int(round(sx)), int(round(y0 + dv * k)), 1, 1, "#eae4fa")
 
 func throw_mouse(c: Dictionary, tg, big: bool) -> void:
 	if tg == null:
@@ -1686,9 +1691,10 @@ func boss(e: Dictionary, dt: float) -> void:
 				G.en.append(nb)
 			sfx("squeak")
 	elif m == 4:
-		if e.bk == 7:
+		if e.bk == 7 or (e.bk == 9 and (e.n / 5) % 2 == 1):
 			# Grim Reaper: warns on the half of the floor it is floating over, then slashes across it
-			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false}
+			# (the chained Jack-in-the-Box does it with a long gloved arm, every other time round)
+			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false, "arm": e.bk == 9}
 			e.at = 1.6
 			sfx("deny")
 		elif e.bk == 3:
@@ -2312,7 +2318,29 @@ func draw_game() -> void:
 		elif sl.t <= 1.05:
 			var k: float = (sl.t - 0.75) / 0.3
 			var cx: float = 160 + sl.side * (10 + 130 * k)
-			spr(SLASH, SLASHPAL, int(round(cx)) - SLASH[0].length(), 224 - SLASH.size() * 2, 2)
+			if sl.get("arm", false) and B != null:
+				# a long arm reaches down from the box and sweeps across the floor, a white glove at the end
+				var sh := Vector2(B.x, B.y + 24)
+				var gp := Vector2(cx, 205)
+				var mid := (sh + gp) / 2 + Vector2(0, 14)
+				var prev := sh
+				for i in 1 + 16:
+					var t := i / 16.0
+					var q := sh * (1 - t) * (1 - t) + mid * 2 * (1 - t) * t + gp * t * t
+					pline(prev.x, prev.y, q.x, q.y, 6, "#1b1530")
+					prev = q
+				prev = sh
+				for i in 1 + 16:
+					var t := i / 16.0
+					var q := sh * (1 - t) * (1 - t) + mid * 2 * (1 - t) * t + gp * t * t
+					pline(prev.x, prev.y, q.x, q.y, 4, "#c9c4d6")
+					prev = q
+				ellipse(int(gp.x), int(gp.y), 8, 7, "#1b1530")
+				ellipse(int(gp.x), int(gp.y), 7, 6, "#fbf7ff")
+				for fx in [-5, -2, 1, 4]:
+					R(int(gp.x) + fx + sl.side * 4, int(gp.y) - 3, 2, 6, "#fbf7ff")
+			else:
+				spr(SLASH, SLASHPAL, int(round(cx)) - SLASH[0].length(), 224 - SLASH.size() * 2, 2)
 	if G.rot != null:
 		# the Pumpkin King rotting away after his final defeat
 		var rk: float = G.t - G.rot.t0
