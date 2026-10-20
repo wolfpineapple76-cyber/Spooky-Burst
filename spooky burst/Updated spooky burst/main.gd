@@ -321,6 +321,7 @@ var tcache := {}
 var gcache := {}
 var stars: Array = []
 var mansion_tex: Texture2D
+var carnival_tex: Texture2D
 var things: Array = []
 var t := 0.0
 var mode := "menu"      # menu, game, pause, over
@@ -855,11 +856,23 @@ func draw_graveyard(boss_here: bool) -> void:
 func in_mansion() -> bool:
 	return G.wave > 15
 
+# level 3: the carnival in the forest (from wave 41, after the Grim Reaper)
+func in_carnival() -> bool:
+	return G.wave > 40
+
 # level 2: the haunted mansion room (mansion.png, 320x240)
 func draw_mansion(boss_here: bool) -> void:
 	if mansion_tex == null:
 		mansion_tex = load("res://mansion.png")
 	draw_texture(mansion_tex, Vector2.ZERO)
+	if boss_here:
+		R(0, 0, 320, 240, "#ff1133", 0.07)
+
+# level 3: the carnival in the forest (carnival.png, 320x240)
+func draw_carnival(boss_here: bool) -> void:
+	if carnival_tex == null:
+		carnival_tex = load("res://carnival.png")
+	draw_texture(carnival_tex, Vector2.ZERO)
 	if boss_here:
 		R(0, 0, 320, 240, "#ff1133", 0.07)
 
@@ -2122,7 +2135,9 @@ func draw_game() -> void:
 		if e.ty == "B":
 			B = e
 	var indoors := in_mansion()
-	if indoors:
+	if in_carnival():
+		draw_carnival(B != null)
+	elif indoors:
 		draw_mansion(B != null)
 	else:
 		draw_graveyard(B != null)
