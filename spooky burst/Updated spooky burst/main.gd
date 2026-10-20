@@ -945,6 +945,13 @@ func start_game(pad: int) -> void:
 	panel = ""
 	next_wave()
 
+func add_wall_cats() -> void:
+	if not G.wc.is_empty():
+		return
+	for sd in [-1, 1]:
+		G.wc.append({"side": sd, "x": 30.0 if sd < 0 else 290.0, "y": 157.0, "hp": 5, "st": "idle", "t": 0.0, "calm": true,
+			"shoot": 2.0 + (0.8 if sd > 0 else 0.0), "sx": 160.0, "flash": 0.0, "dead": false})
+
 func next_wave() -> void:
 	G.wave += 1
 	var w: int = G.wave
@@ -964,13 +971,16 @@ func next_wave() -> void:
 		G.en.append(b)
 		if in_mansion() and b.bk == 5:
 			# two cats on the wall ledges: they throw toy mice, and hiss then throw a big one if you come too close
-			for sd in [-1, 1]:
-				G.wc.append({"side": sd, "x": 30.0 if sd < 0 else 290.0, "y": 157.0, "hp": 5, "st": "idle", "t": 0.0,
-					"shoot": 2.0 + (0.8 if sd > 0 else 0.0), "sx": 160.0, "flash": 0.0, "dead": false})
+			add_wall_cats()
+			for c in G.wc:
+				c.calm = false
 		say(BOSS_NAMES[b.bk], 2.2)
 		sfx("roar")
 		G.shake = 1.0
 		return
+	# the Bat Cat's wall cats show up two waves early, just sitting and watching: the boss is coming
+	if in_mansion() and w % 5 >= 3 and 3 + ((w / 5 + 1) - 4) % 5 == 5:
+		add_wall_cats()
 	var rows := []
 	if w >= 4:
 		rows.append("v")
@@ -1946,6 +1956,8 @@ func update(dt: float) -> void:
 			continue
 		c.flash = maxf(0.0, c.flash - dt)
 		c.t += dt
+		if c.calm:
+			continue
 		if c.st == "idle":
 			c.shoot -= dt
 			var near = null
@@ -1999,7 +2011,7 @@ func update(dt: float) -> void:
 		if s.dead:
 			continue
 		for c in G.wc:
-			if c.dead or is_same(c, s.last):
+			if c.dead or c.calm or is_same(c, s.last):
 				continue
 			var hw: float = 14 + (6 if s.big else 0) + s.grow
 			var hh: float = 20 + (3 if s.big else 0) + s.grow / 2.0
