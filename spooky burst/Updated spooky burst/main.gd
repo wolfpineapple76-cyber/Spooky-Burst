@@ -274,12 +274,25 @@ const L3BAL := [{"f": "#e8283f", "d": "#a81428", "w": "#ffffff"}, {"f": "#3c96f0
 const L3POP := ["........kkk.....", "....kkkkyyyk....", "...kyyyyyyyyk...", "..kyyyyyyhyyyk..", ".kyyyhyyyyyyyyk.", ".kyyyyyyyyyyhyyk", ".kyyyyyhyyYyyyyk", ".kyyhyYyyyyhyyyk", ".kyyyyyyyyyyYyyk", "kRRRRRRRRRRRRRRk", ".kWWppwwwwwWppyk", ".kWWpwpppppwppyk", ".kWWwpppwwppwpk.", ".kWWwpwpppwpwpk.", "..kWwppwwwppwk..", "..kWWwpppppwWk..", "..kRRRwwwwwRRk..", "...kkkkkkkkkk..."]
 const L3PRIZE := ["................", "....kkk..kkk....", "...kyyykkyyyk...", "..kyyyyyyyyyyk..", "..kyyyyyyyyyyk..", ".kkyyyyyyyyyykk.", "kPPPyyyyyyyyPPPk", "kPPPPPPyyPPPPPPk", "kPPPPPPyyPPPPPPk", "kPPPPPPyyPPPPPPk", ".kpppppyypppppk.", ".kpppppyypppppk.", ".kyyyyyyyyyyyyk.", ".kpppppyypppppk.", ".kpppppyypppppk.", ".kppwppyyppwppk.", ".kpppppyypppppk.", "..kkkkkkkkkkkk.."]
 const L3PICKPAL := {"P": "#f08098", "R": "#c0304a", "W": "#f6d0d8", "Y": "#e8a820", "h": "#fff3a8", "k": "#2a1a10", "p": "#ffb0c0", "w": "#fbf7ff", "y": "#ffd84a"}
+# level 3 bosses: pink ragdoll, chained jack-in-the-box, clown king, bunny kid, scarecrow
+const L3B_RAG := [".....kkk...............kkk.....", "....kpppk.............kpppk....", "...kpppppk..kkkkkkk..kpppppk...", "..kppPPPppkkpppppppkkppPPPppk..", "..kppPPPpppppppppppppppPPPppk..", "..kppPPPpppppppppppppppPPPppk..", "...kpppppppppppppppppppppppk...", "....kpppppppppppppppppppppk....", ".....kpppppppppppppppppppk.....", ".....kppprrrrppppprrrrpppk.....", "....kpppprwwrppppprwwrppppk....", "....kpppprrrrppppprrrrppppk....", "....kpppppppppppppppppppppk....", "....kpppppppppppppppppppppk....", "....kpppppppptttttppppppppk....", ".....kppppppttkkkttppppppk.....", ".....kppppptttkkktttpppppk.....", "...kkkkpppptttttttttppppkkkk...", "..kpppkpppptttttttttppppkpppk..", ".kpppppkpkwktkwktkwkpkpkpppppk.", ".kpppppkpkkkkkkkkkkkkkpkpppppk.", "kppppppppkpkpkpkpkpkpkppppppppk", "kpppppppppppppppppppppppppppppk", "kpppppppppppppppppppppppppppppk", "kppppppppkpkpkpkpkpkppppppppppk", "kpppppppppRRRRRxxxRRRttttpppppk", "kpppppppppRxxxxxxxxkRttttpppppk", "kpppppppppxxxxxxxxxxRkkktpppppk", ".kppppppppxxxxxxxXxxxttttppppk.", ".kppppppppxxxXxxxxxxxttttppppk.", "..kpppkpppRxxxRRxxxxxpppkpppk..", "...kkkkppkpkpkpkpkxkppppkkkk...", "......kpppppppppppppppppk......", ".....kpppppppppppppppppppk.....", "....kpppppppppppppppppppppk....", "....kpppppppppppppppppppppk....", "....kpppppppppkkkpppppppppk....", ".....kpppppppk...kpppppppk....."]
+const L3B_RAGPAL := {"P": "#c94f8a", "R": "#b3122e", "X": "#bdb39a", "k": "#14101f", "p": "#ff7fb5", "r": "#ff3355", "t": "#e8c9a0", "w": "#f6f1ff", "x": "#e8e0cc"}
+const L3B_JACKB := ["..............kkkkkkk.............", "............kkwwwwwwwkk...........", "...........kwwwwwwwwwwwk..........", "..........kwwwwwwwwwwwwwk.........", ".........kwwwwwwwwwwwwwwwk........", "........kwwwwwwwwwwwwwwwwwk.......", "........kwwwwwwwwwwwwwwwwwk.......", ".......kwwwwwwwwwwwwwwwwwwwk......", ".......kwwwwwkkwwwwwwkkwwwwk......", ".......kwwwwkkkwwwwwkkkwwwwk......", ".......kwwwwkkkwwwwwkkkwwwwk......", ".......kwwwwwwwwrrrwwwwwwwwk......", "........kwwwwwwwrrrwwwwwwwk.......", "........kwwwwwwwwwwwwwwwwwk.......", ".........kwkwkkwkkwkkwkkwk........", "..........kkkkkkkkkkkkkkk.........", "...........kkkkkkkkkkkkk..........", ".............kwwwwwwwk............", "............kWWWWkkkk.............", "kkkkk........kkkWWWWk........kkkkk", "wwwwwk......kWWWWkkk........kwwwww", "wwwwwk.......kkkWWWWk.......kwwwww", "wwwwwk......kWWWWkkk........kwwwww", "wwwkk........kkkWWWWk........kkwww", "wwwk........kWWWWkkk..........kwww", "wwwk.kkkkkkkkkkkWWWWkkkkkkkkk.kwww", "wwwkkGGGGGGGGGGGGGGGGGGGGGGGGkkwww", "wwwkkGGGGGGGGGGGGGGGGGGGGGGGGkkwww", "wwwkkGGGGGGGGGGGGGGGGGGGGGGGGkkwww", "kkk..kkkkkkkkkkkYYkkkkkkkkkkk..kkk", ".....kkkkkkkkkkkYYkkkkkkkkkkk.....", "....kgggGgGgGgGyYYygGgGgGgGggk....", ".....kkkkkkkkkkyyyykkkkkkkkkk.....", ".....kkkkkkkkkkykyykkkkkkkkkk.....", ".....kkkkkkkkkkyyyykkkkkkkkkk.....", "....kgggGgGgGgGyyyygGgGgGgGggk....", ".....kkkkkkkkkkyyyykkkkkkkkkk.....", ".....kkkkkkkkkkkkkkkkkkkkkkkk.....", "....kGGGGGGGGGGGGGGGGGGGGGGGGk....", "....kGGGGGGGGGGGGGGGGGGGGGGGGk....", "....kGGGGGGGGGGGGGGGGGGGGGGGGk....", ".....kkkkkkkkkkkkkkkkkkkkkkkk....."]
+const L3B_JACKBPAL := {"G": "#8a90a8", "W": "#c9c4d6", "Y": "#c98a10", "g": "#d8dce8", "k": "#1b1530", "r": "#e02030", "w": "#fbf7ff", "y": "#f2c01e"}
+const L3B_KING := ["..........k..k..k..k..k..........", ".........kgkkgkkgkkgkkgk.........", ".........kgggggggggggggk.........", ".........kggngggrgggmggk.........", "..kkkkk..kGGGGGGGGGGGGGk..kkkkk..", ".kuuuuukkkuuuuuuuuuuuuukkkuuuuuk.", ".kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuk.", ".kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuk.", "kuuuuuuuuuuuuwwwwwwwuuuuuuuuuuuuk", "kuuuuuuuuuuwwwwwwwwwwwuuuuuuuuuuk", "kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuk", "kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuk", "kuuuuuuuwwuuwwwwwwwwwwwwwuuuuuuuk", ".kuuuuuuwwwwwwwwwwwwwwwwwuuuuuuk.", ".kuuuuuwwwwwkkwwwwwwkkwwwwuuuuuk.", "..kkuuuwwwwkkkwwwwwkkkwwwwuuukk..", "....kkkwwwwkkkwwwwwkkkwwwwkkk....", "......kwwwwuwwwrrrwwwuwwwwk......", "......kwwwwuwwwrrrwwwuwwwwk......", ".......kwwwuwwwwwwwwwuwwwk.......", ".......kwwwuwwwwwwwwwuwwwk.....kk", "........kwwwwrwwwwwrwwwwk.....kpp", ".......kgggggggggggggggggk....kpp", ".......kgggggggggggggggggk...kppp", "......kygggggggggggggggggyk.kpppp", "......kyyyYYyyyyyyyyyYYyyyk.kpppp", "......kyyyYYyyyyyyyyyYYyyyk.kpppp", "......kyyyYYyyyyyyyyyYYyyyk..kppp", "......kyyyYYyyyyyyyyyYYyyyk..kppp", "......kyyyYYyyyyyyyyyYYyyyk..kppp", "......kwwwYYyyyyyyyyyYYwwwk...kkk", "......kwwwYYyyyyyyyyyYYwwwk......", ".......kkkYYyyyyyyyyyYYkkk.......", ".........kYYyyyyyyyyyYYk.........", ".........kYYyyyyyyyyyYYk.........", ".........kYYyyyyyyyyyYYk.........", ".........kddddddyddddddk.........", ".........kddddddkddddddk........."]
+const L3B_KINGPAL := {"G": "#8a90a8", "Y": "#c98a10", "d": "#2a2a40", "g": "#d8dce8", "k": "#1b1530", "m": "#80e060", "n": "#5ac0ff", "p": "#ff7fb5", "r": "#e02030", "u": "#a070e8", "w": "#fbf7ff", "y": "#f2c01e"}
+const L3B_KID := ["........kwppwk.......kwppwk.......", "........kwppwk.......kwppwk.......", "........kwppwkkkkkkkkkwppwk.......", "........kwppwkyyyyyyykwppwk.......", "........kwppwyfffffffywppwk.......", "........kwwwwfffffffffwwwwk.......", "........kyyyyyyyyyyyyyyyyyk.......", ".......kyyyyyyyyyyyyyyyyyyyk......", "......kyyyyyyyyyyyyyyyyyyyyyk.....", "......kyyyyyfffffffffffyyyyyk.....", ".....kyyfyyyfffffffffffyyyfyyk....", ".....kyyfyyyfffffffffffyyyfyyk....", ".....kyyfffffffffffffffffffyyk....", ".....kyyffffkfkfffffkfkffffyyk....", ".....kyyfffffkfffffffkfffffyyk....", ".....kyyffffkfkfffffkfkffffyyk....", ".....kyyfffffffffffffffffffyyk....", ".....kyyyfffffffffffffffffyyyk....", ".....kyyyfffffffffffffffffyyyk....", ".kkkkkyyyyffffpfffffpffffyyyykkkkk", "kcccccyyyyyfffffffffffffyyyyyaaaaa", "ccccccckkkkkfffffffffffkkkkkaaaaaa", "ccccccwck...kkRwwwwwRkk...kaaaaaaa", "cwcccccck....kRRRRRRRk....kaawaaaa", "CCcccCCck.....kkkkkkk.....kaAAaaaA", "CCCCCwCCk.....kkkkkkk.....kAAAAAAw", "CCCCCCCCuk..kkuuuuuuukk..kuAAAAAAA", "wCCwCCCCukkkuuuuuuuuuuukkkuAwAAwAA", "CCCcCCCuuuuuuuuuuuuuuuuuuuuuAAAaAA", "kkkWkuuuuUUUUUUUUUUUUUUUUUuuuukWkk", "..kWkuuuuuuuuuuuuuuuuuuuuuuuuukWk.", ".kwwwfffuuuuuuuuuuuuuuuuuuufffwwwk", ".kwwwffffUUUUUUUUUUUUUUUUUffffwwwk", ".kwwwffffuuuuuuuuuuuuuuuuuffffwwwk", ".kwwwffffuuuuuuuuuuuuuuuuuffffwwwk", ".kwwwfffkUUUUUUUUUUUUUUUUUkfffwwwk", ".kwwwkkkkuuuuuuuuuuuuuuuuukkkkwwwk", ".kwwwk..kuuuuuuuuuuuuuuuuuk..kwwwk", "..kkk...kuuu....uuu....uuuk...kkk.", ".........kkk....uuu....kkk........", "...........k....uuu....k..........", "..........kk....kkk....kk.........", ".........kddddddk.kddddddk........", ".........kddddddk.kddddddk........"]
+const L3B_KIDPAL := {"A": "#5ab8f0", "C": "#ff8ac8", "R": "#8a1222", "U": "#6a44b8", "W": "#c9c4d6", "a": "#9be0ff", "c": "#ffb8e0", "d": "#2a2a40", "f": "#ffd9b0", "k": "#1b1530", "p": "#ff7fb5", "u": "#a070e8", "w": "#fbf7ff", "y": "#f2c01e"}
+const L3B_SCARE := ["...........kkk...............kkk..........", "..........kdddk.............kdddk.........", ".......kkkddrddk...........kddrddkkk......", "......kdddddddyk...........kydddddddk.....", ".....kdddddddddk...........kdddddddddk....", ".....kddddddddk.............kddddddddk....", "....kddddddddk...............kdddddddk....", "....kdddddddk.................kdddddk.....", ".....kkkkkssk.................ksskkk......", "........kkssk.................ksskk.......", ".......kskkssk...............ksskksk......", ".......kskkssk...............ksskksk......", ".......ksk.ksk...............ksksssk......", "........k..ksk.......k.......kskkkk.......", "...........ksk.k....ktk....k.ksk..........", "...........kskktk...ktk...ktkksk..........", "...........kskktk..kTtTk..ktkksk..........", "..........k.kkTtTkkkTTTkkkTtTkk.k.........", ".........ktk.kTTTkttTTTttkTTTk.ktk........", ".........ktk.kTTTtttttttttTTTk.ktk........", "........kTtTk.ktttttttttttttk.kTtTk.......", "........kTTTkktttttttttttttttkkTTTk.......", "........kTTTktttttttttttttttttkTTTk.......", ".........kkkktttttttttttttttttkkkk........", "...........ktttkkkktttttkkkktttk..........", "...........ktttkkektttttkekktttk..........", "...........ktttkkkktttttkkkktttk..........", "..........ktttttttttttttttttttttk.........", "..........ktttttttttttttttttttttk.........", ".........kTtTtttttttttttttttttTtTk........", ".........kTTTtttktktktktktktttTTTk........", ".........kTTTtttkkkkkkkkkkktttTTTk........", "..........kkktttktktktktktktttkkk.........", ".............ktttttttttttttttk............", "..............ktttttttttttttk.............", "...............ktttttttttttk..............", "................kktttttttkk...............", "...kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..", "..krrrrrrrrrjjjjjjjjjjjjjjjjjjjrrrrrrrrrk.", "..krrrrrrrrrjjjjjjjjjjjjjjjjjjjrrrrrrrrrk.", "..krrrrrrrrrRRRrrrrrrrrrrrrrRRRrrrrrrrrrk.", ".ktttrrrrrrrRRRrrrrrrrrrrrrrRRRrrrrrrtttk.", "kttttttktkktRRRrqqqrrrrrrrrrRtRktkkttttttk", "ktttttTkkTkkTRRrqqqrrrrrrrrrRRTkkTkktttttk", "ktttttk..k.kRRRrrrrrrrrrTTTrRRRk.k.ktttttk", ".ktttk.....kRRRrrrrrrrrrTTTrRRRk....ktttk.", "..kkk......kRRRrqqqrrrrrrrrrRRRk.....kkk..", "...........kRRRrqqqrrrrrrrrrRRRk..........", "...........kRRRrrrrrrrrrTTTrRRRk..........", "...........kRRRrrrrrrrrrTTTrRRRk..........", "...........kRRRrqqqrrrrrrrrrRRRk..........", "...........kRRRrqqqrrrrrrrrrRRRk..........", "...........kRRRrrrrrrrrrTTTrRRRk..........", "...........kRRRrrrrrrrrrTTTrRRRk..........", "...........kRRRrrrrrrrrrrrrrRRRk..........", "............kktkktkktjjtkktkkkk...........", "..............kTkkTkjTjkTkkTk.............", "...............k..kkjjjkk..k.............."]
+const L3B_SCAREPAL := {"R": "#8a1222", "T": "#8a6a2a", "d": "#2a2a40", "e": "#3aa84a", "j": "#7a4a20", "k": "#1b1530", "q": "#e8d6a0", "r": "#e02030", "s": "#7a5a30", "t": "#c9a24a", "y": "#f2c01e"}
+# balloon animals the Clown King throws (dog, swan, snake), coloured with the same palettes as the balloons
+const L3ANIMALS := [["......ff....", "..ff.ffff...", ".ffffffff.f.", "ffffffffffff", "f.ff...ff.f.", "f.f.....f.f."], [".......ff...", "......ffff..", "......ff.f..", ".....ff.....", ".ffffffff...", "ffffffffff..", ".ffffffff..."], ["....fff.....", "..ff...ff...", ".f.......f..", "......ff.f..", "...ffff.....", "ff.........."]]
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
-const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL", "GRIM REAPER"]
+const BOSS_NAMES := ["VAMPIRE LORD", "WITCH QUEEN", "PUMPKIN KING", "SPIDER BEAST", "THE TWINS", "BAT CAT", "PUPPET DOLL", "GRIM REAPER", "PINK RAGDOLL", "JACK IN THE BOX", "CLOWN KING", "BUNNY KID", "SCARECROW"]
 # which level-1 boss each boss moves and attacks like (the mansion bosses borrow these for now)
-const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1, 0]
+const BOSS_STYLE := [0, 1, 2, 0, 1, 2, 1, 0, 0, 2, 1, 2, 1]
 const MENU := [["PLAY GAME", "play"], ["HIGH SCORE", "score"], ["UPGRADES", "shop"], ["SETTINGS", "settings"], ["RESET SAVE", "reset"],
 	["QUIT", "quit"]]
 # where each player's character picker shows when they press Start to join (640x480 screen x)
@@ -990,7 +1003,7 @@ func next_wave() -> void:
 		var hp := int(round((36 + w * 4) * G.bm))
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
 		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, bat cat, puppet doll, grim reaper
-		b.bk = 3 + (w / 5 - 4) % 5 if in_mansion() else (w / 5 - 1) % 3
+		b.bk = 8 + (w / 5 - 9) % 5 if in_carnival() else (3 + (w / 5 - 4) % 5 if in_mansion() else (w / 5 - 1) % 3)
 		b.t = 0.0
 		G.en.append(b)
 		if in_mansion() and b.bk == 5:
@@ -1546,6 +1559,8 @@ func boss(e: Dictionary, dt: float) -> void:
 	var rage: bool = e.hp < e.max / 2.0
 	var sty: int = BOSS_STYLE[e.bk]
 	var K := "pbtn" if e.bk == 6 else ("r" if sty == 0 else ("s" if e.p2 else "c"))
+	if e.bk >= 8:
+		K = ["stuff", "gift", "banimal", "cc", "straw"][e.bk - 8]   # level 3: stuffing, decorated boxes, balloon animals, cotton candy, straw spears
 	var fast := 1.15 if e.p2 else 1.0   # phase 2 is a little faster
 	if rage and not e.raged:
 		e.raged = true
@@ -1666,7 +1681,9 @@ func boss(e: Dictionary, dt: float) -> void:
 			sfx("cackle")
 		else:
 			for i in (4 if rage else 3):
-				G.en.append(new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, 1, "dive"))
+				var nb := new_enemy("b", 62 + (randi() % 8) * 28, 118 + (randi() % 2) * 22, e.x + (i - 1) * 18, e.y + 14, 1, "dive")
+				nb.var = randi() % 6   # level 3: the balloons come in any colour
+				G.en.append(nb)
 			sfx("squeak")
 	elif m == 4:
 		if e.bk == 7:
@@ -1690,7 +1707,7 @@ func boss(e: Dictionary, dt: float) -> void:
 			sfx("ring")
 		elif sty == 1:
 			for i in 9:
-				bshot(e, 0, 95 + randf() * 30, "ndl" if e.bk == 6 else "c", 20 + randf() * 280, -8 - randf() * 40)
+				bshot(e, 0, 95 + randf() * 30, "ndl" if e.bk == 6 else ("crow" if e.bk == 12 else ("banimal" if e.bk == 10 else "c")), 20 + randf() * 280, -8 - randf() * 40)
 			sfx("cackle")
 		elif e.bk == 5:
 			var alive_c := live()
@@ -1882,7 +1899,10 @@ func update(dt: float) -> void:
 			e.y += ((e.fy + sin(e.t * 5) * 14) - e.y) * minf(1.0, 4 * dt)
 			e.drop -= dt
 			if e.drop <= 0:
-				corn(e)
+				if in_carnival():
+					G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "pie", "ph": 0.0, "dead": false})
+				else:
+					corn(e)
 				e.drop = 0.5
 			if (e.dir > 0 and e.x > 304) or (e.dir < 0 and e.x < 16):
 				e.dir = -e.dir
@@ -2010,7 +2030,7 @@ func update(dt: float) -> void:
 		G.vt = maxf(1.2, 2.8 - w * 0.1)
 
 	for b in G.eb:
-		if b.k == "c" or b.k == "s" or b.k == "sm":
+		if b.k == "c" or b.k == "s" or b.k == "sm" or b.k == "crow" or b.k == "cc":
 			b.x += cos(G.t * 5 + b.ph) * 22 * dt
 		b.x += b.vx * dt * G.slow
 		b.y += b.vy * dt * G.slow
@@ -2110,7 +2130,7 @@ func update(dt: float) -> void:
 		for b in G.eb:
 			if not b.dead and absf(b.x - p.x) < (11 if b.k == "mouseb" else 7) and absf(b.y - 209) < 10:
 				b.dead = true
-				if b.k == "web":
+				if b.k == "web" or b.k == "cc":
 					p.web = 2.0
 					sfx("deny")
 					continue
@@ -2224,7 +2244,11 @@ func draw_game() -> void:
 				var px := int(round(e.pncx))
 				ellipse(px, 214, 30, 6, "#7dff5a", 0.35 + 0.25 * (int(floor(e.pnc * 10)) % 2))
 				R(px, int(round(e.y)) + 20, 1, maxi(0, 214 - int(round(e.y)) - 20), "#c9b8ee", 0.5)
-			if e.bk >= 3:
+			if e.bk >= 8:
+				var lrows: Array = [L3B_RAG, L3B_JACKB, L3B_KING, L3B_KID, L3B_SCARE.slice(0, 52)][e.bk - 8]
+				var lpal: Dictionary = [L3B_RAGPAL, L3B_JACKBPAL, L3B_KINGPAL, L3B_KIDPAL, L3B_SCAREPAL][e.bk - 8]
+				spr(lrows, lpal, int(round(e.x)) - lrows[0].length(), int(round(e.y)) - lrows.size(), 2, fl)
+			elif e.bk >= 3:
 				var brows: Array = [SPIDER_A, TWIN_A, CATBOSS, DOLLBOSS, REAPER][e.bk - 3]
 				var bpal: Dictionary = [SPIDERPAL, TWINPAL, CATPAL, DOLLPAL, REAPERPAL][e.bk - 3]
 				spr(brows, bpal, int(round(e.x)) - brows[0].length(), int(round(e.y)) - brows.size(), 2, fl)
@@ -2346,6 +2370,28 @@ func draw_game() -> void:
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
 			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
+		elif b.k == "banimal":
+			var ac: Dictionary = L3BAL[int(b.ph) % 6]
+			var arows: Array = L3ANIMALS[int(b.ph * 7.0) % 3]
+			if b.vx < 0:
+				arows = flip_rows(arows)
+			spr(arows, ac, x - 12, y - 7, 2)
+		elif b.k == "cc":
+			var ccw := int(round(sin(G.t * 8 + b.ph) * 1.0))
+			ellipse(x, y, 5, 5, "#ffb8e0")
+			ellipse(x + 3 + ccw, y - 2, 3, 3, "#9be0ff")
+			ellipse(x - 3, y + 2, 3, 3, "#ffd0ee")
+			R(x - 2, y - 3, 2, 2, "#ffffff")
+		elif b.k == "crow":
+			var fl2 := int(floor(G.t * 10 + b.ph)) % 2
+			ellipse(x, y, 4, 3, "#1b1530")
+			R(x - 6, y - 2 - fl2 * 3, 4, 2, "#1b1530")
+			R(x + 3, y - 2 - fl2 * 3, 4, 2, "#1b1530")
+			R(x + 3, y, 2, 1, "#ffd92e")
+			R(x + 1, y - 2, 1, 1, "#ff3355")
+		elif b.k == "straw":
+			pline(x, y, x - b.vx * 0.12, y - b.vy * 0.12, 1, "#d8b060")
+			R(x - 1, y - 1, 3, 3, "#fff0c0")
 		elif b.k == "pie":
 			ellipse(x, y, 4, 3, "#fff6d8")
 			ellipse(x, y - 1, 3, 1, "#ffffff")
