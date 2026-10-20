@@ -61,6 +61,17 @@ A Halloween arcade shooter. Made for Godot 4.3 or newer.
 - The Black Cat is black for every player; players 2-4 have a coloured tummy matching their orbs.
 - NINE LIVES shows as the cat's tail curled up over his head while the shield is ready.
 
+## Levels
+- Level 1, the graveyard (waves 1-15): bats, witches and vampires. Bosses: Vampire Lord, Witch Queen, Pumpkin King.
+- Level 2, the haunted mansion (waves 16-40): spiders, dolls and ghosts. Bosses: Spider Beast, The Twins, Bat Cat,
+  Puppet Doll, Grim Reaper. Two black wall cats appear on the ledges two waves before the Bat Cat and just watch.
+  When the Bat Cat arrives they throw toy mice at you, and hiss then throw a big one if you stand near their wall.
+  You can shoot them (5 hits each).
+- Level 3, the carnival in the forest (wave 41 on): balloons (in any colour, with curly strings), clowns, jack-in-the-boxes
+  and plush bears. Bosses: Pink Ragdoll, Jack-in-the-Box, Clown King, Bunny Kid, Scarecrow. Popcorn buckets are the
+  treat buckets and pink prize boxes are the power-ups. Level 3 bosses have 20% less health than the formula gives.
+- PRESTIGE is locked (PRESTIGE_LOCKED at the top of the original game's main.gd); the code is still there.
+
 ## Where things are
 - `main.gd` holds the whole game. The sprites are the blocks of letters near the top: each letter is one pixel, and the palettes next to them say which colour each letter is.
 - Each character's power-ups are listed in `_build_chars()`.
