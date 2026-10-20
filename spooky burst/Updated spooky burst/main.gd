@@ -263,6 +263,13 @@ const WCPAL := {"k": "#0e0a14", "K": "#4a4170", "f": "#ff8a1f", "p": "#ff7fb5", 
 # the toy mouse the wall cats throw (flies head-first)
 const WCMOUSE := ["..gg..gg......", "..gGg.gGgg....", ".ggpGggGpgg...", "gGGGGGGGGGGg..", "gGkGGGGGGGGgg.", "pGGGGGGGGGGGgr", "gGGGGGGGGGGg.r", ".gggggggggg.r."]
 const WCMOUSEPAL := {"g": "#9c98b3", "G": "#c9c5dc", "p": "#ff7fb5", "k": "#0e0a14", "r": "#ff6b7d"}
+# level 3 enemies: balloon (colored by f/d), clown, jack-in-the-box, plush bear
+const L3BALLOON := [".....fff....", "...fffffff..", "...fffffww..", "..ffffffwwf.", "..fffffffff.", "..fffffffff.", "..fffffffff.", "..fffffffff.", "...fffffff..", "...fffffff..", ".....ddd....", "......d....."]
+const L3CLOWN := ["..............", "..bbb.....bbb.", ".bbbbbwwwbbbbb", ".bbbbbwwwbbbbb", ".bbbbkwwwkbbbb", "..bbbkrrrkbbb.", "....wcrrrww...", ".....krrrk....", "....k.www.k...", "...wwwwwwwww..", "..BBBBBBBBBBB.", "..BBBwBBBwBBB.", "..BBBBBBwBBBB.", "....BBwBBBB...", "...kkkk.kkkk.."]
+const L3JACK := ["....ybbbbby...", "....wkwwwkw...", "....wkwwwkw...", "....wrwwwrw...", ".....rrrrr....", ".....W........", "........W.....", ".....W........", ".RRRRRRRRRRRR.", "..RRRRRRRRRR..", "..RRRRRRRRRR.y", "..rrrrrrrrrrWy", "..rrrrrrrrrr.y", "..rrrrrrrrrr..", "..RRRRRRRRRR.."]
+const L3BEAR := ["..nnn.....nnn.", "..nNnnnnnnnNn.", "..nnnnnnnnnnn.", "...nnwnnnwnn..", "...nnkNNNknn..", "...nnkNkNknn..", "....nkkkkkn...", ".....nnnnn....", "..nn.nnnnn.nn.", "..nnnnnnnnWnn.", "....nnnnnnnW..", "....nnnnnnn...", ".....nnnnn....", "....nnnnnnn...", "....nn...nn..."]
+const L3PAL := {"B": "#2b6fd0", "N": "#6b4220", "R": "#b3122e", "W": "#d8d0ea", "b": "#4fa8ff", "c": "#9be8ff", "k": "#14101f", "n": "#9a6a3a", "r": "#ff3355", "w": "#f6f1ff", "y": "#ffd92e"}
+const L3BAL := [{"f": "#e8283f", "d": "#a81428", "w": "#ffffff"}, {"f": "#3c96f0", "d": "#2060b8", "w": "#ffffff"}, {"f": "#3fc460", "d": "#238040", "w": "#ffffff"}, {"f": "#ffd92e", "d": "#c9a010", "w": "#ffffff"}, {"f": "#9a6cf0", "d": "#6a44d0", "w": "#ffffff"}, {"f": "#ff7fb5", "d": "#c94f8a", "w": "#ffffff"}]
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -946,7 +953,7 @@ func burst(x: float, y: float, col: String, n: int) -> void:
 func new_enemy(ty: String, hx: float, hy: float, x: float, y: float, hp: int, st: String) -> Dictionary:
 	return {"ty": ty, "hx": hx, "hy": hy, "x": x, "y": y, "hp": hp, "max": hp, "st": st, "t": randf() * 6.0, "vx": 0.0, "flash": 0.0,
 		"dead": false, "dir": 1, "fy": 120.0, "pass": 0, "drop": 0.3, "bk": 0, "at": 1.5, "n": 0, "ph": 0.0, "dz": 0.0,
-		"sp": 0.0, "spt": 0.0, "spa": 0.0, "raged": false, "p2": false, "laugh": 0.0, "pnc": 0.0, "pncx": 0.0}
+		"sp": 0.0, "spt": 0.0, "spa": 0.0, "var": 0, "raged": false, "p2": false, "laugh": 0.0, "pnc": 0.0, "pncx": 0.0}
 
 func start_game(pad: int) -> void:
 	G = {"players": [], "shots": [], "eb": [], "wc": [], "en": [], "candy": [], "parts": [], "drops": [],
@@ -1012,7 +1019,18 @@ func next_wave() -> void:
 					continue
 			elif ty == "v" and (q < 2 or q > 5):
 				continue
-			G.en.append(new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 2 if in_mansion() else (3 if ty == "v" else 1), "enter"))
+			var ne := new_enemy(ty, 62 + q * 28, 44 + r * 22, 62 + q * 28, 44 + r * 22 - 160 - r * 18 - q * 6, 2 if in_mansion() else (3 if ty == "v" else 1), "enter")
+			if in_carnival():
+				# level 3: balloons (any colour), clowns, jack-in-the-boxes (var 0) and plush bears (var 1, tougher)
+				if ty == "b":
+					ne.hp = 1
+					ne.max = 1
+					ne.var = randi() % 6
+				elif ty == "v":
+					ne.var = (q / 2) % 2
+					ne.hp = 2 if ne.var == 0 else 3
+					ne.max = ne.hp
+			G.en.append(ne)
 	say("WAVE %d" % w, 1.4)
 
 # ---------------------------------------------------------------- co-op
@@ -1356,6 +1374,17 @@ func flip_rows(rows: Array) -> Array:
 		out.append(t)
 	return out
 
+# a curly balloon string: it swirls gently when the balloon floats, and thrashes tighter and faster as it falls
+func draw_balloon_string(x: float, y: float, t: float, falling: bool) -> void:
+	var amp := 2.6 if falling else 1.6
+	var spd := 14.0 if falling else 5.0
+	var freq := 1.1 if falling else 0.8
+	var len := 18 if falling else 14
+	for i in len:
+		var k := float(i)
+		var sx := x + sin(t * spd - k * freq) * (amp + k * 0.12) + cos(k * 1.9 + t * spd * 0.5) * 0.8
+		R(int(round(sx)), int(round(y + k)), 1, 1, "#eae4fa")
+
 func throw_mouse(c: Dictionary, tg, big: bool) -> void:
 	if tg == null:
 		return
@@ -1418,6 +1447,18 @@ func button(e: Dictionary) -> void:
 	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
 	var sp: float = 85.0 + G.wave * 3
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "btn", "ph": 0.0, "dead": false})
+
+# level 3 clown: a custard pie at one of the players
+func throw_pie(e: Dictionary) -> void:
+	var alive_p := live()
+	if alive_p.is_empty():
+		return
+	var tg: Dictionary = pick(alive_p)
+	var dx: float = tg.x - e.x
+	var dy: float = 209 - e.y
+	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
+	var sp: float = 80.0 + G.wave * 2
+	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "pie", "ph": 0.0, "dead": false})
 
 func corn(e: Dictionary) -> void:
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "c", "ph": randf() * TAU, "dead": false})
@@ -1830,6 +1871,8 @@ func update(dt: float) -> void:
 			if e.ty == "w":
 				e.x += sin(e.t * 1.7) * 10
 				e.y += sin(e.t * 3.4) * 5
+			elif e.ty == "v" and in_carnival() and e.var == 0:
+				e.y -= absf(sin(e.t * 3.0)) * 9   # springs up and down on its coil
 		elif e.st == "fly":
 			e.x += e.dir * 105 * dt
 			e.y += ((e.fy + sin(e.t * 5) * 14) - e.y) * minf(1.0, 4 * dt)
@@ -1907,7 +1950,9 @@ func update(dt: float) -> void:
 	G.wt -= dt
 	if G.wt <= 0:
 		var ws := formed("w")
-		if not ws.is_empty() and in_mansion():
+		if not ws.is_empty() and in_carnival():
+			throw_pie(pick(ws))
+		elif not ws.is_empty() and in_mansion():
 			button(pick(ws))
 		elif not ws.is_empty():
 			corn(pick(ws))
@@ -1942,7 +1987,16 @@ func update(dt: float) -> void:
 			var dx: float = tg.x - e.x
 			var dy: float = 209 - e.y
 			var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-			if in_mansion():
+			if in_carnival():
+				if e.var == 0:
+					# jack-in-the-box: a small decorated box, aimed
+					G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * 72, "vy": dy / d * 72, "k": "gift", "ph": randf(), "dead": false})
+				else:
+					# plush bear: three puffs of stuffing in a small spread
+					var a2 := atan2(dy, dx)
+					for da in [-0.3, 0.0, 0.3]:
+						G.eb.append({"x": e.x, "y": e.y + 8, "vx": cos(a2 + da) * 58, "vy": sin(a2 + da) * 58, "k": "stuff", "ph": randf() * TAU, "dead": false})
+			elif in_mansion():
 				# mansion ghost: three spectral tears in a small spread
 				var a := atan2(dy, dx)
 				for da in [-0.25, 0.0, 0.25]:
@@ -2187,6 +2241,22 @@ func draw_game() -> void:
 				spr(WQUEEN if e.bk == 1 else VLORD, EPAL, bx, by, 4, fl)
 				if e.bk == 0:
 					spr(CROWN, EPAL, bx + 20, by - 8, 4, fl)
+		elif in_carnival():
+			# level 3: balloons, clowns, jack-in-the-boxes and plush bears take their places
+			var ex := int(round(e.x))
+			var ey := int(round(e.y))
+			if e.ty == "b":
+				var fall: bool = e.st == "dive" or e.st == "drop"
+				var wob: float = sin(e.t * 2.6) * 2.0 if not fall else sin(e.t * 9.0) * 1.5
+				draw_balloon_string(ex + wob, ey + 10, e.t, fall)
+				spr(L3BALLOON, L3BAL[e.var % L3BAL.size()], int(round(ex + wob)) - 12, ey - 12, 2, fl)
+			elif e.ty == "w":
+				spr(L3CLOWN, L3PAL, ex - 14, ey - 15, 2, fl)
+			elif e.var == 0:
+				R(ex - 1, ey + 13, 3, 4, "#c9c4d6", 0.9)   # the coil it springs on
+				spr(L3JACK, L3PAL, ex - 14, ey - 15, 2, fl)
+			else:
+				spr(L3BEAR, L3PAL, ex - 14, ey - 15, 2, fl)
 		elif indoors:
 			# in the mansion the bats, witches and vampires are replaced by spiders, dolls and ghosts
 			var ex := int(round(e.x))
@@ -2264,6 +2334,23 @@ func draw_game() -> void:
 			spr(NEEDLE, NEEDLEPAL, x - 3, y - 10, 2)
 		elif b.k == "claw":
 			spr(CLAW, CLAWPAL, x - 10, y - 9, 2)
+		elif b.k == "pie":
+			ellipse(x, y, 4, 3, "#fff6d8")
+			ellipse(x, y - 1, 3, 1, "#ffffff")
+			R(x - 3, y + 2, 7, 1, "#e8c8a0")
+			R(x + 1, y - 2, 1, 1, "#ff4d7a")
+		elif b.k == "gift":
+			var gcs := ["#ff4d7a", "#4fa8ff", "#7be07b", "#ffd92e"]
+			var gc: String = gcs[int(b.ph * 4.0) % 4]
+			R(x - 3, y - 3, 7, 7, gc)
+			R(x - 3, y - 1, 7, 1, "#ffffff")
+			R(x, y - 3, 1, 7, "#ffffff")
+			R(x - 1, y - 4, 3, 1, "#ffffff")
+		elif b.k == "stuff":
+			var wob2 := int(round(sin(G.t * 10 + b.ph)))
+			ellipse(x, y, 3, 3, "#f3e2c0")
+			R(x + wob2 - 1, y - 2, 2, 1, "#ffffff")
+			R(x + 1, y + 1, 1, 1, "#bdb39a")
 		elif b.k == "mouse" or b.k == "mouseb":
 			draw_mouse(b)
 		elif b.k == "tp" or b.k == "tb":
