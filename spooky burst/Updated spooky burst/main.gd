@@ -1000,7 +1000,7 @@ func next_wave() -> void:
 				p.lives += 1
 	if w % 5 == 0:
 		G.bm = boss_mult()
-		var hp := int(round((36 + w * 4) * G.bm))
+		var hp := int(round((36 + w * 4) * G.bm * (0.8 if in_carnival() else 1.0)))   # level 3 bosses have a little less health
 		var b := new_enemy("B", 160, 66, 160, -30, hp, "enter")
 		# level 1: vampire lord, witch queen, pumpkin king. Mansion (wave 20 on): spider beast, twins, bat cat, puppet doll, grim reaper
 		b.bk = 8 + (w / 5 - 9) % 5 if in_carnival() else (3 + (w / 5 - 4) % 5 if in_mansion() else (w / 5 - 1) % 3)
