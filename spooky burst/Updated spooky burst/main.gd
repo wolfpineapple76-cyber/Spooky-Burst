@@ -270,6 +270,10 @@ const L3JACK := ["....ybbbbby...", "....wkwwwkw...", "....wkwwwkw...", "....wrww
 const L3BEAR := ["..nnn.....nnn.", "..nNnnnnnnnNn.", "..nnnnnnnnnnn.", "...nnwnnnwnn..", "...nnkNNNknn..", "...nnkNkNknn..", "....nkkkkkn...", ".....nnnnn....", "..nn.nnnnn.nn.", "..nnnnnnnnWnn.", "....nnnnnnnW..", "....nnnnnnn...", ".....nnnnn....", "....nnnnnnn...", "....nn...nn..."]
 const L3PAL := {"B": "#2b6fd0", "N": "#6b4220", "R": "#b3122e", "W": "#d8d0ea", "b": "#4fa8ff", "c": "#9be8ff", "k": "#14101f", "n": "#9a6a3a", "r": "#ff3355", "w": "#f6f1ff", "y": "#ffd92e"}
 const L3BAL := [{"f": "#e8283f", "d": "#a81428", "w": "#ffffff"}, {"f": "#3c96f0", "d": "#2060b8", "w": "#ffffff"}, {"f": "#3fc460", "d": "#238040", "w": "#ffffff"}, {"f": "#ffd92e", "d": "#c9a010", "w": "#ffffff"}, {"f": "#9a6cf0", "d": "#6a44d0", "w": "#ffffff"}, {"f": "#ff7fb5", "d": "#c94f8a", "w": "#ffffff"}]
+# level 3 pickups: the popcorn bucket (in place of the basket) and the pink prize box (in place of the power-up)
+const L3POP := ["........kkk.....", "....kkkkyyyk....", "...kyyyyyyyyk...", "..kyyyyyyhyyyk..", ".kyyyhyyyyyyyyk.", ".kyyyyyyyyyyhyyk", ".kyyyyyhyyYyyyyk", ".kyyhyYyyyyhyyyk", ".kyyyyyyyyyyYyyk", "kRRRRRRRRRRRRRRk", ".kWWppwwwwwWppyk", ".kWWpwpppppwppyk", ".kWWwpppwwppwpk.", ".kWWwpwpppwpwpk.", "..kWwppwwwppwk..", "..kWWwpppppwWk..", "..kRRRwwwwwRRk..", "...kkkkkkkkkk..."]
+const L3PRIZE := ["................", "....kkk..kkk....", "...kyyykkyyyk...", "..kyyyyyyyyyyk..", "..kyyyyyyyyyyk..", ".kkyyyyyyyyyykk.", "kPPPyyyyyyyyPPPk", "kPPPPPPyyPPPPPPk", "kPPPPPPyyPPPPPPk", "kPPPPPPyyPPPPPPk", ".kpppppyypppppk.", ".kpppppyypppppk.", ".kyyyyyyyyyyyyk.", ".kpppppyypppppk.", ".kpppppyypppppk.", ".kppwppyyppwppk.", ".kpppppyypppppk.", "..kkkkkkkkkkkk.."]
+const L3PICKPAL := {"P": "#f08098", "R": "#c0304a", "W": "#f6d0d8", "Y": "#e8a820", "h": "#fff3a8", "k": "#2a1a10", "p": "#ffb0c0", "w": "#fbf7ff", "y": "#ffd84a"}
 const TREE := [[28, 206, 30, 120, 9], [30, 120, 34, 90, 6], [32, 112, 60, 96, 4], [60, 96, 84, 92, 2], [50, 101, 56, 84, 2],
 	[30, 128, 8, 112, 3], [8, 112, 0, 100, 2], [34, 90, 46, 66, 3], [46, 66, 58, 60, 2], [34, 90, 22, 68, 3],
 	[22, 68, 14, 58, 2], [22, 68, 28, 56, 1], [56, 84, 62, 78, 1], [20, 206, 10, 210, 3], [34, 206, 46, 210, 3]]
@@ -2296,7 +2300,12 @@ func draw_game() -> void:
 	for d in G.drops:
 		var x := int(round(d.x))
 		var y := int(round(d.y))
-		if d.k == "b" and in_mansion():
+		if d.k == "b" and in_carnival():
+			spr(L3POP, L3PICKPAL, x - 16, y - 18, 2)
+		elif d.k == "p" and in_carnival():
+			ellipse(x, y, 12, 12, "#ffb0d0", 0.18 + 0.1 * sin(gt * 8))
+			spr(L3PRIZE, L3PICKPAL, x - 16, y - 18, 2)
+		elif d.k == "b" and in_mansion():
 			spr(CANDLE, CANDLEPAL, x - 10, y - 11, 2)
 		elif d.k == "p" and in_mansion():
 			ellipse(x, y, 11, 11, "#ffb84a", 0.18 + 0.1 * sin(gt * 8))
@@ -2318,7 +2327,10 @@ func draw_game() -> void:
 			R(x - 10, y + 3, 1, 1, "#ffffff")
 	if G.pk != null:
 		var k: Dictionary = G.pk
-		if in_mansion():
+		if in_carnival():
+			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb0d0", 0.16 + 0.08 * sin(gt * 8))
+			spr(L3PRIZE, L3PICKPAL, int(round(k.x)) - 16, int(round(k.y)) - 18, 2, k.flash > 0)
+		elif in_mansion():
 			ellipse(int(round(k.x)), int(round(k.y)), 13, 13, "#ffb84a", 0.16 + 0.08 * sin(gt * 8))
 			spr(CANDELABRA, CANDLEPAL, int(round(k.x)) - 10, int(round(k.y)) - 11, 2, k.flash > 0)
 		else:
