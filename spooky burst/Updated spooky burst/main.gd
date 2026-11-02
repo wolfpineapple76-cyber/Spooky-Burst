@@ -886,6 +886,12 @@ func in_mansion() -> bool:
 func in_carnival() -> bool:
 	return G.wave > 40
 
+# the wave number that enemy speeds scale with: level 3 starts as fast as level 2 did and speeds up slowly
+func sw_wave() -> float:
+	if in_carnival():
+		return 16.0 + (G.wave - 41) * 0.5
+	return float(G.wave)
+
 # level 2: the haunted mansion room (mansion.png, 320x240)
 func draw_mansion(boss_here: bool) -> void:
 	if mansion_tex == null:
@@ -911,7 +917,7 @@ func say(s: String, dur: float) -> void:
 # for their character. eq: upgrades they have this run. bo: how many of each boost this run. got: candy this run.
 func mk_player(x: float, n: int, kb: String, pad: int, ch: int) -> Dictionary:
 	return {"x": x, "cd": 0.0, "inv": 1.5, "lives": 5, "n": n, "kb": kb, "pad": pad, "out": false,
-		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false, "web": 0.0}
+		"own": owns(n, ch), "eq": {}, "bo": {}, "ch": ch, "got": 0, "sh": 0.0, "revived": false, "web": 0.0, "ccw": false, "cci": 0.0}
 
 func bo(p: Dictionary, k: String) -> int:
 	return int(p.bo.get(k, 0))
@@ -1479,7 +1485,7 @@ func throw_pie(e: Dictionary) -> void:
 	var dx: float = tg.x - e.x
 	var dy: float = 209 - e.y
 	var d := maxf(1.0, sqrt(dx * dx + dy * dy))
-	var sp: float = 80.0 + G.wave * 2
+	var sp: float = 80.0 + sw_wave() * 2
 	G.eb.append({"x": e.x, "y": e.y + 8, "vx": dx / d * sp, "vy": dy / d * sp, "k": "pie", "ph": 0.0, "dead": false})
 
 func corn(e: Dictionary) -> void:
@@ -1694,7 +1700,7 @@ func boss(e: Dictionary, dt: float) -> void:
 		if e.bk == 7 or (e.bk == 9 and (e.n / 5) % 2 == 1):
 			# Grim Reaper: warns on the half of the floor it is floating over, then slashes across it
 			# (the chained Jack-in-the-Box does it with a long gloved arm, every other time round)
-			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false, "arm": e.bk == 9}
+			G.slash = {"side": 1 if e.x > 160 else -1, "t": 0.0, "hit": false, "arm": e.bk == 9, "warn": 1.0 if e.bk == 9 else 0.75}
 			e.at = 1.6
 			sfx("deny")
 		elif e.bk == 3:
@@ -1763,15 +1769,16 @@ func update(dt: float) -> void:
 	if G.slash != null:
 		var sl: Dictionary = G.slash
 		sl.t += dt
-		if sl.t >= 0.75 and not sl.hit:
+		var wn: float = sl.get("warn", 0.75)
+		if sl.t >= wn and not sl.hit:
 			sl.hit = true
 			sfx("dash")
 			G.shake = 0.4
-		if sl.t >= 0.75 and sl.t <= 1.05:
+		if sl.t >= wn and sl.t <= wn + 0.3:
 			for p in live():
 				if p.inv <= 0 and (p.x > 160 if sl.side > 0 else p.x < 160):
 					hurt(p)
-		if sl.t > 1.2:
+		if sl.t > wn + 0.45:
 			G.slash = null
 	if G.boom != null:
 		var o: Dictionary = G.boom
@@ -1803,8 +1810,13 @@ func update(dt: float) -> void:
 			continue
 		var I := player_input(p)
 		var stuck := 0.4 if p.web > 0 else 1.0   # caught in a Spider Beast web
+		if p.cci > 0:
+			p.cci -= dt
 		if p.web > 0:
 			p.web -= dt
+			if p.web <= 0 and p.ccw:
+				p.ccw = false
+				p.cci = 1.5   # sticky cotton candy can't catch you again right away
 		p.x += I.dir * (205.0 if p.eq.has("swift") else 135.0) * (1.0 + 0.04 * bo(p, "move")) * stuck * dt
 		if p.sh > 0:
 			p.sh -= dt
@@ -1906,7 +1918,7 @@ func update(dt: float) -> void:
 			e.drop -= dt
 			if e.drop <= 0:
 				if in_carnival():
-					G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + G.wave * 3, "k": "pie", "ph": 0.0, "dead": false})
+					G.eb.append({"x": e.x, "y": e.y + 8, "vx": 0.0, "vy": 85.0 + sw_wave() * 3, "k": "pie", "ph": 0.0, "dead": false})
 				else:
 					corn(e)
 				e.drop = 0.5
@@ -1918,7 +1930,7 @@ func update(dt: float) -> void:
 		elif e.st == "drop":
 			# mansion spider: straight down on its thread, a short hang at the players' height, then back up
 			if e.n == 0:
-				e.y += (120 + w * 4) * dt
+				e.y += (120 + sw_wave() * 4) * dt
 				if e.y >= 200:
 					e.y = 200
 					e.n = 1
@@ -1943,7 +1955,7 @@ func update(dt: float) -> void:
 			var tg := nearest(e.x)
 			e.vx = clampf(e.vx + signf(tg.x - e.x) * 220 * dt, -95, 95)
 			e.x += (e.vx + sin(e.t * 6) * 45) * dt
-			e.y += (95 + w * 6) * dt
+			e.y += (95 + sw_wave() * 6) * dt
 			if e.y > 252:
 				e.y = -14
 				e.x = tx
@@ -2137,6 +2149,10 @@ func update(dt: float) -> void:
 			if not b.dead and absf(b.x - p.x) < (11 if b.k == "mouseb" else 7) and absf(b.y - 209) < 10:
 				b.dead = true
 				if b.k == "web" or b.k == "cc":
+					if b.k == "cc":
+						if p.cci > 0:
+							continue   # still shaking the sticky stuff off
+						p.ccw = true
 					p.web = 2.0
 					sfx("deny")
 					continue
@@ -2313,10 +2329,11 @@ func draw_game() -> void:
 	if G.slash != null:
 		var sl: Dictionary = G.slash
 		var hx := 160 if sl.side > 0 else 0
-		if sl.t < 0.75:
+		var wn2: float = sl.get("warn", 0.75)
+		if sl.t < wn2:
 			R(hx, 192, 160, 32, "#ff2244", 0.12 + 0.10 * (int(floor(sl.t * 10)) % 2))
-		elif sl.t <= 1.05:
-			var k: float = (sl.t - 0.75) / 0.3
+		elif sl.t <= wn2 + 0.3:
+			var k: float = (sl.t - wn2) / 0.3
 			var cx: float = 160 + sl.side * (10 + 130 * k)
 			if sl.get("arm", false) and B != null:
 				# a long arm reaches down from the box and sweeps across the floor, a white glove at the end
